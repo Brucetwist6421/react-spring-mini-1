@@ -50,18 +50,17 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SERVER_KEY }}
           script: |
-            # 1. 이전 컨테이너 중지 및 삭제 (에러 무시 처리)
+            # 1. 기존 컨테이너 및 쓰지 않는 네트워크 정리
             docker stop spring-container react-container 2>/dev/null || true
             docker rm spring-container react-container 2>/dev/null || true
             
-            # 2. 기존 이미지 삭제 (용량 확보)
-            docker rmi ${{ secrets.DOCKER_USERNAME }}/spring-app:latest 2>/dev/null || true
-            docker rmi ${{ secrets.DOCKER_USERNAME }}/react-app:latest 2>/dev/null || true
+            # 네트워크 설정이 꼬인 경우를 대비해 도커 네트워크 정리
+            docker network prune -f 
             
-            # 3. 최신 이미지 풀 (명시적으로 플랫폼 지정)
+            # 2. 이미지 풀
             docker pull --platform linux/arm64 ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
             docker pull --platform linux/arm64 ${{ secrets.DOCKER_USERNAME }}/react-app:latest
             
-            # 4. 새 컨테이너 실행
+            # 3. 새 컨테이너 실행
             docker run -d --name spring-container -p 8080:8080 --platform linux/arm64 ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
             docker run -d --name react-container -p 80:80 --platform linux/arm64 ${{ secrets.DOCKER_USERNAME }}/react-app:latest
