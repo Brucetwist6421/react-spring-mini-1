@@ -13,7 +13,12 @@ public class CorsConfig {
 	@Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // React
+        // 실제 배포된 서버의 IP 주소를 추가해야 합니다.
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173",          // 로컬 개발용
+            "http://168.107.51.143",          // 배포된 리액트 서버 IP
+            "http://168.107.51.143:80"        // 80포트 명시 (선택사항)
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(List.of("*"));

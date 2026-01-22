@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import jakarta.servlet.DispatcherType;
 import kr.or.ddit.security.CustomAccessDeniedHandler;
@@ -31,6 +32,9 @@ public class SecurityConfig {
 	@Autowired
 	UserDetailServiceImpl detailServiceImpl;
 	// 실습 3 끝
+
+	@Autowired
+	private CorsConfigurationSource corsConfigurationSource; // CorsConfig에서 등록한 빈 주입
 	
 	//1. 스프링 시큐리티 기능 비활성화
 	   /*
@@ -106,11 +110,15 @@ public class SecurityConfig {
 	   // 실습 1 진행
 	   @Bean
 	   protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		   return http.csrf(csrf->csrf.disable()).httpBasic(hbasic->hbasic.disable())
+		   return http
+			   	// 1. CORS 설정 연결 (이 부분이 누락되어 CorsConfig가 적용되지 않았습니다)
+        		.cors(cors -> cors.configurationSource(corsConfigurationSource))
+		   		.csrf(csrf->csrf.disable()).httpBasic(hbasic->hbasic.disable())
 				   .headers(config->config.frameOptions(customizer->customizer.sameOrigin()))
 				   .authorizeHttpRequests(
 						   authz->authz.dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ASYNC).permitAll()
 						   .requestMatchers("/accessError","/login","/signup","/js/**","/adminlte/**","/images/**","/css/**","/sbadmin/**","*/**").permitAll()
+						   .requestMatchers("/pokemon/**").permitAll() // 포켓몬 API 누구나 접근 허용
 						   .requestMatchers("/download/**").permitAll() // ← 다운로드 경로 허용
 //						   .requestMatchers("/member/list").permitAll()
 						   // 실습 4 시작
