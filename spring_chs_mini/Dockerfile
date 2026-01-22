@@ -1,8 +1,7 @@
-# Build는 GitHub Actions에서 진행하므로 실행 환경만 설정
-FROM openjdk:17-jdk-slim
-# 빌드된 jar 파일의 이름을 app.jar로 복사
-ARG JAR_FILE=build/libs/*.jar
+# JDK 21 버전의 가벼운 이미지 사용
+FROM eclipse-temurin:21-jdk-slim
+# Maven의 경우 빌드 결과물이 target 폴더에 생성됨
+ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} app.jar
-# 8080포트 개방
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app.jar"]
