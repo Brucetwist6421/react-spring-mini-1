@@ -84,7 +84,7 @@ export default function PokemonDetailPage() {
       
       // PokeAPI에 GET 요청 보내기 (axios 인스턴스 사용)
       const res = await api.get(
-        `http://localhost:5174/pokemon/${encodeURIComponent(id)}` 
+        `http://168.107.51.143:8080/pokemon/${encodeURIComponent(id)}` 
         // encodeURIComponent: id에 공백, 한글, 특수문자 등이 포함될 경우 URL 안전하게 인코딩
       );
       console.log("Fetched data:", res.data);
@@ -227,7 +227,7 @@ export default function PokemonDetailPage() {
     const initialFiles = data.attachments
       // .filter(att => /\.(jpe?g|png|gif|webp)$/i.test(att.fileName))
       .map(att => ({
-        url: `http://localhost:5174/upload/${att.fileName}`,
+        url: `http://168.107.51.143:8080/upload/${att.fileName}`,
         id: att.id,
       }));
     setVariantFiles(initialFiles);
@@ -454,7 +454,7 @@ export default function PokemonDetailPage() {
   const imageSrc =
   preview ??
   (data.mainImagePath
-    ? `http://localhost:5174/upload/${data.mainImagePath}`
+    ? `http://168.107.51.143:8080/upload/${data.mainImagePath}`
     : data.sprites?.front_default);
 
 

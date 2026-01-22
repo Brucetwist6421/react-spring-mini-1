@@ -5,7 +5,7 @@ export const fileListDownload = async (vf: { url: string; file?: File }) => {
     const fileName = vf.file?.name ?? vf.url.split("/").pop()!;
     // const downloadUrl = `/download/${encodeURIComponent(fileName)}`;
     // 서버 포트 5174로 요청
-    const downloadUrl = `http://localhost:5174/pokemon/download/${encodeURIComponent(fileName)}`;
+    const downloadUrl = `http://168.107.51.143:8080/pokemon/download/${encodeURIComponent(fileName)}`;
 
     const res = await axios.get<Blob>(downloadUrl, { responseType: "blob" });
     const blobUrl = window.URL.createObjectURL(res.data);
