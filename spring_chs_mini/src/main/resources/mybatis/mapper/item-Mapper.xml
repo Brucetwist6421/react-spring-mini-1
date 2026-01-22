@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.ItemMapper">
+
+	<!-- ITEM 테이블에 insert public int registerPost(ItemVO itemVO) ItemVO(itemId=0, 
+		itemName=삼성태블릿, price=120000, description=쓸만함 , pictureUrl=/2025/09/08/asdldfksj_개똥이.jpg, 
+		uploadFile=파일객체 -->
+	<insert id="registerPost" parameterType="kr.or.ddit.vo.ItemVO">
+		<selectKey keyProperty="itemId" order="BEFORE"
+			resultType="int">
+			SELECT NVL(MAX(ITEM_ID),0) + 1 FROM ITEM
+		</selectKey>
+		INSERT INTO ITEM(ITEM_ID, ITEM_NAME, PRICE, DESCRIPTION, PICTURE_URL)
+		VALUES(#{itemId},#{itemName},#{price},#{description},#{pictureUrl})
+	</insert>
+
+	<!-- 실습 2 시작 -->
+<!-- 	<select id="detail" parameterType="kr.or.ddit.vo.ItemVO" -->
+<!-- 		resultType="kr.or.ddit.vo.ItemVO"> -->
+<!-- 		SELECT ITEM_ID, ITEM_NAME, PRICE, DESCRIPTION, PICTURE_URL -->
+<!-- 		FROM ITEM -->
+<!-- 		WHERE ITEM_ID = #{itemId} -->
+<!-- 	</select> -->
+	<!-- 실습 2 끝 -->
+	
+	<!-- 실습 22 시작 : 실습 2 주석 처리 -->
+	<resultMap type="kr.or.ddit.vo.ItemVO" id="itemMap">
+		<result property="itemId" column="ITEM_ID"/>
+		<result property="itemName" column="ITEM_NAME"/>
+		<result property="price" column="PRICE"/>
+		<result property="description" column="DESCRIPTION"/>
+		<result property="pictureUrl" column="PICTURE_URL"/>
+		<result property="pictureUrl2" column="PICTURE_URL2"/>
+		<result property="fileGroupNo" column="FILE_GROUP_NO"/>
+		<association property="fileGroupVO" resultMap="fileGroupMap"></association>
+	</resultMap>
+	
+	
+	<select id="detail" parameterType="kr.or.ddit.vo.ItemVO"
+		resultMap="itemMap">
+		SELECT I.ITEM_ID, I.ITEM_NAME, I.PRICE, I.DESCRIPTION, I.FILE_GROUP_NO, I.PICTURE_URL
+		    , FG.FILE_REGDATE
+		    , FD.FILE_SN, FD.FILE_ORIGINAL_NAME, FD.FILE_SAVE_NAME
+		    , FD.FILE_SAVE_LOCATE, FD.FILE_SIZE, FD.FILE_EXT, FD.FILE_MIME
+		    , FD.FILE_FANCYSIZE, FD.FILE_SAVE_DATE, FD.FILE_DOWNCOUNT
+		FROM ITEM I
+		LEFT JOIN FILE_GROUP FG ON I.FILE_GROUP_NO = FG.FILE_GROUP_NO
+		LEFT JOIN FILE_DETAIL FD ON FG.FILE_GROUP_NO = FD.FILE_GROUP_NO
+		WHERE I.ITEM_ID = #{itemId}
+	</select>
+	<!-- 실습 22 끝 -->
+
+	<!-- 실습 3 시작 -->
+	<update id="editPost" parameterType="kr.or.ddit.vo.ItemVO">
+		UPDATE ITEM
+		SET ITEM_NAME = #{itemName}
+			, PRICE = #{price}
+			, DESCRIPTION = #{description}
+		<if test="pictureUrl!=null and pictureUrl!=''">
+			, PICTURE_URL = #{pictureUrl}
+		</if>
+		WHERE ITEM_ID = #{itemId}
+	</update>
+	<!-- 실습 3 끝 -->
+
+	<!-- 실습 4 시작 -->
+	<delete id="deletePost" parameterType="kr.or.ddit.vo.ItemVO">
+		DELETE FROM ITEM
+		WHERE
+		ITEM_ID = #{itemId}
+	</delete>
+	<!-- 실습 4 끝 -->
+
+	<!-- 실습 5 시작 -->
+	<!-- <select id="list" parameterType="kr.or.ddit.vo.ItemVO" resultType="kr.or.ddit.vo.ItemVO"> -->
+	<!-- SELECT ITEM_ID, ITEM_NAME, PRICE, DESCRIPTION, PICTURE_URL -->
+	<!-- FROM ITEM -->
+	<!-- ORDER BY ITEM_ID DESC -->
+	<!-- </select> -->
+	<!-- 실습 5 끝 -->
+
+	<!-- 실습 6 시작 -->
+	<!-- <select id="getTotal" resultType="int"> -->
+	<!-- SELECT COUNT(*) -->
+	<!-- FROM ITEM -->
+	<!-- </select> -->
+	<!-- 실습 6 끝 -->
+
+	<!-- 실습 7 시작 : 실습 5 주석 처리 -->
+	<!-- <select id="list" parameterType="kr.or.ddit.vo.ItemVO" resultType="kr.or.ddit.vo.ItemVO"> -->
+	<!-- SELECT * -->
+	<!-- FROM ( -->
+	<!-- SELECT -->
+	<!-- ITEM_ID, -->
+	<!-- ITEM_NAME, -->
+	<!-- PRICE, -->
+	<!-- DESCRIPTION, -->
+	<!-- PICTURE_URL, -->
+	<!-- ROW_NUMBER() OVER (ORDER BY ITEM_ID DESC) AS rn -->
+	<!-- FROM ITEM -->
+	<!-- ) t -->
+	<!-- WHERE t.rn BETWEEN #{startRow} AND #{endRow} -->
+	<!-- </select> -->
+	<!-- 실습 7 끝 -->
+
+	<!-- 실습 8 시작 : 실습 7 주석 처리 -->
+	<select id="list" parameterType="kr.or.ddit.vo.ItemVO"
+		resultType="kr.or.ddit.vo.ItemVO">
+		SELECT *
+		FROM (
+			SELECT
+			ITEM_ID,
+			ITEM_NAME,
+			PRICE,
+			DESCRIPTION,
+			PICTURE_URL,
+			ROW_NUMBER() OVER (ORDER BY ITEM_ID DESC) AS rn
+			FROM ITEM
+			where item_name like '%' || #{keyword} || '%'
+		) t
+		WHERE t.rn BETWEEN #{startRow} AND #{endRow}
+
+	</select>
+	<!-- 실습 8 끝 -->
+
+	<!-- 실습 9 시작 : 실습 6 주석 처리 -->
+	<select id="getTotal" resultType="int">
+		SELECT COUNT(*)
+		FROM ITEM
+		where
+		item_name like '%' || #{keyword} || '%'
+	</select>
+	<!-- 실습 9 끝 -->
+
+	<!-- 실습 10 시작 -->
+	<select id="getExamPassFail"
+		resultType="kr.or.ddit.vo.ExamPassFailVO">
+		SELECT SEQ, STUDY_TIME, LIB_INV_CNT, PASS_FAIL
+		FROM EXAM_PASS_FAIL
+		ORDER BY SEQ
+	</select>
+	<!-- 실습 10 끝 -->
+
+	<!-- 실습 11 시작 -->
+	<select id="hoichaAmtData"
+		resultType="kr.or.ddit.vo.HoichaAmtDataVO">
+		SELECT ID, HOICHA, AMT
+		FROM HOICHA_AMT_DATA
+		ORDER BY ID
+	</select>
+	<!-- 실습 11 끝 -->
+
+	<!-- 실습 12 시작 -->
+	<select id="floodInfo" resultType="kr.or.ddit.vo.FloodInfoVO">
+		SELECT YEAR_NUM, WATER_AMT, TEMP_NUM, FLOOD_YN
+		FROM FLOOD_INFO
+	</select>
+	<!-- 실습 12 끝 -->
+
+	<!-- 실습 13 시작 -->
+	<!-- 테이블 JOIN 은 사용하지 않았지만 ClusterDataPoint 와 연관을 위해 resultMap 사용 -->
+	<resultMap type="kr.or.ddit.vo.FinalTestVO" id="finalTestMap">
+		<result property="studentId" column="STUDENT_ID" />
+		<result property="studentName" column="STUDENT_NAME" />
+		<result property="koreanScore" column="KOREAN_SCORE" />
+		<result property="englishScore" column="ENGLISH_SCORE" />
+		<result property="mathScore" column="MATH_SCORE" />
+		<result property="scienceScore" column="SCIENCE_SCORE" />
+		<result property="historyKr" column="HISTORY_KR" />
+		<result property="historyWorld" column="HISTORY_WORLD" />
+		<result property="colx" column="COLX" />
+		<result property="coly" column="COLY" />
+	</resultMap>
+
+	<select id="finalTest" resultMap="finalTestMap">
+		SELECT STUDENT_ID, STUDENT_NAME
+			, KOREAN_SCORE, ENGLISH_SCORE
+			, MATH_SCORE, SCIENCE_SCORE
+			, HISTORY_KR, HISTORY_WORLD
+			, ((KOREAN_SCORE + ENGLISH_SCORE)*2 + HISTORY_KR + HISTORY_WORLD) COLX
+			, (MATH_SCORE + SCIENCE_SCORE) COLY
+		FROM FINAL_TEST
+		ORDER BY 1
+	</select>
+	<!-- 실습 13 끝 -->
+
+	<!-- 실습 14 시작 -->
+	<!-- <select id="getFinalTest" parameterType="kr.or.ddit.vo.FinalTestVO" 
+		resultType="kr.or.ddit.vo.FinalTestVO"> -->
+	<!-- SELECT STUDENT_ID, STUDENT_NAME -->
+	<!-- , KOREAN_SCORE, ENGLISH_SCORE -->
+	<!-- , MATH_SCORE, SCIENCE_SCORE -->
+	<!-- , HISTORY_KR, HISTORY_WORLD -->
+	<!-- FROM FINAL_TEST -->
+	<!-- WHERE STUDENT_ID = #{studentId} -->
+	<!-- </select> -->
+	<!-- 실습 14 끝 -->
+
+	<!-- 실습 17 시작 : 실습 14 주석 처리 -->
+	<!-- FINAL_TEST : FILE_GROUP = 1 : 1 -->
+	<resultMap type="kr.or.ddit.vo.FinalTestVO" id="getFinalTestMap">
+		<result property="studentId" column="STUDENT_ID" />
+		<result property="studentName" column="STUDENT_NAME" />
+		<result property="koreanScore" column="KOREAN_SCORE" />
+		<result property="englishScore" column="ENGLISH_SCORE" />
+		<result property="mathScore" column="MATH_SCORE" />
+		<result property="scienceScore" column="SCIENCE_SCORE" />
+		<result property="historyKr" column="HISTORY_KR" />
+		<result property="historyWorld" column="HISTORY_WORLD" />
+		<result property="fileGroupNo" column="FILE_GROUP_NO" />
+		<association property="fileGroupVO" resultMap="fileGroupMap"></association>
+	</resultMap>
+
+	<!-- FILE_GROUP : FILE_DETAIL = 1 : N -->
+	<resultMap type="kr.or.ddit.vo.FileGroupVO" id="fileGroupMap">
+		<result property="fileGroupNo" column="FILE_GROUP_NO" />
+		<result property="fileRegdate" column="FILE_REGDATE" />
+		<collection property="fileDetailVOList" resultMap="fileDetailMap"></collection>
+	</resultMap>
+
+	<resultMap type="kr.or.ddit.vo.FileDetailVO" id="fileDetailMap">
+		<result property="fileSn" column="FILE_SN" />
+		<result property="fileGroupNo" column="FILE_GROUP_NO" />
+		<result property="fileOriginalName" column="FILE_ORIGINAL_NAME" />
+		<result property="fileSaveName" column="FILE_SAVE_NAME" />
+		<result property="fileSaveLocate" column="FILE_SAVE_LOCATE" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="fileExt" column="FILE_EXT" />
+		<result property="fileMime" column="FILE_MIME" />
+		<result property="fileFancysize" column="FILE_FANCYSIZE" />
+		<result property="fileSaveDate" column="FILE_SAVE_DATE" />
+		<result property="fileDowncount" column="FILE_DOWNCOUNT" />
+	</resultMap>
+
+	<select id="getFinalTest"
+		parameterType="kr.or.ddit.vo.FinalTestVO"
+		resultType="kr.or.ddit.vo.FinalTestVO" resultMap="getFinalTestMap">
+		SELECT FT.STUDENT_ID,
+		FT.STUDENT_NAME, FT.KOREAN_SCORE, FT.ENGLISH_SCORE, FT.MATH_SCORE
+		, FT.SCIENCE_SCORE, FT.HISTORY_KR, FT.HISTORY_WORLD, FT.FILE_GROUP_NO
+		, FG.FILE_GROUP_NO, FG.FILE_REGDATE
+		, FD.FILE_SN, FD.FILE_GROUP_NO, FD.FILE_ORIGINAL_NAME
+		, FD.FILE_SAVE_NAME, FD.FILE_SAVE_LOCATE, FD.FILE_SIZE
+		, FD.FILE_EXT, FILE_MIME, FD.FILE_FANCYSIZE, FD.FILE_SAVE_DATE
+		, FD.FILE_DOWNCOUNT
+		FROM FINAL_TEST FT
+		LEFT JOIN FILE_GROUP FG ON
+		FT.FILE_GROUP_NO = FG.FILE_GROUP_NO
+		LEFT JOIN FILE_DETAIL FD ON
+		FG.FILE_GROUP_NO = FD.FILE_GROUP_NO
+		WHERE FT.STUDENT_ID = #{studentId}
+	</select>
+	<!-- 실습 17 끝 -->
+
+	<!-- 실습 15 시작 -->
+	<insert id="insertFileGroup"
+		parameterType="kr.or.ddit.vo.FileGroupVO">
+		<selectKey resultType="long" order="BEFORE"
+			keyProperty="fileGroupNo">
+			SELECT NVL(MAX(FILE_GROUP_NO) + 1,
+				TO_CHAR(SYSDATE,'YYYYMMDD') || '001')
+			FROM FILE_GROUP
+			WHERE
+			SUBSTR(FILE_GROUP_NO,1,8) = TO_CHAR(SYSDATE,'YYYYMMDD')
+		</selectKey>
+		INSERT INTO FILE_GROUP(FILE_GROUP_NO, FILE_REGDATE)
+		VALUES(#{fileGroupNo}, SYSDATE)
+	</insert>
+	<!-- 실습 15 끝 -->
+
+	<!-- 실습 16 시작 -->
+	<!-- FILE_DETAIL 테이블에 insert FILE_DETAIL 테이블에 insert public int insertFileDetail(FileDetailVO 
+		fileDetailVO) -->
+	<insert id="insertFileDetail"
+		parameterType="kr.or.ddit.vo.FileDetailVO">
+		<!-- FILE_DETAIL 테이블의 마지막 FILE_SN 값 + 1을 구하기 단, FILE_SN는 주어진 FILE_GROUP_NO의 
+			값을 조건으로 하기 단, FILE_SN 값이 NULL이면 NULL처리하기 파일을 업로드 했고, 오늘 첫번째 그룹으로써 업로드 함 상세 
+			테이블에는 3개의 파일이 있더라 SELECT NVL(MAX(FILE_SN),0) + 1 FROM FILE_DETAIL WHERE FILE_GROUP_NO 
+			= '20250619001'; -->
+
+		<selectKey resultType="int" order="BEFORE"
+			keyProperty="fileSn">
+			SELECT NVL(MAX(FILE_SN),0) + 1
+			FROM FILE_DETAIL
+			WHERE
+			FILE_GROUP_NO = #{fileGroupNo}
+		</selectKey>
+
+		INSERT INTO FILE_DETAIL(FILE_SN, FILE_GROUP_NO, FILE_ORIGINAL_NAME,
+			FILE_SAVE_NAME, FILE_SAVE_LOCATE
+			, FILE_SIZE, FILE_EXT, FILE_MIME, FILE_FANCYSIZE, FILE_SAVE_DATE
+			, FILE_DOWNCOUNT)
+		VALUES(#{fileSn},#{fileGroupNo},#{fileOriginalName},#{fileSaveName},#{fileSaveLocate}
+			,#{fileSize},#{fileExt},#{fileMime},#{fileFancysize},SYSDATE
+			,#{fileDowncount})
+	</insert>
+	<!-- 실습 16 끝 -->
+	
+	
+	<!-- 실습 18 시작 -->
+<!-- 	<update id="updateFinalTest" parameterType="kr.or.ddit.vo.FinalTestVO"> -->
+<!-- 		UPDATE FINAL_TEST -->
+<!-- 		SET FILE_GROUP_NO = #{fileGroupNo} -->
+<!-- 		WHERE STUDENT_ID = #{studentId} -->
+<!-- 	</update> -->
+	<!-- 실습 18 끝 -->
+	
+	<!-- 실습 19 시작 : 실습 18 주석 처리 -->
+	<update id="updateFinalTest" parameterType="kr.or.ddit.vo.FinalTestVO">
+		UPDATE FINAL_TEST
+		SET    STUDENT_NAME = #{studentName}
+		    , KOREAN_SCORE = #{koreanScore}
+		    , ENGLISH_SCORE = #{englishScore}
+		    , MATH_SCORE = #{mathScore}
+		    , SCIENCE_SCORE = #{scienceScore}
+		    , HISTORY_KR = #{historyKr}
+		    , HISTORY_WORLD = #{historyWorld}
+		    <if test="fileGroupNo!=null and fileGroupNo!=0">
+		       , FILE_GROUP_NO = #{fileGroupNo}
+		    </if>
+		WHERE  STUDENT_ID = #{studentId}
+    </update>
+	<!-- 실습 19 끝 -->
+	
+	<!-- 실습 20 시작 -->
+	<!-- delete 수행
+    public int deleteFinalTest(FinalTestVO finalTestVO) 
+   
+    FinalTestVO(studentId=1, studentName=null, koreanScore=0,  ...
+    -->
+    <delete id="deleteFinalTest" parameterType="kr.or.ddit.vo.FinalTestVO">
+       DELETE FROM FINAL_TEST
+       WHERE  STUDENT_ID = #{studentId}
+    </delete>
+	<!-- 실습 20 끝 -->
+	
+	<!-- 실습 21 시작 -->
+	<update id="editPostAjax" parameterType="kr.or.ddit.vo.ItemVO">
+		UPDATE ITEM
+		SET    ITEM_NAME = #{itemName}
+		    , PRICE = #{price}
+		    , DESCRIPTION = #{description}
+		    <if test="fileGroupNo!=null and fileGroupNo!=0">
+		       , FILE_GROUP_NO = #{fileGroupNo}
+		    </if>
+		WHERE  ITEM_ID = #{itemId}
+    </update>
+	<!-- 실습 21 끝 -->
+	
+	
+	
+	
+
+</mapper>

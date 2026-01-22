@@ -1,0 +1,13 @@
+# React 관련
+**/node_modules/
+**/build/
+.env
+
+# Spring 관련
+**/build/
+**/out/
+.gradle/
+*.jar
+
+# 기타
+.DS_Store

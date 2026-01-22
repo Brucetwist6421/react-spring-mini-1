@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.PokemonMapper">
+	<!-- 실습 1 시작 -->
+	<insert id="insertPokemon" parameterType="kr.or.ddit.vo.PokemonVO">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+            SELECT pokemon_seq.NEXTVAL FROM dual
+        </selectKey>
+		INSERT INTO pokemon (id,
+		name, description, type, height, weight,
+		is_favorite, is_public, is_notify, variant, main_image_path
+		) VALUES (#{id},
+		#{name}, #{description}, #{type}, #{height}, #{weight},
+		#{isFavorite}, #{isPublic}, #{isNotify}, #{variant}, #{mainImagePath}
+		)
+	</insert>
+
+	<insert id="insertAttachment">
+		INSERT INTO pokemon_attachment (pokemon_id, pokemon_name, file_name)
+		VALUES (#{pokemonId}, #{name}, #{fileName})
+	</insert>
+	<!-- 실습 1 끝 -->
+	
+	<!-- 실습 2 시작 -->
+	<!-- 상세 조회 (pokemon) -->
+	<select id="selectPokemonById" parameterType="long" resultType="kr.or.ddit.vo.PokemonVO">
+	    SELECT
+	        id,
+	        name,
+	        description,
+	        type,
+	        height,
+	        weight,
+	        is_favorite AS isFavorite,
+	        is_public AS isPublic,
+	        is_notify AS isNotify,
+	        variant,
+	        main_image_path AS mainImagePath
+	    FROM pokemon
+	    WHERE id = #{id}
+	</select>
+	
+	<!-- 첨부파일 조회 -->
+	<select id="selectAttachmentsByPokemonId" parameterType="long" resultType="kr.or.ddit.vo.PokemonAttachmentVO">
+	    SELECT
+	        id,
+	        pokemon_id ,
+	        file_name
+	    FROM pokemon_attachment
+	    WHERE pokemon_id = #{pokemonId}
+	    order by id asc
+	</select>
+	<!-- 실습 2 끝 -->
+	
+	<!-- 실습 3 시작 -->
+	<update id="updatePokemon">
+		UPDATE pokemon
+		SET
+		    name = #{name},
+		    description = #{description},
+		    type = #{type},
+		    height = #{height},
+		    weight = #{weight},
+		    is_favorite = #{isFavorite},
+		    is_public = #{isPublic},
+		    is_notify = #{isNotify},
+		    variant = #{variant},
+		    main_image_path = #{mainImagePath}
+		WHERE id = #{id}
+	</update>
+	
+	<select id="selectAttachmentIdsByPokemonId" parameterType="Long" resultType="Long">
+		SELECT id 
+		  FROM pokemon_attachment
+		 WHERE pokemon_id = #{pokemonId}
+	</select>
+	
+	<delete id="deleteAttachmentById" parameterType="Long">
+		DELETE 
+		  FROM pokemon_attachment
+		 WHERE id = #{id}
+	</delete>
+	
+	<!-- 실습 3 끝 -->
+	
+	<!-- 실습 4 시작 -->
+	<delete id="deletePokemon" parameterType="Long">
+		DELETE 
+		  FROM pokemon
+		 WHERE id = #{id}
+	</delete>
+	<!-- 실습 4 끝 -->
+</mapper>

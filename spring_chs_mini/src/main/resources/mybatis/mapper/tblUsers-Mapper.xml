@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.TblUsersMapper">
+	<!-- 실습 2 시작 -->
+	<!-- 부모 -->
+	<resultMap type="kr.or.ddit.vo.TblUsersVO" id="tblUsersMap">
+		<result property="id" column="ID"/>
+		<result property="email" column="EMAIL"/>
+		<result property="password" column="PASSWORD"/>
+		<result property="createdAt" column="CREATED_AT"/>
+		<result property="updatedAt" column="UPDATED_AT"/>
+		<result property="name" column="NAME"/>
+		<result property="imgUrl" column="IMG_URL"/>
+		<result property="accessToken" column="ACCESS_TOKEN"/>
+		<result property="enabled" column="ENABLED"/>
+		<collection property="tblUsersAuthVOList" resultMap="tblUsersAuthMap"></collection>
+	</resultMap>
+	
+	<!-- 자식 -->
+	<resultMap type="kr.or.ddit.vo.TblUsersAuthVO" id="tblUsersAuthMap">
+		<result property="email" column="EMAIL"/>
+		<result property="auth" column="AUTH"/>
+	</resultMap>
+	<!-- 실습 2 끝 -->
+	
+	<!-- 실습 4 시작 -->
+	<!-- 부모 -->
+	<resultMap type="kr.or.ddit.vo.MemberVO" id="memberMap">
+		<result property="userNo" column="USER_NO"/>
+		<result property="userId" column="USER_ID"/>
+		<result property="userPw" column="USER_PW"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="coin" column="COIN"/>
+		<result property="regDate" column="REG_DATE"/>
+		<result property="updDate" column="UPD_DATE"/>
+		<result property="enabled" column="ENABLED"/>
+		<collection property="memberAuthVOList" resultMap="memberAuthMap"></collection>
+	</resultMap>
+	
+	<!-- 자식 -->
+	<resultMap type="kr.or.ddit.vo.MemberAuthVO" id="memberAuthMap">
+		<result property="userId" column="USER_ID"/>
+		<result property="auth" column="AUTH"/>
+	</resultMap>
+	<!-- 실습 4 끝 -->
+	
+	
+	<!-- 실습 1 시작 -->
+	<!-- join 이 있으면 resultMap을 사용한다. -->
+<!-- 	<select id="findByEmail" parameterType="String" -->
+<!-- 		resultMap="tblUsersMap"> -->
+<!-- 		SELECT TU.ID, TU.EMAIL, TU.PASSWORD, TU.CREATED_AT, -->
+<!-- 		TU.UPDATED_AT, TU.NAME, TU.IMG_URL, TU.ACCESS_TOKEN, TU.ENABLED, -->
+<!-- 		TUA.AUTH -->
+<!-- 		FROM TBL_USERS TU LEFT JOIN TBL_USERS_AUTH TUA ON -->
+<!-- 		TU.EMAIL = TUA.EMAIL -->
+<!-- 		WHERE 1 = 1 -->
+<!-- 		AND TU.EMAIL = #{email} -->
+<!-- 	</select> -->
+	<!-- 실습 1 끝 -->
+	
+	<!-- 실습 3 시작 : 실습 1 주석처리 -->
+	<select id="findByEmail" parameterType="String"
+		resultMap="memberMap">
+		SELECT A.USER_NO, A.USER_ID, A.USER_PW, A.USER_NAME, A.COIN
+		     , A.REG_DATE, A.UPD_DATE, A.ENABLED
+		     , B.AUTH
+		FROM   MEMBER A LEFT OUTER JOIN MEMBER_AUTH B ON(A.USER_ID = B.USER_ID)
+		WHERE  A.USER_ID = #{userId}
+	</select>
+	<!-- 실습 3 끝 : 실습 1 주석처리 -->
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.CustMapper">
+	
+	<!-- 실습 1 시작 -->
+	<insert id="createPost" parameterType="kr.or.ddit.vo.CustVO">
+		<selectKey keyProperty="custNum" order="BEFORE"
+			resultType="int">
+			SELECT NVL(MAX(CUST_NUM),0) + 1 FROM CUST
+		</selectKey>
+		INSERT INTO CUST (
+	        cust_num,
+	        cust_name,
+	        cust_addr,
+	        cust_phone
+	    ) VALUES (
+	        #{custNum},
+	        #{custName},
+	        #{custAddr},
+	        #{custPhone}
+	    )
+	</insert>
+	<!-- 실습 1 끝 -->
+	
+	<!-- 실습 2 시작 -->
+	<select id="getList" resultType="kr.or.ddit.vo.CustVO">
+		SELECT CUST_NUM, CUST_NAME, CUST_ADDR, CUST_PHONE
+		FROM CUST
+	</select>
+	<!-- 실습 2 끝 -->
+</mapper>

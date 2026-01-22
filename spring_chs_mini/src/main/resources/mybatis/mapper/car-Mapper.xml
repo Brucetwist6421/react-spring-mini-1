@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.CarMapper">
+	<!-- 실습 1 시작 -->
+	<insert id="createPostAjax" parameterType="kr.or.ddit.vo.CarVO">
+<!-- 		<selectKey keyProperty="carNum" order="BEFORE" resultType="int"> -->
+<!-- 			SELECT NVL(MAX(car_num),0) + 1 FROM CAR -->
+<!-- 		</selectKey> -->
+	    INSERT INTO car (
+	        car_num,
+	        manuft,
+	        mkyr,
+	        dist,
+	        cust_num
+	        <if test="fileGroupNo != null and fileGroupNo != 0">
+	            , file_group_no
+	        </if>
+	    )
+	    VALUES (
+	        #{carNum},
+	        #{manuft},
+	        #{mkyr},
+	        #{dist},
+	        #{custNum}
+	        <if test="fileGroupNo != null and fileGroupNo != 0">
+	            , #{fileGroupNo}
+	        </if>
+	    )
+</insert>
+	<!-- 실습 1 끝 -->
+</mapper>
