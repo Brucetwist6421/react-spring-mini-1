@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -8,8 +8,8 @@ RUN npm run build
 
 # Run stage (Nginx)
 FROM nginx:alpine
-# React의 build 폴더 내용을 Nginx 웹 폴더로 복사
-COPY --from=build /app/build /usr/share/nginx/html
+# Vite는 결과물을 dist 폴더에 생성하므로 경로를 변경합니다.
+COPY --from=build /app/dist /usr/share/nginx/html
 # 80포트 개방
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
