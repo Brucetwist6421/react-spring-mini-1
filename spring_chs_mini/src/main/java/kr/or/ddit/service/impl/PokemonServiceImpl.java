@@ -47,15 +47,47 @@ public class PokemonServiceImpl implements PokemonService {
 
 	// 공통 파일 업로드(컴포넌트 화)
 	// 첨부 파일 저장
+	// private void saveAttachments(Long pokemonId, String pokemonName,
+	// List<MultipartFile> attachmentFiles)
+	// throws IOException {
+	// if (attachmentFiles == null || attachmentFiles.isEmpty())
+	// return;
+
+	// for (MultipartFile file : attachmentFiles) {
+	// if (!file.isEmpty()) {
+	// String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+	// file.transferTo(new File("/upload/" + fileName));
+	// pokemonMapper.insertAttachment(pokemonId, pokemonName, fileName);
+	// }
+	// }
+	// }
+
+	// 첨부 파일 저장
 	private void saveAttachments(Long pokemonId, String pokemonName, List<MultipartFile> attachmentFiles)
 			throws IOException {
 		if (attachmentFiles == null || attachmentFiles.isEmpty())
 			return;
 
+		// 1. 실제 저장될 서버의 절대 경로를 설정합니다. (끝에 / 포함)
+		// 윈도우라면 "C:/upload/", 리눅스라면 "/home/ubuntu/upload/"
+		String uploadPath = "/home/ubuntu/upload/";
+
+		// 2. 해당 폴더가 없으면 생성하는 로직 추가 (방어 코드)
+		File uploadDir = new File(uploadPath);
+		if (!uploadDir.exists()) {
+			uploadDir.mkdirs();
+		}
+
 		for (MultipartFile file : attachmentFiles) {
 			if (!file.isEmpty()) {
+				// 한글 파일명 문제를 방지하기 위해 가급적 공백을 제거하거나
+				// 실무에서는 UUID로만 저장하는 것을 권장하지만, 일단 현재 로직을 유지합니다.
 				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-				file.transferTo(new File("/upload/" + fileName));
+
+				// 3. 수정된 절대 경로로 파일 저장
+				File saveFile = new File(uploadPath + fileName);
+				file.transferTo(saveFile);
+
 				pokemonMapper.insertAttachment(pokemonId, pokemonName, fileName);
 			}
 		}
@@ -137,34 +169,33 @@ public class PokemonServiceImpl implements PokemonService {
 		return pokemonMapper.deletePokemon(id);
 	}
 	// 실습 4 끝
-	
+
 	// 실습 5 시작
 	@Override
 	@Transactional
 	public int deletePokemons(List<Long> idList) {
-	    int result = 0;
+		int result = 0;
 
-	    try {
-	        for (Long id : idList) {
-	            int deleted = pokemonMapper.deletePokemon(id);
-	            if (deleted > 0) {
-	                result++;
-	            }
-	        }
+		try {
+			for (Long id : idList) {
+				int deleted = pokemonMapper.deletePokemon(id);
+				if (deleted > 0) {
+					result++;
+				}
+			}
 
-	        // 모든 삭제가 성공했는지 여부 확인
-	        if (result == idList.size()) {
-	            return 1; // 전부 성공
-	        } else {
-	            return 0; // 일부 또는 전체 실패
-	        }
+			// 모든 삭제가 성공했는지 여부 확인
+			if (result == idList.size()) {
+				return 1; // 전부 성공
+			} else {
+				return 0; // 일부 또는 전체 실패
+			}
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return 0; // 예외 발생 시 실패
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0; // 예외 발생 시 실패
+		}
 	}
 	// 실습 5 끝
-	
-	
+
 }

@@ -227,7 +227,7 @@ export default function PokemonDetailPage() {
     const initialFiles = data.attachments
       // .filter(att => /\.(jpe?g|png|gif|webp)$/i.test(att.fileName))
       .map(att => ({
-        url: `http://168.107.51.143:8080/upload/${att.fileName}`,
+        url: `http://168.107.51.143:8080/upload/${encodeURIComponent(att.fileName)}`,
         id: att.id,
       }));
     setVariantFiles(initialFiles);
@@ -798,30 +798,6 @@ export default function PokemonDetailPage() {
               )}  
 
               <Typography variant="subtitle2">첨부파일 미리 보기</Typography>
-                {/*
-                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
-                {data.types?.map((t: PokemonTypeItem) => (
-                  <Chip key={t.type.name} label={t.type.name} />
-                ))}
-                */}
-                {/* 🔹 변경/추가: attachments 이미지 미리보기 */}
-                {/*
-                {data.attachments?.map((att) => {
-                  const isImage = /\.(jpe?g|png|gif|webp)$/i.test(att.fileName);
-                  if (!isImage) return null;
-                  const url = `http://localhost:5174/upload/${att.fileName}`;
-                  return (
-                    <Box key={att.id} sx={{ position: "relative" }}>
-                      <img
-                        src={url}
-                        alt={att.fileName}
-                        style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 4 }}
-                      />
-                    </Box>
-                  );
-                })}
-              </Box>
-              */}
 
               <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(4, 1fr)" }}>
               {variantFiles.map((vf, idx) => {
