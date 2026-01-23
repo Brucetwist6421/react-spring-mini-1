@@ -24,10 +24,10 @@ import {
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "./api/axiosInstance";
+import api from "../api/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
-import SampleSwal from "./SampleSwal";
-import RandomSpinner from "./Spinners";
+import SampleSwal from "../components/SampleSwal";
+import RandomSpinner from "../components/Spinners";
 
 type FormState = {
   name: string;

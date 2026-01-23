@@ -1,13 +1,12 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Footer from "./Footer";
-import Header from "./Header";
-import PokemonCreatePage from "./PokemonCreatePage";
-import PokemonDetailPage from "./PokemonDetailPage";
-import PokemonDetailPage2 from "./PokemonDetailPage2";
-import SampleGrid from "./SampleGrid";
-import SampleTree from "./SampleTree";
+import Footer from "./layout/Footer";
+import Header from "./layout/Header";
+import SampleGrid from "./pages/grid/SampleGrid";
+import PokemonCreatePage from "./pages/PokemonCreatePage";
+import PokemonDetailPage from "./pages/PokemonDetailPage";
+import PokemonDetailPage2 from "./pages/PokemonDetailPage2";
 import theme from "./theme";
 
 function App() {
@@ -65,9 +64,6 @@ function App() {
                   padding: 16,
                 }}
               >
-                <div style={{ width: 320, flex: "0 0 320px" }}>
-                  <SampleTree />
-                </div>
                 <div style={{ flex: 1 }}>
                   <SampleGrid />
                 </div>
@@ -85,9 +81,6 @@ function App() {
                   padding: 16,
                 }}
               >
-                <div style={{ width: 320, flex: "0 0 320px" }}>
-                  <SampleTree />
-                </div>
                 <div style={{ flex: 1 }}>
                   <PokemonDetailPage />
                 </div>
@@ -104,9 +97,6 @@ function App() {
                   padding: 16,
                 }}
               >
-                <div style={{ width: 320, flex: "0 0 320px" }}>
-                  <SampleTree />
-                </div>
                 <div style={{ flex: 1 }}>
                   <PokemonCreatePage />
                 </div>
@@ -125,9 +115,6 @@ function App() {
                   padding: 16,
                 }}
               >
-                <div style={{ width: 320, flex: "0 0 320px" }}>
-                  <SampleTree />
-                </div>
                 <div style={{ flex: 1 }}>
                   <PokemonDetailPage2 />
                 </div>

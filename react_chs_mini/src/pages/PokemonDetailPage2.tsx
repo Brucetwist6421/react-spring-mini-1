@@ -22,10 +22,10 @@ import Typography from "@mui/material/Typography";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "./api/axiosInstance";
-import { fileListDownload } from "./fileListDownload";
-import SampleSwal from "./SampleSwal";
-import RandomSpinner from "./Spinners";
+import api from "../api/axiosInstance";
+import { fileListDownload } from "../api/fileListDownload";
+import SampleSwal from "../components/SampleSwal";
+import RandomSpinner from "../components/Spinners";
 
 // Pokemon 응답 타입 일부만 정의
 type PokemonTypeItem = { type: { name: string } };

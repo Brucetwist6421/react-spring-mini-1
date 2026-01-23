@@ -8,16 +8,16 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // 실습 1 시작
 import { useQuery } from "@tanstack/react-query";
-import api from "./api/axiosInstance";
-import PokemonDetailModal from "./PokemonDetailModal";
+import api from "../../api/axiosInstance";
+import PokemonDetailModal from "../PokemonDetailModal";
 
-import SampleSwal from "./SampleSwal";
+import SampleSwal from "../../components/SampleSwal";
 
 import * as React from 'react';
 // 실습 1 끝
 
 import { useMutation } from "@tanstack/react-query";
-import RandomSpinner from "./Spinners";
+import RandomSpinner from "../../components/Spinners";
 
 // Row 타입 정의
 interface RowData {
