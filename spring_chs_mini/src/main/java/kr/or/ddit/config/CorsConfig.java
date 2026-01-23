@@ -1,31 +1,23 @@
 package kr.or.ddit.config;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class CorsConfig {
+public class CorsConfig implements WebMvcConfigurer { // WebMvcConfigurer를 구현합니다.
 
-	@Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // 실제 배포된 서버의 IP 주소를 추가해야 합니다.
-        configuration.setAllowedOrigins(List.of(
-            "http://localhost:5173",          // 로컬 개발용
-            "http://168.107.51.143",          // 배포된 리액트 서버 IP
-            "http://168.107.51.143:80"        // 80포트 명시 (선택사항)
-        ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT"));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(List.of("*"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // 모든 API 허용
-
-        return source;
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**") // 모든 API 경로에 대해
+                .allowedOrigins(
+                    "http://localhost:5173", 
+                    "http://168.107.51.143", 
+                    "http://168.107.51.143:80"
+                ) // 허용할 도메인들
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 메서드
+                .allowedHeaders("*") // 모든 헤더 허용
+                .allowCredentials(true) // 쿠키/인증정보 포함 허용
+                .maxAge(3600); // 프리플라이트 요청 캐싱 시간
     }
 }
