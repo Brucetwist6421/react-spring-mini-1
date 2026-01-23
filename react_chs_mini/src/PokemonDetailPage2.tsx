@@ -478,7 +478,15 @@ export default function PokemonDetailPage() {
                 style={{ display: "block", marginBottom: 8, objectFit: "contain" }}
               />
             ) : (
-              <div style={{ width: 120, height: 120, background: "#eee" }}>이미지 없음</div>
+              <div style={{ width: 120, height: 120, background: "#eee" }}>
+                <Box sx={{ mb: 1 }}>
+                <img
+                  src={"https://mblogthumb-phinf.pstatic.net/MjAxOTEwMjdfMTI4/MDAxNTcyMTU4OTEwNzI2.XrBHHBuiTESxgjZ96cxz3I1FAsi1so1HpkuDxqGYjYAg.zQQKNoDVIGxzcxrz4__Dnt6nXbtWczXzgpdXjGP4MsUg.GIF.msjin93/IMG_8483.GIF?type=w800"}
+                  alt="main"
+                  style={{ width: 140, height: 140, objectFit: "contain", background: "#f5f5f5" }}
+                />
+                </Box>
+              </div>
             )}
 
             {/* 실습 4 끝 */}

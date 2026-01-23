@@ -4,7 +4,7 @@
 	<!-- 실습 1 시작 -->
 	<insert id="insertPokemon" parameterType="kr.or.ddit.vo.PokemonVO">
 		<selectKey keyProperty="id" resultType="long" order="BEFORE">
-			SELECT nextval('pokemon_seq')
+		SELECT nextval('pokemon_seq')
 		</selectKey>
 		INSERT INTO pokemon (id,
 		name, description, type, height, weight,
