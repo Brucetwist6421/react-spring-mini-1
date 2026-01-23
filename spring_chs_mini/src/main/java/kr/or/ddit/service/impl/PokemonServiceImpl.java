@@ -55,7 +55,7 @@ public class PokemonServiceImpl implements PokemonService {
 		for (MultipartFile file : attachmentFiles) {
 			if (!file.isEmpty()) {
 				String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-				file.transferTo(new File("C:/upload/" + fileName));
+				file.transferTo(new File("/upload/" + fileName));
 				pokemonMapper.insertAttachment(pokemonId, pokemonName, fileName);
 			}
 		}
@@ -66,7 +66,7 @@ public class PokemonServiceImpl implements PokemonService {
 		if (mainImage == null || mainImage.isEmpty())
 			return null;
 		String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
-		File mainFile = new File("C:/upload/" + mainName);
+		File mainFile = new File("/upload/" + mainName);
 		mainImage.transferTo(mainFile);
 		return mainName;
 	}

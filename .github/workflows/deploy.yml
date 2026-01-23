@@ -58,9 +58,14 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/react-app:latest
             
-            # 3. 새 컨테이너 실행
             # E2.1.Micro의 적은 메모리(1GB)를 고려하여 스프링 메모리 제한 추가 가능
-            docker run -d --name spring-container -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+            # 3. 새 컨테이너 실행 (볼륨 설정 -v 추가)
+            # [서버실제경로]:[컨테이너내부경로] 형식을 사용합니다.
+            docker run -d --name spring-container \
+              -p 8080:8080 \
+              -v /home/ubuntu/upload:/upload \
+              ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+              
             docker run -d --name react-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/react-app:latest
             
             # 4. (선택) 미사용 이미지 정리 (용량 확보)
