@@ -9,7 +9,7 @@ import PokemonCreatePage from "./pages/PokemonCreatePage";
 import PokemonDetailPage from "./pages/PokemonDetailPage";
 import PokemonDetailPage2 from "./pages/PokemonDetailPage2";
 import theme from "./theme";
-import { AppSidebar } from "./layout/Sidebar"; // 생성하신 사이드바 임포트
+import { AppSidebar } from "./layout/Sidebar";
 
 function App() {
   return (
