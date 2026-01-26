@@ -30,234 +30,6 @@ interface RowData {
   taxRate?: number;
 }
 
-// 샘플 데이터
-const rows = [
-  {
-    id: 1,
-    firstName: "Jon",
-    lastName: "Snow",
-    age: 14,
-    gross: 100000,
-    costs: 80000,
-    taxRate: 0.2,
-  },
-  {
-    id: 2,
-    firstName: "Cersei",
-    lastName: "Lannister",
-    age: 31,
-    gross: 150000,
-    costs: 120000,
-    taxRate: 0.25,
-  },
-  {
-    id: 3,
-    firstName: "Jaime",
-    lastName: "Lannister",
-    age: 31,
-    gross: 130000,
-    costs: 100000,
-    taxRate: 0.22,
-  },
-  {
-    id: 4,
-    firstName: "Arya",
-    lastName: "Stark",
-    age: 11,
-    gross: 90000,
-    costs: 70000,
-    taxRate: 0.18,
-  },
-  {
-    id: 5,
-    firstName: "Daenerys",
-    lastName: "Targaryen",
-    age: null,
-    gross: 200000,
-    costs: 150000,
-    taxRate: 0.3,
-  },
-  {
-    id: 6,
-    firstName: null,
-    lastName: "Melisandre",
-    age: 150,
-    gross: 110000,
-    costs: 90000,
-    taxRate: 0.21,
-  },
-  {
-    id: 7,
-    firstName: "Ferrara",
-    lastName: "Clifford",
-    age: 44,
-    gross: 140000,
-    costs: 110000,
-    taxRate: 0.24,
-  },
-  {
-    id: 8,
-    firstName: "Rossini",
-    lastName: "Frances",
-    age: 36,
-    gross: 125000,
-    costs: 100000,
-    taxRate: 0.23,
-  },
-  {
-    id: 9,
-    firstName: "Harvey",
-    lastName: "Roxie",
-    age: 65,
-    gross: 160000,
-    costs: 120000,
-    taxRate: 0.26,
-  },
-  {
-    id: 10,
-    firstName: "Tyrion",
-    lastName: "Lannister",
-    age: 38,
-    gross: 135000,
-    costs: 95000,
-    taxRate: 0.22,
-  },
-  {
-    id: 11,
-    firstName: "Sansa",
-    lastName: "Stark",
-    age: 30,
-    gross: 145000,
-    costs: 105000,
-    taxRate: 0.23,
-  },
-  {
-    id: 12,
-    firstName: "Bran",
-    lastName: "Stark",
-    age: 28,
-    gross: 120000,
-    costs: 90000,
-    taxRate: 0.2,
-  },
-  {
-    id: 13,
-    firstName: "Joffrey",
-    lastName: "Baratheon",
-    age: 20,
-    gross: 110000,
-    costs: 80000,
-    taxRate: 0.18,
-  },
-  {
-    id: 14,
-    firstName: "Margaery",
-    lastName: "Tyrell",
-    age: 26,
-    gross: 130000,
-    costs: 100000,
-    taxRate: 0.21,
-  },
-  {
-    id: 15,
-    firstName: "Samwell",
-    lastName: "Tarly",
-    age: 32,
-    gross: 95000,
-    costs: 70000,
-    taxRate: 0.19,
-  },
-  {
-    id: 16,
-    firstName: "Gilly",
-    lastName: "Tarly",
-    age: 29,
-    gross: 90000,
-    costs: 65000,
-    taxRate: 0.18,
-  },
-  {
-    id: 17,
-    firstName: "Petyr",
-    lastName: "Baelish",
-    age: 42,
-    gross: 170000,
-    costs: 130000,
-    taxRate: 0.25,
-  },
-  {
-    id: 18,
-    firstName: "Varys",
-    lastName: null,
-    age: 45,
-    gross: 150000,
-    costs: 110000,
-    taxRate: 0.23,
-  },
-  {
-    id: 19,
-    firstName: "Bronn",
-    lastName: null,
-    age: 35,
-    gross: 125000,
-    costs: 95000,
-    taxRate: 0.22,
-  },
-  {
-    id: 20,
-    firstName: "Sandor",
-    lastName: "Clegane",
-    age: 40,
-    gross: 140000,
-    costs: 110000,
-    taxRate: 0.24,
-  },
-  {
-    id: 21,
-    firstName: "Gregor",
-    lastName: "Clegane",
-    age: 43,
-    gross: 180000,
-    costs: 140000,
-    taxRate: 0.28,
-  },
-  {
-    id: 22,
-    firstName: "Davos",
-    lastName: "Seaworth",
-    age: 50,
-    gross: 130000,
-    costs: 100000,
-    taxRate: 0.21,
-  },
-  {
-    id: 23,
-    firstName: "Stannis",
-    lastName: "Baratheon",
-    age: 48,
-    gross: 160000,
-    costs: 125000,
-    taxRate: 0.25,
-  },
-  {
-    id: 24,
-    firstName: "Renly",
-    lastName: "Baratheon",
-    age: 36,
-    gross: 155000,
-    costs: 120000,
-    taxRate: 0.24,
-  },
-  {
-    id: 25,
-    firstName: "Ygritte",
-    lastName: null,
-    age: 25,
-    gross: 95000,
-    costs: 70000,
-    taxRate: 0.2,
-  },
-];
 
 // 컬럼 정의 (타입 안전)
 const columns: GridColDef<RowData>[] = [
@@ -301,7 +73,7 @@ const columns: GridColDef<RowData>[] = [
     sortable: false, // false면 컬럼 정렬 불가
     width: 160,
     valueGetter: (value, row) => {
-      // console.log(value, row);
+      console.log(value, row);
       // params.row에서 데이터를 가져와 fullName 생성
       return `${row.firstName || ""} ${row.lastName || ""}`;
     },
@@ -318,7 +90,7 @@ const columns: GridColDef<RowData>[] = [
   {
     field: "profit",
     valueGetter: (value, row) => {
-      // console.log(value, row);
+      console.log(value, row);
       if (!row.gross || !row.costs) {
         return null;
       }
@@ -367,7 +139,7 @@ export default function DataGridDemo() {
         gross: i + Math.random() * 10,
         costs: i + Math.random() * 10,
       }))
-    : rows;
+    : [];
   // 실습 2 끝
 
   // 실습 9 시작
