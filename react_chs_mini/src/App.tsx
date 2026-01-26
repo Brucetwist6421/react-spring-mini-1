@@ -9,7 +9,7 @@ import PokemonCreatePage from "./pages/PokemonCreatePage";
 import PokemonDetailPage from "./pages/PokemonDetailPage";
 import PokemonDetailPage2 from "./pages/PokemonDetailPage2";
 import theme from "./theme";
-import AppSidebar from "./layout/Sidebar";
+import NavigationBar from "./layout/NavigationBar";
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
         {/* 1. 전체 가로 배치를 위한 컨테이너 */}
         <Box sx={{ display: "flex", minHeight: "100vh" }}>
           {/* 2. 왼쪽 고정 사이드바 */}
-          <AppSidebar />
+          <NavigationBar />
 
           {/* 3. 오른쪽 가변 컨텐츠 영역 */}
           <Box
