@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const drawerWidth = 260;
 
-export const AppSidebar = () => {
+const AppSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation(); // 현재 경로 표시용
 
@@ -78,3 +78,5 @@ export const AppSidebar = () => {
     </Drawer>
   );
 };
+
+export default AppSidebar;
