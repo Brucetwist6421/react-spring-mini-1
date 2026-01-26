@@ -54,7 +54,13 @@ export const AppSidebar = () => {
                 <ListItemIcon sx={{ color: location.pathname === item.path ? "#fff" : "#94a3b8", minWidth: 40 }}>
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: "14px", fontWeight: 500 }} />
+                <ListItemText 
+                    primary={
+                        <Typography sx={{ fontSize: "14px", fontWeight: 500 }}>
+                        {item.text}
+                        </Typography>
+                    } 
+                    />
               </ListItemButton>
             </ListItem>
           ))}
