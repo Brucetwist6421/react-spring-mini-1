@@ -5,8 +5,8 @@ import { Box } from "@mui/material"; // 레이아웃 구성을 위한 Box
 import Footer from "./layout/Footer";
 import Header from "./layout/Header";
 import PokemonCreatePage from "./pages/PokemonCreatePage";
-import PokemonDetailPage from "./pages/Details/PokemonDetailPage";
-import PokemonDetailPage2 from "./pages/Details/PokemonDetailPage2";
+import PokemonDetailPage from "./pages/details/PokemonDetailPage";
+import PokemonDetailPage2 from "./pages/details/PokemonDetailPage2";
 import theme from "./theme";
 import NavigationBar from "./layout/NavigationBar";
 import MainDashboard from "./pages/dashboard/MainDashboard";
