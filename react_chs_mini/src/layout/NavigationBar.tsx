@@ -10,7 +10,7 @@ const NavigationBar = () => {
 
   const menuItems = [
     { text: "대시보드", icon: <Dashboard />, path: "/" },
-    { text: "포켓몬 목록", icon: <CatchingPokemon />, path: "/" },
+    { text: "포켓몬 목록", icon: <CatchingPokemon />, path: "/pokemonList" },
     { text: "새 포켓몬 등록", icon: <AddCircle />, path: "/pokemon/create" },
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];

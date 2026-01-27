@@ -99,7 +99,7 @@ const columns: GridColDef<RowData>[] = [
   },
 ];
 
-export default function DataGridDemo() {
+export default function PokemonList() {
   // 실습 7 시작
   const navigate = useNavigate();
   // 실습 7 끝

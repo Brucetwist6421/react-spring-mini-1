@@ -4,12 +4,13 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Box } from "@mui/material"; // 레이아웃 구성을 위한 Box
 import Footer from "./layout/Footer";
 import Header from "./layout/Header";
-import SampleGrid from "./pages/grid/PokemonList";
 import PokemonCreatePage from "./pages/PokemonCreatePage";
 import PokemonDetailPage from "./pages/PokemonDetailPage";
 import PokemonDetailPage2 from "./pages/PokemonDetailPage2";
 import theme from "./theme";
 import NavigationBar from "./layout/NavigationBar";
+import MainDashboard from "./pages/dashboard/MainDashboard";
+import PokemonList from "./pages/grid/PokemonList";
 
 function App() {
   return (
@@ -36,7 +37,8 @@ function App() {
             {/* 메인 본문: 페이지 이동 시 여기만 바뀝니다 */}
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
               <Routes>
-                <Route path="/" element={<SampleGrid />} />
+                <Route path="/" element={<MainDashboard />} />
+                <Route path="/pokemonList" element={<PokemonList />} />
                 <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon/create" element={<PokemonCreatePage />} />
                 <Route path="/pokemon2/:id" element={<PokemonDetailPage2 />} />
