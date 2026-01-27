@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import api from "../api/axiosInstance";
+import api from "../../api/axiosInstance";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -24,7 +24,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import RandomSpinner from "../components/RandomSpinner";
+import RandomSpinner from "../../components/RandomSpinner";
 
 // Pokemon 응답 타입 일부만 정의
 type PokemonTypeItem = { type: { name: string } };
