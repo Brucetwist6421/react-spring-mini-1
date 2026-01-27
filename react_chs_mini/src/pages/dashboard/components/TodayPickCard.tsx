@@ -59,25 +59,75 @@ export default function TodayPickCard({ pokemon, color }: any) {
         <Typography variant="caption" fontWeight={900} sx={{ color: '#64748b', display: 'block', mb: 1.5 }}>
           {TYPE_MAP[primaryType]} 속성 평균 대비 분석
         </Typography>
-        <Stack spacing={1.2}>
+        
+        <Stack spacing={1.5}>
           {pokemon.stats.map((s: any) => {
             const current = s.base_stat;
             const average = avgStats[s.stat.name];
             const diff = current - average;
+            
             return (
               <Box key={s.stat.name}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-                  <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 700 }}>{STAT_LABELS[s.stat.name].label}</Typography>
-                  <Stack direction="row" spacing={0.5} alignItems="center">
-                    <Typography sx={{ fontSize: '0.6rem', fontWeight: 900, color: diff >= 0 ? '#10b981' : '#ef4444' }}>
-                      {diff >= 0 ? `+${diff}` : diff}
+                {/* 상단 라벨 및 수치 영역 */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 0.5 }}>
+                  <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 800, color: '#1e293b' }}>
+                    {STAT_LABELS[s.stat.name].label}
+                  </Typography>
+                  
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    {/* [현재값 / 평균값] 표시 */}
+                    <Typography sx={{ fontSize: '0.65rem', fontWeight: 600, color: '#94a3b8' }}>
+                      <span style={{ color: '#1e293b', fontWeight: 900 }}>{current}(현재)</span> / {average}(평균)
                     </Typography>
-                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 900 }}>{current}</Typography>
+                    
+                    {/* [차이값] 강조 표시 */}
+                    <Box sx={{ 
+                      minWidth: 35,
+                      textAlign: 'right',
+                      px: 0.6,
+                      py: 0.1,
+                      bgcolor: diff >= 0 ? '#ecfdf5' : '#fef2f2',
+                      borderRadius: '4px'
+                    }}>
+                      <Typography sx={{ 
+                        fontSize: '0.65rem', 
+                        fontWeight: 900, 
+                        color: diff >= 0 ? '#10b981' : '#ef4444' 
+                      }}>
+                        {diff >= 0 ? `+${diff}` : diff}
+                      </Typography>
+                    </Box>
                   </Stack>
                 </Box>
-                <Box sx={{ position: 'relative', height: 6, bgcolor: '#f1f5f9', borderRadius: 1 }}>
-                  <LinearProgress variant="determinate" value={(current / 200) * 100} sx={{ height: 6, bgcolor: 'transparent', borderRadius: 1, '& .MuiLinearProgress-bar': { bgcolor: STAT_LABELS[s.stat.name].color } }} />
-                  <Box sx={{ position: 'absolute', left: `${(average / 200) * 100}%`, top: -2, bottom: -2, width: '2px', bgcolor: '#1e293b', zIndex: 1, opacity: 0.4 }} />
+
+                {/* 프로그레스 바 영역 */}
+                <Box sx={{ position: 'relative', height: 8, bgcolor: '#f1f5f9', borderRadius: 1, overflow: 'hidden' }}>
+                  {/* 현재값 바 */}
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={(current / 200) * 100} 
+                    sx={{ 
+                      height: 8, 
+                      bgcolor: 'transparent', 
+                      '& .MuiLinearProgress-bar': { 
+                        bgcolor: STAT_LABELS[s.stat.name].color,
+                        borderRadius: 1
+                      } 
+                    }} 
+                  />
+                  {/* 평균선 마커 (검은 세로선) */}
+                  <Box 
+                    sx={{ 
+                      position: 'absolute', 
+                      left: `${(average / 200) * 100}%`, 
+                      top: 0, 
+                      bottom: 0, 
+                      width: '2px', 
+                      bgcolor: '#1e293b', 
+                      zIndex: 1, 
+                      opacity: 0.5 
+                    }} 
+                  />
                 </Box>
               </Box>
             );

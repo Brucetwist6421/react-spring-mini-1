@@ -31,4 +31,11 @@ export const TYPE_STAT_DATA: any = {
   ghost: { hp: 63, attack: 73, defense: 71, "special-attack": 81, "special-defense": 76, speed: 64 },
   steel: { hp: 68, attack: 93, defense: 119, "special-attack": 70, "special-defense": 79, speed: 55 },
   psychic: { hp: 70, attack: 65, defense: 67, "special-attack": 92, "special-defense": 82, speed: 80 },
+  ice: { hp: 71, attack: 73, defense: 71, "special-attack": 70, "special-defense": 76, speed: 63 },
+  poison: { hp: 67, attack: 74, defense: 68, "special-attack": 67, "special-defense": 70, speed: 64 },
+  ground: { hp: 73, attack: 94, defense: 84, "special-attack": 56, "special-defense": 63, speed: 63 },
+  flying: { hp: 71, attack: 79, defense: 68, "special-attack": 75, "special-defense": 71, speed: 85 },
+  bug: { hp: 57, attack: 71, defense: 71, "special-attack": 54, "special-defense": 65, speed: 62 },
+  dark: { hp: 70, attack: 89, defense: 68, "special-attack": 70, "special-defense": 69, speed: 75 },
+  fairy: { hp: 71, attack: 67, defense: 71, "special-attack": 79, "special-defense": 85, speed: 67 },
 };
