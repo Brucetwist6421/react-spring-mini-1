@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 // 실습 1 시작
 import { useQuery } from "@tanstack/react-query";
 import api from "../../api/axiosInstance";
-import PokemonDetailModal from "../PokemonDetailModal";
+import PokemonDetailModal from "../modal/PokemonDetailModal";
 
 import SampleSwal from "../../components/SampleSwal";
 
