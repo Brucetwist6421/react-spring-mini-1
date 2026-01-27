@@ -43,17 +43,26 @@ export default function MainDashboard() {
         const typeRes = await fetch(currentPoke.types[0].type.url);
         const typeData = await typeRes.json();
 
-        // 2. 상위 10마리 정도의 상세 데이터를 먼저 가져옴 (정렬을 위해)
-        // Tip: 실제 운영 시에는 모든 포켓몬의 BST가 저장된 DB가 필요하지만,
-        // 여기서는 샘플 15마리를 가져와 그중 진짜 강한 순으로 정렬합니다.
+        // 2. 상위 10마리 정도의 상세 데이터를 가져오면서 한글 이름(Species)도 함께 호출
         const sampleList = typeData.pokemon.slice(0, 15);
         const detailedList = await Promise.all(
-          sampleList.map((p: any) =>
-            fetch(p.pokemon.url).then((r) => r.json()),
-          ),
+          sampleList.map(async (p: any) => {
+            // 포켓몬 상세 데이터 호출
+            const pokeData = await fetch(p.pokemon.url).then((r) => r.json());
+            // 포켓몬 종(Species) 데이터 호출 (한글 이름을 위해)
+            const speciesData = await fetch(pokeData.species.url).then((r) => r.json());
+            
+            // 한글 이름 찾기
+            const koName = speciesData.names.find(
+              (n: any) => n.language.name === "ko"
+            )?.name || pokeData.name;
+
+            // 기존 데이터에 koName 추가하여 반환
+            return { ...pokeData, koName };
+          })
         );
 
-        // 🔥 3. 핵심: 종족값 합계(BST) 계산 후 내림차순 정렬
+        // 3. 핵심: 종족값 합계(BST) 계산 후 내림차순 정렬
         const rankedList = detailedList.sort((a, b) => {
           const bstA = a.stats.reduce(
             (acc: number, cur: any) => acc + cur.base_stat,

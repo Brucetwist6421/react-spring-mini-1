@@ -12,7 +12,7 @@ export default function TopRankerCard({ p, rank }: any) {
           <Box sx={{ position: 'absolute', top: -5, left: -5, bgcolor: colors[rank-1] || '#94a3b8', color: '#fff', px: 0.8, fontSize: '0.6rem', fontWeight: 900 }}>{rank}위</Box>
         </Box>
         <Box>
-          <Typography variant="subtitle2" fontWeight={800} sx={{ textTransform: 'capitalize' }}>{p.name}</Typography>
+          <Typography variant="subtitle2" fontWeight={800} sx={{ textTransform: 'capitalize' }}>{p.koName}({p.name})</Typography>
           <Typography variant="caption" color="text.secondary">전투력(BST): {bst}</Typography>
         </Box>
       </Paper>
