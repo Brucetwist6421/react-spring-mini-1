@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const TYPE_COLORS: { [key: string]: string } = {
   fire: '#ef4444', water: '#3b82f6', grass: '#22c55e', electric: '#f59e0b',
   psychic: '#ec4899', ice: '#6ee7b7', dragon: '#8b5cf6', dark: '#334155',
@@ -37,3 +38,4 @@ export const SUMMARY_METRICS = [
   { label: 'Avg. Base Stat', value: '432', color: '#10b981' },
   { label: 'Generations', value: 'IX', color: '#f59e0b' },
 ];
+
