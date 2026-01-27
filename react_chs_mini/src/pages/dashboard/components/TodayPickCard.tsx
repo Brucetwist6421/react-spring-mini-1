@@ -8,7 +8,7 @@ import InsightsIcon from '@mui/icons-material/Insights';
 
 import { usePokemonAnalytics } from "./hooks/usePokemonAnalytics";
 import { STAT_LABELS, TYPE_MAP, TYPE_STAT_DATA } from "./types/dashboardType";
-import RandomSpinner from "../../../components/Spinners";
+import RandomSpinner from "../../../components/RandomSpinner";
 
 export default function TodayPickCard({ pokemon, color }: any) {
   const { strengths, weaknesses, evoChain, habitat, typeRank, globalRank, isLoading } = usePokemonAnalytics(pokemon);

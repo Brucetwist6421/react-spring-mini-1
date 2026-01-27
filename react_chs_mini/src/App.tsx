@@ -10,7 +10,7 @@ import PokemonDetailPage2 from "./pages/PokemonDetailPage2";
 import theme from "./theme";
 import NavigationBar from "./layout/NavigationBar";
 import MainDashboard from "./pages/dashboard/MainDashboard";
-import PokemonList from "./pages/grid/PokemonList";
+import PokemonList from "./pages/lists/PokemonList";
 
 function App() {
   return (

@@ -27,7 +27,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
 import SampleSwal from "../components/SampleSwal";
-import RandomSpinner from "../components/Spinners";
+import RandomSpinner from "../components/RandomSpinner";
 
 type FormState = {
   name: string;

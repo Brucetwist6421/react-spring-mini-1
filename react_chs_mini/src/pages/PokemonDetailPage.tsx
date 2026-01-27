@@ -7,7 +7,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
 import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -25,6 +24,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import RandomSpinner from "../components/RandomSpinner";
 
 // Pokemon 응답 타입 일부만 정의
 type PokemonTypeItem = { type: { name: string } };
@@ -131,12 +131,10 @@ export default function PokemonDetailPage() {
     };
   }, [file]);
 
-  if (isLoading)
-    return (
-      <Container sx={{ py: 6 }}>
-        <CircularProgress />
-      </Container>
-    );
+  // 상세조회 시 spinner 호출
+  if (isLoading ) {
+    return <RandomSpinner />;
+  }
   if (error)
     return (
       <Container sx={{ py: 6 }}>

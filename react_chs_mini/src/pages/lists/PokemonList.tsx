@@ -1,8 +1,8 @@
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import { DataGrid} from '@mui/x-data-grid';
-import type { GridRowSelectionModel } from '@mui/x-data-grid';
+import { DataGrid } from "@mui/x-data-grid";
+import type { GridRowSelectionModel } from "@mui/x-data-grid";
 import { koKR } from "@mui/x-data-grid/locales";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,11 +13,11 @@ import PokemonDetailModal from "../PokemonDetailModal";
 
 import SampleSwal from "../../components/SampleSwal";
 
-import * as React from 'react';
+import * as React from "react";
 // 실습 1 끝
 
 import { useMutation } from "@tanstack/react-query";
-import RandomSpinner from "../../components/Spinners";
+import RandomSpinner from "../../components/RandomSpinner";
 
 // Row 타입 정의
 interface RowData {
@@ -29,7 +29,6 @@ interface RowData {
   costs?: number;
   taxRate?: number;
 }
-
 
 // 컬럼 정의 (타입 안전)
 const columns: GridColDef<RowData>[] = [
@@ -116,14 +115,22 @@ export default function PokemonList() {
 
   // 실습 2 시작
   // pokemonList 호출 :  axios + react-query
-  const { data: pokeData, isLoading, isFetching, error } = useQuery({
+  const {
+    data: pokeData,
+    isLoading,
+    isFetching,
+    error,
+  } = useQuery({
     queryKey: ["pokemonList"],
     queryFn: async () => {
       // setLoading(true);
       const res = await api.get("https://pokeapi.co/api/v2/pokemon?limit=30");
       console.log("res.data : ", res.data);
       // setLoading(false);
-      return res.data as { count: number; results: { name: string; url: string }[] };
+      return res.data as {
+        count: number;
+        results: { name: string; url: string }[];
+      };
     },
   });
 
@@ -145,18 +152,18 @@ export default function PokemonList() {
   // 실습 9 시작
   // 1. useMutation 훅 정의
   const deletePokemonMutation = useMutation({
-    mutationFn: async (selectedIds : Array<string | number>) => {
+    mutationFn: async (selectedIds: Array<string | number>) => {
       console.log("전송된 pokemonIds :", selectedIds);
       // API DELETE 요청 실행
       const res = await api.delete("/pokemon/deletePokemons", {
-      data: selectedIds, // 배열을 body에 담아 전송
-    });
+        data: selectedIds, // 배열을 body에 담아 전송
+      });
       return res.data;
     },
     onSuccess: (data) => {
       console.log("서버 응답:", data);
       SampleSwal.fire({
-        title: "삭제되었습니다.", 
+        title: "삭제되었습니다.",
         // text: "text 속성 ",
         icon: "success",
       });
@@ -171,13 +178,15 @@ export default function PokemonList() {
 
   // 버튼 클릭 시 선택된 row id 전송 (DataGrid props 없이 DOM에서 선택된 항목 추출)
   const [rowSelectionModel, setRowSelectionModel] =
-  React.useState<GridRowSelectionModel>({ type: 'include', ids: new Set() });
+    React.useState<GridRowSelectionModel>({ type: "include", ids: new Set() });
 
   // 그리드 체크박스 선택 후 삭제 버튼 클릭 시 핸들러
   const handleShowSelectedIds = () => {
     console.log(rowSelectionModel.ids);
-    const selectedIds = Array.from(rowSelectionModel.ids).map((id) => Number(id));
-    console.log("selectedIds : ",selectedIds);
+    const selectedIds = Array.from(rowSelectionModel.ids).map((id) =>
+      Number(id),
+    );
+    console.log("selectedIds : ", selectedIds);
     SampleSwal.fire({
       title: "선택된 데이터 목록을 삭제하시겠습니까?",
       text: selectedIds.join(", "),
@@ -189,8 +198,6 @@ export default function PokemonList() {
       cancelButtonText: "아니오",
     }).then((result) => {
       if (result.isConfirmed) {
-
-
         // React Query로 전송 (기존 axios.post 대신)
         deletePokemonMutation.mutate(selectedIds);
       } else {
@@ -205,14 +212,11 @@ export default function PokemonList() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
 
-  //실습 3 시작 
-  //로딩 / 에러 표시 (선택사항: gridRows는 fetch 전에도 기존 rows로 대체됨) 
-  if(isLoading || isFetching) return <RandomSpinner />;
-  if(error) return <h1>404 ERROR</h1>;
+  //실습 3 시작
+  //로딩 / 에러 표시 (선택사항: gridRows는 fetch 전에도 기존 rows로 대체됨)
+  if (isLoading || isFetching) return <RandomSpinner />;
+  if (error) return <h1>404 ERROR</h1>;
   // 실습 3 끝
-
-
-  
 
   // ID, FirstName 클릭 핸들러 포함한 컬럼 복사
   const columnsWithHandler = columns.map((col) => {
@@ -288,34 +292,63 @@ export default function PokemonList() {
     // 실습 8 끝
 
     return col;
-
   });
 
   return (
     <Box sx={{ height: "100%", width: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-        {/* 선택 항목 전송 버튼 */}
-        <Button
-          variant="contained"
-          color="info"
-          onClick={handleShowSelectedIds}
-          sx={{ mb : 1 }}
-          disabled={rowSelectionModel.ids.size === 0}
-        >
-          선택 항목 삭제
-        </Button>
+      {/* 상단 헤더 섹션: 제목과 버튼 배치 */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between", // 양 끝으로 배치
+          alignItems: "center", // 세로 중앙 정렬
+          mb: 2, // 데이터그리드와의 간격
+          px: 1, // 양 옆 살짝 여백
+        }}
+      >
+        {/* 1. 왼쪽 제목 추가 */}
+        <Typography variant="h5" sx={{ fontWeight: 800, color: "#1e293b" }}>
+          포켓몬 목록
+        </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mb: 1 }}
-          onClick={() => navigate("/pokemon/create")}
-        >
-          포켓몬 등록
-        </Button>
-      </div>
+        {/* 2. 오른쪽 버튼 그룹 */}
+        <Box sx={{ display: "flex", gap: "8px" }}>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={handleShowSelectedIds}
+            disabled={rowSelectionModel.ids.size === 0}
+            sx={{ 
+              borderRadius: '8px',   // 0에서 '8px'로 변경 (취향에 따라 '4px', '12px'로 조절 가능)
+              fontWeight: 700,
+              boxShadow: 'none',     // 그림자를 없애면 더 깔끔한 플랫 디자인이 됩니다.
+              '&:hover': {
+                boxShadow: 'none',
+              }
+            }}
+          >
+            선택 항목 삭제
+          </Button>
 
-      
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate("/pokemon/create")}
+            sx={{ 
+              borderRadius: '8px', // 삭제 버튼과 동일하게 8px로 설정
+              fontWeight: 700,
+              boxShadow: 'none',   // 그림자를 제거하여 모던한 느낌 추가
+              px: 3,               // 좌우 패딩을 늘려 버튼의 비율을 개선
+              '&:hover': {
+                boxShadow: 'none', // 호버 시에도 그림자 제거 유지
+              }
+            }}
+          >
+            포켓몬 등록
+          </Button>
+        </Box>
+      </Box>
+      {/* DataGrid 시작 */}
       <DataGrid
         //rows={rows} // rows 고정 데이터 사용 시
         rows={gridRows} // 데이터 배열 (fetch 결과 우선)
@@ -344,27 +377,30 @@ export default function PokemonList() {
         slotProps={{
           toolbar: {
             csvOptions: {
-              fileName: '포켓몬리스트_'+Date.now().toString(),
-              delimiter: ';',
+              fileName: "포켓몬리스트_" + Date.now().toString(),
+              delimiter: ";",
               utf8WithBom: true,
             },
           },
         }}
         // loading={loading}
-        
+
         // onRowSelectionModelChange={handleSelectionChange} // 체크박스 클릭 이벤트
       />
       {/* 실습 6 시작 */}
       {/* 상세조회 컴포넌트 */}
-      <PokemonDetailModal open={detailOpen} onClose={() => setDetailOpen(false)} row={selectedRow} />
+      <PokemonDetailModal
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        row={selectedRow}
+      />
       {/* 실습 6 끝 */}
       {/* 실습 10 시작 */}
       {/* 로딩 시 스피너 실행 */}
       {/* {loading && (
-        <RandomSpinner/>
-      )} */}
+          <RandomSpinner/>
+        )} */}
       {/* 실습 10 끝 */}
-
     </Box>
   );
 }

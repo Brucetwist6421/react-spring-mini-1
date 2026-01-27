@@ -25,7 +25,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axiosInstance";
 import { fileListDownload } from "../api/fileListDownload";
 import SampleSwal from "../components/SampleSwal";
-import RandomSpinner from "../components/Spinners";
+import RandomSpinner from "../components/RandomSpinner";
 
 // Pokemon 응답 타입 일부만 정의
 type PokemonTypeItem = { type: { name: string } };
