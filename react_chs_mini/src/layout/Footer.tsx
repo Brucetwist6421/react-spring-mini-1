@@ -1,9 +1,4 @@
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Link from "@mui/material/Link";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
+import { Box, Container, Link, Typography } from "@mui/material";
 
 interface FooterProps {
   company?: string;
@@ -11,22 +6,60 @@ interface FooterProps {
 
 export default function Footer({ company = "My Company" }: FooterProps) {
   return (
-    <AppBar position="static" component="footer" color="primary" sx={{ mt: 4 }}>
-      <Toolbar>
-        <Container sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="body2" color="inherit">
-            © {new Date().getFullYear()} {company}
+    <Box 
+      component="footer" 
+      sx={{ 
+        py: 5, 
+        px: 2, 
+        mt: "auto", 
+        backgroundColor: "#f1f5f9", // 헤더보다 약간 더 짙은 회색 (Slate 100)
+        borderTop: "1px solid #e2e8f0",
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box 
+          sx={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            alignItems: "center",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1
+          }}
+        >
+          <Typography variant="body2" sx={{ color: "#64748b", fontWeight: 500 }}>
+            © {new Date().getFullYear()} 
+            <Box component="span" sx={{ color: "#334155", ml: 0.5, fontWeight: 600 }}>
+              {company}
+            </Box>
+            . All rights reserved.
           </Typography>
-          <Box>
-            <Link color="inherit" href="/about" sx={{ mr: 2 }}>
-              About
+
+          <Box sx={{ display: "flex", gap: 3 }}>
+            <Link 
+              href="#" 
+              underline="none" 
+              sx={{ 
+                fontSize: "0.85rem", 
+                color: "#64748b", 
+                "&:hover": { color: "#38bdf8" } 
+              }}
+            >
+              Privacy Policy
             </Link>
-            <Link color="inherit" href="/contact">
+            <Link 
+              href="#" 
+              underline="none" 
+              sx={{ 
+                fontSize: "0.85rem", 
+                color: "#64748b", 
+                "&:hover": { color: "#38bdf8" } 
+              }}
+            >
               Contact
             </Link>
           </Box>
-        </Container>
-      </Toolbar>
-    </AppBar>
+        </Box>
+      </Container>
+    </Box>
   );
 }

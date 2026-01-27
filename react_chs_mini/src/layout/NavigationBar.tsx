@@ -26,7 +26,8 @@ const NavigationBar = () => {
           boxSizing: "border-box",
           backgroundColor: "#1e293b", // 실무에서 선호하는 다크 블루톤 (Slate 800)
           color: "#f8fafc",
-          borderRight: "none",
+          borderRadius: 0, // 곡률 제거
+          borderRight: "1px solid rgba(255, 255, 255, 0.1)", // 헤더와 경계선 통일
         },
       }}
     >
