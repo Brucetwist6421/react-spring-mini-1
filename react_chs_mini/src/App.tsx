@@ -5,13 +5,13 @@ import { Box } from "@mui/material"; // 레이아웃 구성을 위한 Box
 import Footer from "./layout/Footer";
 import Header from "./layout/Header";
 import PokemonDetailPage from "./pages/details/PokemonDetailPage";
-import PokemonDetailPage2 from "./pages/details/NewPokemonDetailPage";
 import theme from "./theme";
 import NavigationBar from "./layout/NavigationBar";
 import MainDashboard from "./pages/dashboard/MainDashboard";
 import PokemonList from "./pages/lists/PokemonList";
 import NewPokemonList from "./pages/lists/NewPokemonList";
 import PokemonCreatePage from "./pages/inserts/PokemonCreatePage";
+import NewPokemonDetailPage from "./pages/details/NewPokemonDetailPage";
 
 function App() {
   return (
@@ -43,7 +43,7 @@ function App() {
                 <Route path="/newPokemonList" element={<NewPokemonList />} />
                 <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon/create" element={<PokemonCreatePage />} />
-                <Route path="/pokemon2/:id" element={<PokemonDetailPage2 />} />
+                <Route path="/pokemon2/:id" element={<NewPokemonDetailPage />} />
               </Routes>
             </Box>
 

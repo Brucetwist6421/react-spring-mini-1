@@ -1,12 +1,17 @@
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Avatar } from "@mui/material";
-import { Dashboard, CatchingPokemon, AddCircle, Settings, CatchingPokemonTwoTone } from "@mui/icons-material";
+import { useState } from "react";
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Avatar, IconButton } from "@mui/material";
+import { Dashboard, CatchingPokemon, AddCircle, Settings, CatchingPokemonTwoTone, Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const drawerWidth = 260;
+const fullWidth = 260;
+const collapsedWidth = 88; // 접혔을 때의 너비
 
 const NavigationBar = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // 현재 경로 표시용
+  const location = useLocation();
+  const [open, setOpen] = useState(true); // 사이드바 상태 관리
+
+  const toggleDrawer = () => setOpen(!open);
 
   const menuItems = [
     { text: "대시보드", icon: <Dashboard />, path: "/" },
@@ -16,66 +21,89 @@ const NavigationBar = () => {
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];
 
+  const currentWidth = open ? fullWidth : collapsedWidth;
+
   return (
     <Drawer
       variant="permanent"
       sx={{
-        width: drawerWidth,
+        width: currentWidth,
         flexShrink: 0,
+        whiteSpace: "nowrap", // 텍스트 줄바꿈 방지 (애니메이션 자연스럽게)
         "& .MuiDrawer-paper": {
-          width: drawerWidth,
+          width: currentWidth,
+          transition: "width 0.3s ease-in-out", // 부드러운 애니메이션
+          overflowX: "hidden",
           boxSizing: "border-box",
-          backgroundColor: "#1e293b", // 실무에서 선호하는 다크 블루톤 (Slate 800)
+          backgroundColor: "#1e293b",
           color: "#f8fafc",
-          borderRadius: 0, // 곡률 제거
-          borderRight: "1px solid rgba(255, 255, 255, 0.1)", // 헤더와 경계선 통일
+          borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: 0,
         },
       }}
     >
-      {/* 사이드바 상단 로고 영역 */}
-      <Box sx={{ p: 3, textAlign: "center", borderBottom: "1px solid #334155" }}>
-        <Typography variant="h6" fontWeight="bold" color="#38bdf8">
-          POKEMON ADMIN
-        </Typography>
+      {/* 사이드바 상단 로고 및 토글 버튼 */}
+      <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: open ? "space-between" : "center", borderBottom: "1px solid #334155" }}>
+        {open && (
+          <Typography variant="h6" fontWeight="bold" color="#38bdf8" sx={{ ml: 1 }}>
+            POKEMON
+          </Typography>
+        )}
+        <IconButton onClick={toggleDrawer} sx={{ color: "#94a3b8" }}>
+          {open ? <ChevronLeftIcon /> : <MenuIcon />}
+        </IconButton>
       </Box>
 
+      {/* 메뉴 리스트 */}
       <Box sx={{ overflow: "auto", mt: 2 }}>
-        <List sx={{ px: 2 }}>
-          {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
-              <ListItemButton
-                onClick={() => navigate(item.path)}
-                selected={location.pathname === item.path}
-                sx={{
-                  borderRadius: "8px",
-                  "&.Mui-selected": { backgroundColor: "#38bdf8", color: "#fff" },
-                  "&.Mui-selected:hover": { backgroundColor: "#0ea5e9" },
-                  "&:hover": { backgroundColor: "#334155" },
-                }}
-              >
-                <ListItemIcon sx={{ color: location.pathname === item.path ? "#fff" : "#94a3b8", minWidth: 40 }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText 
-                    primary={
-                        <Typography sx={{ fontSize: "14px", fontWeight: 500 }}>
-                        {item.text}
-                        </Typography>
-                    } 
+        <List sx={{ px: open ? 2 : 1.5 }}>
+          {menuItems.map((item) => {
+            const isSelected = location.pathname === item.path;
+            return (
+              <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
+                <ListItemButton
+                  onClick={() => navigate(item.path)}
+                  selected={isSelected}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: open ? "initial" : "center",
+                    px: 2.5,
+                    borderRadius: "8px",
+                    "&.Mui-selected": { backgroundColor: "#38bdf8", color: "#fff" },
+                    "&.Mui-selected:hover": { backgroundColor: "#0ea5e9" },
+                    "&:hover": { backgroundColor: "#334155" },
+                  }}
+                >
+                  <ListItemIcon sx={{ 
+                    color: isSelected ? "#fff" : "#94a3b8", 
+                    minWidth: 0, 
+                    mr: open ? 2 : "auto", 
+                    justifyContent: "center" 
+                  }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  {open && (
+                    <ListItemText 
+                      primary={item.text} 
+                      primaryTypographyProps={{ fontSize: "14px", fontWeight: 500 }} 
                     />
-              </ListItemButton>
-            </ListItem>
-          ))}
+                  )}
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
       </Box>
 
-      {/* 사이드바 하단 프로필 영역 */}
-      <Box sx={{ p: 2, mt: "auto", borderTop: "1px solid #334155", display: "flex", alignItems: "center", gap: 2 }}>
-        <Avatar sx={{ bgcolor: "#38bdf8" }}>AD</Avatar>
-        <Box>
-          <Typography variant="body2" fontWeight="bold">Admin User</Typography>
-          <Typography variant="caption" color="#94a3b8">Premium Plan</Typography>
-        </Box>
+      {/* 하단 프로필 영역 */}
+      <Box sx={{ p: 2, mt: "auto", borderTop: "1px solid #334155", display: "flex", justifyContent: open ? "flex-start" : "center", alignItems: "center", gap: 2 }}>
+        <Avatar sx={{ bgcolor: "#38bdf8", width: 32, height: 32, fontSize: '0.8rem' }}>AD</Avatar>
+        {open && (
+          <Box sx={{ overflow: "hidden" }}>
+            <Typography variant="body2" fontWeight="bold" noWrap>Admin User</Typography>
+            <Typography variant="caption" color="#94a3b8" noWrap>Premium Plan</Typography>
+          </Box>
+        )}
       </Box>
     </Drawer>
   );

@@ -39,3 +39,12 @@ export const TYPE_STAT_DATA: any = {
   dark: { hp: 70, attack: 89, defense: 68, "special-attack": 70, "special-defense": 69, speed: 75 },
   fairy: { hp: 71, attack: 67, defense: 71, "special-attack": 79, "special-defense": 85, speed: 67 },
 };
+
+// 타입별 색상 매핑
+export const TYPE_COLORS: any = {
+  fire: "#ef4444", water: "#3b82f6", grass: "#22c55e", electric: "#f59e0b",
+  ice: "#3fd1ff", fighting: "#991b1b", poison: "#a855f7", ground: "#ca8a04",
+  flying: "#818cf8", psychic: "#ec4899", bug: "#84cc16", rock: "#78350f",
+  ghost: "#6d28d9", dragon: "#4338ca", dark: "#1e293b", steel: "#475569",
+  fairy: "#f472b6", normal: "#94a3b8"
+};

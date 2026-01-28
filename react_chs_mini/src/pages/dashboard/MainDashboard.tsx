@@ -8,6 +8,7 @@ import {
   Container,
   Grid,
   Paper,
+  Stack,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -21,12 +22,17 @@ import TopRankerCard from "./components/TopRankerCard";
 import TypePieChart from "./components/TypePieChart";
 import { TYPE_STAT_DATA } from "./components/types/dashboardType";
 import { getPrimaryColor } from "./utils/pokemonUtils";
+import PokemonSkillTable from "./components/PokemonSkillTable";
+import RecommendedSkills from "./components/RecommendedSkills";
+import { usePokemonMoves } from "./components/hooks/usePokemonMoves";
 
 export default function MainDashboard() {
   const [pokemon, setPokemon] = useState<any>(null);
   const [topRankers, setTopRankers] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const pokemonMoves = pokemon?.moves || [];
+  const { detailedMoves, isLoading: movesLoading } = usePokemonMoves(pokemonMoves);
 
   useEffect(() => {
     async function fetchData() {
@@ -89,7 +95,7 @@ export default function MainDashboard() {
     fetchData();
   }, []);
 
-  if (loading)
+  if (loading || !pokemon)
     return (
       <RandomSpinner/>
     );
@@ -105,9 +111,7 @@ export default function MainDashboard() {
   const primaryColor = getPrimaryColor(pokemon.types);
 
   return (
-    <Box
-      sx={{ flexGrow: 1, p: 3, backgroundColor: "#f8fafc", minHeight: "100vh" }}
-    >
+    <Box sx={{ flexGrow: 1, p: 3, backgroundColor: "#f8fafc", minHeight: "100vh" }}>
       <Container maxWidth="xl">
         <Box
           sx={{
@@ -131,10 +135,18 @@ export default function MainDashboard() {
         </Box>
 
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TodayPickCard pokemon={pokemon} color={primaryColor} />
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Stack spacing={3}>
+              <TodayPickCard pokemon={pokemon} color={primaryColor} />
+              <RecommendedSkills 
+                movesWithDetail={detailedMoves} 
+                loading={movesLoading}
+                pokemonStats={pokemon.stats} // 이 부분!
+                pokemonTypes={pokemon.types}
+              />
+            </Stack>
           </Grid>
-          <Grid size={{ xs: 12, md: 8 }}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <StatRadarChart
@@ -149,8 +161,11 @@ export default function MainDashboard() {
                 <TypePieChart types={pokemon.types} />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <AllTypeBarChart />
+                <PokemonSkillTable moves={pokemon.moves} />
               </Grid>
+              <Grid size={{ xs: 12 }}>
+                <AllTypeBarChart />
+             </Grid>
             </Grid>
           </Grid>
 
@@ -161,7 +176,7 @@ export default function MainDashboard() {
                 alignItems: "center",
                 gap: 1,
                 mb: 2,
-                mt: 3,
+                mt: 1,
               }}
             >
               <WorkspacePremiumIcon sx={{ color: "#f59e0b" }} />

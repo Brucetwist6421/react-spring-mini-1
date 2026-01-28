@@ -17,43 +17,52 @@ export default function AllTypeBarChart() {
         포켓몬 속성 분포 현황
       </Typography>
       
-      <Box sx={{ width: '100%', height: 400 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart 
-            data={ALL_TYPE_STATS} 
-            // 1. margin의 좌우 값을 20 정도로 넉넉히 주어 잘림 방지
-            margin={{ top: 30, right: 20, left: 20, bottom: 20 }}
-            barCategoryGap="15%" 
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="name" 
-              tick={{ fontSize: 11, fontWeight: 700, fill: '#64748b' }} 
-              axisLine={{ stroke: '#e2e8f0' }}
-              tickLine={false}
-              interval={0}
-              // 2. padding을 추가하여 막대가 차트 끝에 붙지 않게 조절
-              padding={{ left: 10, right: 10 }} 
-            />
-            {/* 3. YAxis를 완전히 숨기지 않고 width: 0만 주어 공간 확보 */}
-            <YAxis width={0} domain={[0, 'dataMax + 15']} /> 
-            
-            <Tooltip 
-              cursor={{ fill: '#f1f5f9', opacity: 0.4 }}
-              contentStyle={{ borderRadius: 0, border: '1px solid #e2e8f0', fontWeight: 700 }}
-            />
-            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-              {ALL_TYPE_STATS.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={TYPE_COLORS[entry.name] || "#94a3b8"} />
-              ))}
-              <LabelList 
-                dataKey="value" 
-                position="top" 
-                style={{ fill: '#1e293b', fontSize: 11, fontWeight: 800 }} 
+      {/* 1. 가로 스크롤을 허용하는 부모 컨테이너 */}
+      <Box sx={{ 
+        width: '100%', 
+        overflowX: 'auto', // 가로 스크롤 자동 생성
+        overflowY: 'hidden',
+        pb: 1, // 스크롤바가 차트 숫자를 가리지 않게 약간의 여백
+        // 스크롤바 커스텀 스타일 (선택사항)
+        '&::-webkit-scrollbar': { height: '6px' },
+        '&::-webkit-scrollbar-thumb': { bgcolor: '#e2e8f0', borderRadius: '10px' }
+      }}>
+        {/* 2. 차트가 찌그러지지 않도록 최소 너비(minWidth) 고정 */}
+        <Box sx={{ width: '100%', minWidth: 800, height: 400 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart 
+              data={ALL_TYPE_STATS} 
+              margin={{ top: 30, right: 20, left: 10, bottom: 20 }}
+              barCategoryGap="20%" 
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fontSize: 12, fontWeight: 700, fill: '#64748b' }} 
+                axisLine={{ stroke: '#e2e8f0' }}
+                tickLine={false}
+                interval={0}
+                padding={{ left: 20, right: 20 }} 
               />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              <YAxis hide domain={[0, 'dataMax + 15']} /> 
+              
+              <Tooltip 
+                cursor={{ fill: '#f1f5f9', opacity: 0.4 }}
+                contentStyle={{ borderRadius: 0, border: '1px solid #e2e8f0', fontWeight: 700 }}
+              />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                {ALL_TYPE_STATS.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={TYPE_COLORS[entry.name] || "#94a3b8"} />
+                ))}
+                <LabelList 
+                  dataKey="value" 
+                  position="top" 
+                  style={{ fill: '#1e293b', fontSize: 11, fontWeight: 800 }} 
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Box>
       </Box>
     </Paper>
   );
