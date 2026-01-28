@@ -759,7 +759,9 @@ export default function PokemonDetailPage() {
               <Typography variant="subtitle2">첨부파일 미리 보기</Typography>
 
               <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(4, 1fr)" }}>
-              {variantFiles.map((vf, idx) => {
+              {variantFiles && variantFiles.map((vf, idx) => {
+                // [추가] vf 자체가 없거나, 파일과 URL 둘 다 없는 경우 렌더링하지 않음
+                if (!vf || (!vf.file && !vf.url)) return null;
                 // 1. 파일명 추출 (신규 파일이면 file.name, 기존 파일이면 URL에서 추출)
                 const currentFileName = vf.file?.name || vf.url.split('/').pop() || "";
                 

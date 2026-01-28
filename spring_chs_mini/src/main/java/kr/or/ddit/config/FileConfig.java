@@ -21,6 +21,6 @@ public class FileConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/upload/**")
                 // 2. 실제 리눅스 서버의 물리적 경로와 연결합니다.
                 // file:/ 형식으로 시작해야 하며 끝에 반드시 /를 붙여야 합니다.
-                .addResourceLocations("file:/home/ubuntu/upload/");
+                .addResourceLocations("file:///home/ubuntu/upload/");
     }
 }

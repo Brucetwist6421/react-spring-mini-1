@@ -85,7 +85,7 @@ const columns: GridColDef<RowData>[] = [
       if (!fileName) return "No Image";
 
       // 서버의 이미지 업로드 경로 주소 (IP 주소 확인 필요)
-      const imageUrl = `http://168.107.51.143:8080/upload/images/${fileName}`;
+      const imageUrl = `http://168.107.51.143:8080/upload/${fileName}`;
 
       return (
         <Box
@@ -135,6 +135,8 @@ export default function NewPokemonList() {
       // setLoading(false);
       return res.data;
     },
+    // [추가] 에러 발생 시 재시도를 하지 않음 (즉시 화면 노출)
+    retry: false,
   });
 
   // pokeData가 배열인지 확인하고 직접 map을 돌립니다.
@@ -222,7 +224,9 @@ const gridRows: RowData[] = Array.isArray(pokeData)
   //실습 3 시작
   //로딩 / 에러 표시 (선택사항: gridRows는 fetch 전에도 기존 rows로 대체됨)
   if (isLoading || isFetching) return <RandomSpinner />;
-  if (error) return <h1>404 ERROR</h1>;
+  if (error) {
+    console.warn("서버 메시지:", error);
+  }
   // 실습 3 끝
 
   // ID, FirstName 클릭 핸들러 포함한 컬럼 복사
@@ -379,7 +383,10 @@ const gridRows: RowData[] = Array.isArray(pokeData)
           "& .MuiDataGrid-row:hover": { backgroundColor: "#f3f9ff" }, // 행 hover 스타일
         }}
         // 한글로 UI 표시: 필터, 검색, 내보내기, 페이지네이션 등
-        localeText={koKR.components.MuiDataGrid.defaultProps.localeText}
+        localeText={{
+            ...koKR.components.MuiDataGrid.defaultProps.localeText,
+            noRowsLabel: '조회된 데이터가 없습니다.', // 데이터가 0건일 때 표시될 문구
+        }}
         // Excel 내보내기 옵션 커스터마이징
         slotProps={{
           toolbar: {
