@@ -25,6 +25,7 @@ public class PokemonServiceImpl implements PokemonService {
 	// 실습 1 시작
 	@Autowired
 	private final PokemonMapper pokemonMapper;
+	
 
 	@Override
 	public void createPokemon(PokemonVO vo, MultipartFile mainImage) {
@@ -98,8 +99,12 @@ public class PokemonServiceImpl implements PokemonService {
 		if (mainImage == null || mainImage.isEmpty())
 			return null;
 		String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
-		File mainFile = new File("/upload/" + mainName);
-		mainImage.transferTo(mainFile);
+		File uploadDir = new File("/home/ubuntu/upload/");
+		if (!uploadDir.exists()) uploadDir.mkdirs(); // 폴더가 없으면 생성
+
+    	File mainFile = new File(uploadDir, mainName);
+		log.info("메인 이미지 저장 경로: {}", mainFile.getAbsolutePath()); // 로그로 확인
+    	mainImage.transferTo(mainFile);
 		return mainName;
 	}
 	// 실습 1 끝
