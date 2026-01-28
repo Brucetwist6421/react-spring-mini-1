@@ -28,6 +28,7 @@ interface RowData {
   gross?: number;
   costs?: number;
   taxRate?: number;
+  mainImagePath?: string | null; // 추가
 }
 
 // 컬럼 정의 (타입 안전)
@@ -150,6 +151,8 @@ const gridRows: RowData[] = Array.isArray(pokeData)
       taxRate: p.weight || 0,
       gross: p.isFavorite || 0,
       costs: p.isPublic || 0,
+      // 추가: 서버에서 온 이미지 경로 파일명을 매핑
+      mainImagePath: p.mainImagePath,
     }))
   : [];
 
