@@ -413,7 +413,7 @@ export default function PokemonDetailPage() {
   const imageSrc =
   preview ??
   (data.mainImagePath
-    ? `http://168.107.51.143:8080/upload/${data.mainImagePath}`
+    ? `http://168.107.51.143:8080/upload/${decodeURIComponent(data.mainImagePath)}`
     : data.sprites?.front_default);
 
 
