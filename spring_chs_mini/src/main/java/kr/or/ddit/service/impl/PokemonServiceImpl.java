@@ -98,13 +98,22 @@ public class PokemonServiceImpl implements PokemonService {
 	private String saveMainImage(MultipartFile mainImage) throws IOException {
 		if (mainImage == null || mainImage.isEmpty())
 			return null;
-		String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
-		File uploadDir = new File("/home/ubuntu/upload/");
-		if (!uploadDir.exists()) uploadDir.mkdirs(); // 폴더가 없으면 생성
 
-    	File mainFile = new File(uploadDir, mainName);
-		log.info("메인 이미지 저장 경로: {}", mainFile.getAbsolutePath()); // 로그로 확인
-    	mainImage.transferTo(mainFile);
+		// 1. 경로 통일 (첨부파일과 동일하게!)
+		String uploadPath = "/home/ubuntu/upload/";
+		
+		// 2. 방어 코드 추가 (폴더 없으면 생성)
+		File uploadDir = new File(uploadPath);
+		if (!uploadDir.exists()) {
+			uploadDir.mkdirs();
+		}
+
+		String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
+
+		// 3. 전체 경로로 파일 생성
+		File mainFile = new File(uploadPath + mainName);
+		mainImage.transferTo(mainFile);
+
 		return mainName;
 	}
 	// 실습 1 끝
