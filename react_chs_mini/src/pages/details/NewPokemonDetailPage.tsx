@@ -419,9 +419,9 @@ export default function PokemonDetailPage() {
 
   return (
     <Container sx={{ py: 4 }}>
-      <Button variant="text" onClick={() => navigate("/pokemonList")} sx={{ mb: 2 }}>
+      {/* <Button variant="text" onClick={() => navigate("/pokemonList")} sx={{ mb: 2 }}>
         목록으로
-      </Button>
+      </Button> */}
 
       <Paper sx={{ p: 3 }}>
         <Stack direction="row" spacing={3} alignItems="flex-start">

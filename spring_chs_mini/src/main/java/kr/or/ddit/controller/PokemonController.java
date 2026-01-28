@@ -8,12 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -107,22 +109,47 @@ public class PokemonController {
     // 실습 2 끝
     
     // 실습 3 시작
+    // @GetMapping("/download/{fileName:.+}")
+    // public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) throws IOException {
+    //     String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
+    //     Path path = Paths.get("C:/upload").resolve(decodedFileName).normalize();
+    //     Resource resource = new UrlResource(path.toUri());
+
+    //     if (!resource.exists()) {
+    //         throw new FileNotFoundException(decodedFileName + " not found");
+    //     }
+
+    //     return ResponseEntity.ok()
+    //             .contentType(MediaType.APPLICATION_OCTET_STREAM)
+    //             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + decodedFileName + "\"")
+    //             .body(resource);
+    // }
+    // 실습 3 끝
+
     @GetMapping("/download/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) throws IOException {
         String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
-        Path path = Paths.get("C:/upload").resolve(decodedFileName).normalize();
+        
+        // 윈도우용 C:/upload 대신 리눅스용 경로로 수정
+        // (아까 핑가 파일을 찾으려고 했던 그 경로입니다)
+        Path path = Paths.get("/home/ubuntu/upload").resolve(decodedFileName).normalize();
+        
         Resource resource = new UrlResource(path.toUri());
 
         if (!resource.exists()) {
+            // 로그를 찍어보면 서버가 어디를 뒤지고 있는지 확실히 알 수 있습니다.
+            log.error("파일을 찾을 수 없습니다. 시도한 경로: {}", path.toAbsolutePath());
             throw new FileNotFoundException(decodedFileName + " not found");
         }
 
+        // 파일 이름에 한글이 포함될 경우 브라우저 인코딩 설정
+        String encodedFileName = UriUtils.encode(decodedFileName, StandardCharsets.UTF_8);
+
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + decodedFileName + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"")
                 .body(resource);
     }
-    // 실습 3 끝
     
     // 실습 4 시작
     @PostMapping("/updatePokemon")
