@@ -407,7 +407,7 @@ export default function PokemonDetailPage() {
 
   const handleCancel = () => {
     // 이전 페이지로
-    navigate("/");
+    navigate("/pokemonList");
   };
 
   const imageSrc =
@@ -419,7 +419,7 @@ export default function PokemonDetailPage() {
 
   return (
     <Container sx={{ py: 4 }}>
-      <Button variant="text" onClick={() => navigate("/")} sx={{ mb: 2 }}>
+      <Button variant="text" onClick={() => navigate("/pokemonList")} sx={{ mb: 2 }}>
         목록으로
       </Button>
 
@@ -760,23 +760,23 @@ export default function PokemonDetailPage() {
 
               <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(4, 1fr)" }}>
               {variantFiles.map((vf, idx) => {
-                // 이미지 파일 검증
-                const isImage = vf.file
-                  ? /\.(jpe?g|png|gif|webp)$/i.test(vf.file.name)
-                  : /\.(jpe?g|png|gif|webp)$/i.test(vf.url);
+                // 1. 파일명 추출 (신규 파일이면 file.name, 기존 파일이면 URL에서 추출)
+                const currentFileName = vf.file?.name || vf.url.split('/').pop() || "";
+                
+                // 2. 확장자 판별 (URL 전체가 아니라 파일명만 가지고 판별하는 것이 안전합니다)
+                const cleanFileName = decodeURIComponent(currentFileName).split('?')[0];
+                const isImage = /\.(jpe?g|png|gif|webp)$/i.test(cleanFileName);
+                const isVideo = /\.(mp4|webm|ogg|mov|avi)$/i.test(cleanFileName);
 
-                // 동영상 파일 검증
-                const isVideo = vf.file
-                  ? /\.(mp4|webm|ogg|mov|avi)$/i.test(vf.file.name)
-                  : /\.(mp4|webm|ogg|mov|avi)$/i.test(vf.url);
-
+                // 3. Key값은 고유하게 (idx를 포함하는 것이 가장 안전)
+                const itemKey = `file-${vf.id || 'new'}-${idx}`;
                 // const fileName = vf.file?.name ?? vf.url.split("/").pop();
 
                 // 이미지 파일은 썸네일 표시
                 if (isImage) {
                   return (
                     <Box
-                      key={`${vf.file?.name ?? vf.id ?? vf.url ?? idx}`}
+                      key={itemKey}
                       sx={{
                         position: "relative",
                         borderRadius: 1,
@@ -796,7 +796,7 @@ export default function PokemonDetailPage() {
                       style={{display: "block", width: "100%", height: "100%" }}>
                         <img
                           src={vf.url}
-                          alt={`${vf.file?.name ?? vf.id ?? vf.url ?? idx}`}
+                          alt="preview"
                           style={{
                             width: "100%",
                             height: "100%",

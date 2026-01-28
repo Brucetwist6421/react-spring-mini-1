@@ -104,6 +104,20 @@ public class PokemonServiceImpl implements PokemonService {
 	}
 	// 실습 1 끝
 
+	@Override
+	public List<PokemonVO> getPokemonList() {
+		List<PokemonVO> pokemonList = pokemonMapper.selectPokemonList();
+		if (pokemonList == null || pokemonList.isEmpty()) {
+			for (PokemonVO vo : pokemonList) {
+				List<PokemonAttachmentVO> attachments = pokemonMapper.selectAttachmentsByPokemonId(vo.getId());
+				if (attachments != null && !attachments.isEmpty()) {
+					vo.setAttachments(attachments);
+				}
+			}
+		}
+		return pokemonList;
+	}
+
 	// 실습 2 시작
 	@Override
 	public PokemonVO getPokemonDetail(Long id) {
@@ -196,6 +210,8 @@ public class PokemonServiceImpl implements PokemonService {
 			return 0; // 예외 발생 시 실패
 		}
 	}
+
+	
 	// 실습 5 끝
 
 }

@@ -21,6 +21,22 @@
 	</insert>
 	<!-- 실습 1 끝 -->
 	
+	<select id="selectPokemonList" resultType="kr.or.ddit.vo.PokemonVO">
+	    SELECT
+	        id,
+	        name,
+	        description,
+	        type,
+	        height,
+	        weight,
+	        is_favorite AS isFavorite,
+	        is_public AS isPublic,
+	        is_notify AS isNotify,
+	        variant,
+	        main_image_path AS mainImagePath
+	    FROM pokemon
+	</select>
+
 	<!-- 실습 2 시작 -->
 	<!-- 상세 조회 (pokemon) -->
 	<select id="selectPokemonById" parameterType="long" resultType="kr.or.ddit.vo.PokemonVO">

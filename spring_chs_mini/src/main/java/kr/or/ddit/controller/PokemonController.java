@@ -23,9 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+
 import java.net.URLDecoder;
 
 @RestController
@@ -85,6 +83,16 @@ public class PokemonController {
         }
     }
     // 실습 1 끝
+
+     @GetMapping("/list")
+    public ResponseEntity<?> getPokemonList() {
+        List<PokemonVO> pokemonList = pokemonService.getPokemonList();
+        if (pokemonList == null || pokemonList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body(Map.of("message", "해당 포켓몬이 존재하지 않습니다."));
+        }
+        return ResponseEntity.ok(pokemonList);
+    }
     
     // 실습 2 시작
     @GetMapping("/{id}")

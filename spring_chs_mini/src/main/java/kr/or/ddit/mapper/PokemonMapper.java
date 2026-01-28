@@ -16,6 +16,8 @@ public interface PokemonMapper {
 	public void insertPokemon(PokemonVO vo);
 	// 실습 1 끝
 
+	public List<PokemonVO> selectPokemonList();
+
 	// 실습 2 시작
 	public PokemonVO selectPokemonById(Long id);
 	

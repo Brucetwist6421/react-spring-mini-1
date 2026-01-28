@@ -11,6 +11,8 @@ public interface PokemonService {
 	// 실습 1 시작
 	public void createPokemon(PokemonVO pokemonVO, MultipartFile mainImage);
 	// 실습 1 끝
+	
+	public List<PokemonVO> getPokemonList();
 
 	// 실습 2 시작
 	public PokemonVO getPokemonDetail(Long id);

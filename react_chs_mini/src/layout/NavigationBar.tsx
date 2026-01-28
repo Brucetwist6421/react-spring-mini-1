@@ -1,5 +1,5 @@
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Avatar } from "@mui/material";
-import { Dashboard, CatchingPokemon, AddCircle, Settings } from "@mui/icons-material";
+import { Dashboard, CatchingPokemon, AddCircle, Settings, CatchingPokemonTwoTone } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const drawerWidth = 260;
@@ -10,7 +10,8 @@ const NavigationBar = () => {
 
   const menuItems = [
     { text: "대시보드", icon: <Dashboard />, path: "/" },
-    { text: "포켓몬 목록", icon: <CatchingPokemon />, path: "/pokemonList" },
+    { text: "기존 포켓몬 목록", icon: <CatchingPokemon />, path: "/pokemonList" },
+    { text: "새 포켓몬 목록", icon: <CatchingPokemonTwoTone />, path: "/newPokemonList" },
     { text: "새 포켓몬 등록", icon: <AddCircle />, path: "/pokemon/create" },
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];

@@ -54,12 +54,13 @@ const columns: GridColDef<RowData>[] = [
       );
     },
   },
-  // {
-  //   field: "lastName",
-  //   headerName: "Last Name",
-  //   width: 150,
-  //   editable: true,
-  // },
+  {
+    field: "lastName",
+    headerName: "Last Name",
+    width: 150,
+    flex: 1,
+    editable: true,
+  },
   {
     field: "age",
     headerName: "Age",
@@ -102,23 +103,9 @@ const columns: GridColDef<RowData>[] = [
   },
 ];
 
-export default function PokemonList() {
-  // 실습 7 시작
+export default function NewPokemonList() {
   const navigate = useNavigate();
-  // 실습 7 끝
-  // selectionModel을 항상 배열로 관리
-  // const [selectionModel, setSelectionModel] = useState<GridRowId[]>([]);
 
-  // 체크박스 선택 변경 이벤트 — selectionModel 그대로 배열로 set
-  // const handleSelectionChange = (newSelection: GridRowId[]) => {
-  //   setSelectionModel(newSelection);
-  // };
-
-  // 로딩 시 스피너 사용 관련 state
-  // const [loading, setLoading] = useState(true);
-
-  // 실습 2 시작
-  // pokemonList 호출 :  axios + react-query
   const {
     data: pokeData,
     isLoading,
@@ -128,7 +115,7 @@ export default function PokemonList() {
     queryKey: ["pokemonList"],
     queryFn: async () => {
       // setLoading(true);
-      const res = await api.get("https://pokeapi.co/api/v2/pokemon?limit=30");
+      const res = await api.get("http://localhost:8080/pokemon/list");
       console.log("res.data : ", res.data);
       // setLoading(false);
       return res.data as {
@@ -387,24 +374,12 @@ export default function PokemonList() {
             },
           },
         }}
-        // loading={loading}
-
-        // onRowSelectionModelChange={handleSelectionChange} // 체크박스 클릭 이벤트
       />
-      {/* 실습 6 시작 */}
-      {/* 상세조회 컴포넌트 */}
       <PokemonDetailModal
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
         row={selectedRow}
       />
-      {/* 실습 6 끝 */}
-      {/* 실습 10 시작 */}
-      {/* 로딩 시 스피너 실행 */}
-      {/* {loading && (
-          <RandomSpinner/>
-        )} */}
-      {/* 실습 10 끝 */}
     </Box>
   );
 }
