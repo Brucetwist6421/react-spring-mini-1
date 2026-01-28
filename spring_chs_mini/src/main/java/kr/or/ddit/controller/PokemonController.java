@@ -127,23 +127,26 @@ public class PokemonController {
     // 실습 3 끝
 
     @GetMapping("/download/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) throws IOException {
-        String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
+    public ResponseEntity<Resource> downloadFile(@PathVariable("fileName") String fileName) throws IOException {
         
-        // 윈도우용 C:/upload 대신 리눅스용 경로로 수정
-        // (아까 핑가 파일을 찾으려고 했던 그 경로입니다)
-        Path path = Paths.get("/home/ubuntu/upload").resolve(decodedFileName).normalize();
-        
+        // 1. 핵심: 이미 Spring이 @PathVariable로 받으면서 디코딩을 수행합니다. 
+        // 중복 디코딩(URLDecoder.decode)은 파일명을 깨뜨릴 수 있으므로 제거하거나 주의해야 합니다.
+        log.info("수신된 파일명: {}", fileName);
+
+        // 2. 경로 조합 (FileConfig와 동일한 기본 경로 사용)
+        Path path = Paths.get("/home/ubuntu/upload").resolve(fileName).normalize();
+        log.info("실제 탐색 경로: {}", path.toAbsolutePath());
+
         Resource resource = new UrlResource(path.toUri());
 
-        if (!resource.exists()) {
-            // 로그를 찍어보면 서버가 어디를 뒤지고 있는지 확실히 알 수 있습니다.
-            log.error("파일을 찾을 수 없습니다. 시도한 경로: {}", path.toAbsolutePath());
-            throw new FileNotFoundException(decodedFileName + " not found");
+        // 3. 파일 존재 및 읽기 권한 확인
+        if (!resource.exists() || !resource.isReadable()) {
+            log.error("파일이 존재하지 않거나 읽을 수 없습니다: {}", path.toAbsolutePath());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // 파일 이름에 한글이 포함될 경우 브라우저 인코딩 설정
-        String encodedFileName = UriUtils.encode(decodedFileName, StandardCharsets.UTF_8);
+        // 4. 한글 파일명 다운로드 시 깨짐 방지 (UTF-8 인코딩)
+        String encodedFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
