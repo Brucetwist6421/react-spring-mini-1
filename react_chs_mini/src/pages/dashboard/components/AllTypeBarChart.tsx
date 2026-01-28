@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Box, Paper, Typography } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'; 
 import { ALL_TYPE_STATS } from '../utils/pokemonUtils';
 
 const TYPE_COLORS: { [key: string]: string } = {
@@ -11,27 +11,24 @@ const TYPE_COLORS: { [key: string]: string } = {
 };
 
 export default function AllTypeBarChart() {
+  // 1. 데이터 레이어에서 색상(fill)을 미리 정의합니다.
+  // Recharts는 데이터 객체 안에 'fill'이라는 키가 있으면 자동으로 해당 막대의 색상으로 사용합니다.
+  const chartData = ALL_TYPE_STATS.map((entry) => ({
+    ...entry,
+    fill: TYPE_COLORS[entry.name] || "#94a3b8"
+  }));
+
   return (
     <Paper sx={{ p: 3, borderRadius: 0, border: '1px solid #e2e8f0', boxShadow: 'none', height: '100%' }}>
       <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 3, color: '#1e293b' }}>
         포켓몬 속성 분포 현황
       </Typography>
       
-      {/* 1. 가로 스크롤을 허용하는 부모 컨테이너 */}
-      <Box sx={{ 
-        width: '100%', 
-        overflowX: 'auto', // 가로 스크롤 자동 생성
-        overflowY: 'hidden',
-        pb: 1, // 스크롤바가 차트 숫자를 가리지 않게 약간의 여백
-        // 스크롤바 커스텀 스타일 (선택사항)
-        '&::-webkit-scrollbar': { height: '6px' },
-        '&::-webkit-scrollbar-thumb': { bgcolor: '#e2e8f0', borderRadius: '10px' }
-      }}>
-        {/* 2. 차트가 찌그러지지 않도록 최소 너비(minWidth) 고정 */}
-        <Box sx={{ width: '100%', minWidth: 800, height: 400 }}>
+      <Box sx={{ width: '100%', overflowX: 'auto', overflowY: 'hidden', pb: 1 }}>
+        <Box sx={{ width: '100%', minWidth: 800, height: 378 }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 
-              data={ALL_TYPE_STATS} 
+              data={chartData} // fill 정보가 포함된 데이터 전달
               margin={{ top: 30, right: 20, left: 10, bottom: 20 }}
               barCategoryGap="20%" 
             >
@@ -39,21 +36,16 @@ export default function AllTypeBarChart() {
               <XAxis 
                 dataKey="name" 
                 tick={{ fontSize: 12, fontWeight: 700, fill: '#64748b' }} 
-                axisLine={{ stroke: '#e2e8f0' }}
-                tickLine={false}
-                interval={0}
-                padding={{ left: 20, right: 20 }} 
+                axisLine={{ stroke: '#e2e8f0' }} 
+                tickLine={false} 
+                interval={0} 
               />
               <YAxis hide domain={[0, 'dataMax + 15']} /> 
-              
-              <Tooltip 
-                cursor={{ fill: '#f1f5f9', opacity: 0.4 }}
-                contentStyle={{ borderRadius: 0, border: '1px solid #e2e8f0', fontWeight: 700 }}
-              />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {ALL_TYPE_STATS.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={TYPE_COLORS[entry.name] || "#94a3b8"} />
-                ))}
+              <Tooltip cursor={{ fill: '#f1f5f9', opacity: 0.4 }} contentStyle={{ borderRadius: 0, border: '1px solid #e2e8f0', fontWeight: 700 }} />
+
+              {/* 2. Bar 컴포넌트에 특정 색(fill)을 지정하지 않으면 
+                   데이터 객체 내부의 'fill' 속성을 따라갑니다. */}
+              <Bar dataKey="value" radius={0}>
                 <LabelList 
                   dataKey="value" 
                   position="top" 
