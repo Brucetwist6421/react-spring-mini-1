@@ -429,13 +429,21 @@ export default function PokemonDetailPage() {
             {/* 실습 4 시작 */}
             {/* 🔹 변경/추가: 업로드된 프리뷰 우선, 없으면 mainImagePath or API 스프라이트 노출 */}
             {imageSrc ? (
-              <img
-                src={imageSrc}
-                alt={data.name}
-                width={120}
-                height={120}
-                style={{ display: "block", marginBottom: 8, objectFit: "contain" }}
-              />
+              <Box>
+                <img
+                  src={imageSrc}
+                  alt={data.name}
+                  width={120}
+                  height={120}
+                  style={{ display: "block", marginBottom: 8, objectFit: "contain", cursor: isEditMode ? "default" : "pointer" }}
+                  onClick={() => {
+                    if (!isEditMode) {
+                      fileListDownload({ url: imageSrc }); // 수정 모드가 아니면 다운로드
+                      }
+                  }}
+                />
+                <Typography variant="subtitle2">※ 클릭 시 다운로드</Typography>
+              </Box>
             ) : (
               <div style={{ width: 120, height: 120, background: "#eee" }}>
                 <Box sx={{ mb: 1 }}>
@@ -756,7 +764,7 @@ export default function PokemonDetailPage() {
                 </>
               )}  
 
-              <Typography variant="subtitle2">첨부파일 미리 보기</Typography>
+              <Typography variant="subtitle2">첨부파일 미리 보기(클릭 시 다운로드)</Typography>
 
               <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(4, 1fr)" }}>
               {variantFiles && variantFiles.map((vf, idx) => {

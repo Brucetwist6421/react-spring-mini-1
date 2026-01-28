@@ -29,6 +29,8 @@ interface RowData {
   costs?: number;
   taxRate?: number;
   mainImagePath?: string | null; // 추가
+  name?: string | null;
+  description?: string | null;
 }
 
 // 컬럼 정의 (타입 안전)
@@ -36,47 +38,30 @@ const columns: GridColDef<RowData>[] = [
   {
     field: "id", // 컬럼 key
     headerName: "ID", // 컬럼 헤더 이름
+    headerAlign: "center",
     width: 90, // 컬럼 너비
   },
   {
-    field: "lastName",
-    headerName: "Last Name",
+    field: "name",
+    headerName: "포켓몬 이름",
+    headerAlign: "center",
     width: 150,
     flex: 1,
     editable: true,
   },
-  {
-    field: "age",
-    headerName: "Age",
-    type: "number", // 숫자 타입
+  {  
+    field: "description",
+    headerName: "설명",
+    headerAlign: "center",
+    flex: 1,
     width: 110,
     editable: true,
   },
   {
-    field: "taxRate",
-    flex: 1,
-    valueGetter: (value) => {
-      if (!value) {
-        return value;
-      }
-      return value * 100;
-    },
-  },
-  {
-    field: "profit",
-    flex: 1,
-    valueGetter: (value, row) => {
-      console.log(value, row);
-      if (!row.gross || !row.costs) {
-        return null;
-      }
-      return row.gross - row.costs;
-    },
-  },
-  {
     field: "mainImagePath",
-    headerName: "Thumbnail",
-    width: 100,
+    headerName: "썸네일",
+    headerAlign: "center",
+    width: 120,
     sortable: false,
     filterable: false,
     renderCell: (params: GridRenderCellParams<RowData>) => {
@@ -101,8 +86,8 @@ const columns: GridColDef<RowData>[] = [
             src={imageUrl}
             alt="pokemon"
             style={{
-              width: "40px",
-              height: "40px",
+              width: "55px",
+              height: "55px",
               borderRadius: "4px",
               objectFit: "cover",
               border: "1px solid #eee",
@@ -155,6 +140,8 @@ const gridRows: RowData[] = Array.isArray(pokeData)
       costs: p.isPublic || 0,
       // 추가: 서버에서 온 이미지 경로 파일명을 매핑
       mainImagePath: p.mainImagePath,
+      name: p.name || "",
+      description: p.description || "",
     }))
   : [];
 
@@ -279,7 +266,7 @@ const gridRows: RowData[] = Array.isArray(pokeData)
     // 실습 4 끝
 
     // 실습 8 시작
-    if (col.field === "lastName") {
+    if (col.field === "name") {
       return {
         ...col,
         renderCell: (params: GridRenderCellParams<RowData>) => {

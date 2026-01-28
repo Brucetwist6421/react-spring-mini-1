@@ -24,10 +24,10 @@ import {
 import type { SelectChangeEvent } from "@mui/material/Select";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axiosInstance";
 import { useMutation } from "@tanstack/react-query";
-import SampleSwal from "../components/SampleSwal";
-import RandomSpinner from "../components/RandomSpinner";
+import api from "../../api/axiosInstance";
+import SampleSwal from "../../components/SampleSwal";
+import RandomSpinner from "../../components/RandomSpinner";
 
 type FormState = {
   name: string;
@@ -355,7 +355,7 @@ export default function PokemonCreatePage() {
               </Box>
 
               <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2 }}>
-                <Button onClick={() => navigate("/")}>목록</Button>
+                <Button onClick={() => navigate("/newPokemonList")}>목록</Button>
                 <Button variant="contained" onClick={handleSubmit}>
                   등록
                 </Button>
