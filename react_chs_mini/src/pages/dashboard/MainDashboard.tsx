@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import LanguageIcon from "@mui/icons-material/Language";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import StarIcon from "@mui/icons-material/Star";
