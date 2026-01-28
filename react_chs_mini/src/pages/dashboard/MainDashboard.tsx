@@ -1,25 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import LanguageIcon from "@mui/icons-material/Language";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import StarIcon from "@mui/icons-material/Star";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import {
   Box,
-  Typography,
   Container,
-  CircularProgress,
-  Paper,
   Grid,
+  Paper,
+  Typography,
 } from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import LanguageIcon from "@mui/icons-material/Language";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import { useEffect, useState } from "react";
 
-import { getPrimaryColor } from "./utils/pokemonUtils";
-import TodayPickCard from "./components/TodayPickCard";
-import StatRadarChart from "./components/StatRadarChart";
-import TypePieChart from "./components/TypePieChart";
+import RandomSpinner from "../../components/RandomSpinner";
 import ActionCard from "./components/ActionCard";
 import AllTypeBarChart from "./components/AllTypeBarChart";
+import StatRadarChart from "./components/StatRadarChart";
+import TodayPickCard from "./components/TodayPickCard";
 import TopRankerCard from "./components/TopRankerCard";
+import TypePieChart from "./components/TypePieChart";
+import { TYPE_STAT_DATA } from "./components/types/dashboardType";
+import { getPrimaryColor } from "./utils/pokemonUtils";
 
 export default function MainDashboard() {
   const [pokemon, setPokemon] = useState<any>(null);
@@ -90,10 +91,16 @@ export default function MainDashboard() {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 20 }}>
-        <CircularProgress />
-      </Box>
+      <RandomSpinner/>
     );
+
+  // 1. 현재 포켓몬의 타입에 해당하는 평균 데이터 찾기
+  // pokemon.type이 '전기'라면 ALL_TYPE_STATS에서 '전기' 항목을 찾는다.
+  // 1. 포켓몬 타입 이름 가져오기 (예: 'electric')
+  const typeName = pokemon?.types?.[0]?.type?.name;
+
+  // 2. TYPE_STAT_DATA에서 해당 타입의 스탯 객체 가져오기
+  const currentTypeAverage = typeName ? TYPE_STAT_DATA[typeName] : null;
 
   const primaryColor = getPrimaryColor(pokemon.types);
 
@@ -131,9 +138,11 @@ export default function MainDashboard() {
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <StatRadarChart
+                  typeAverage={currentTypeAverage} // 찾은 평균 데이터를 전달
                   stats={pokemon.stats}
                   color={primaryColor}
                   name={pokemon.name}
+                  typeName={typeName}
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
