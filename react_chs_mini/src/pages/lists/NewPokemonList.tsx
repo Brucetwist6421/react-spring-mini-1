@@ -115,30 +115,29 @@ export default function NewPokemonList() {
     queryKey: ["pokemonList"],
     queryFn: async () => {
       // setLoading(true);
-      const res = await api.get("http://localhost:8080/pokemon/list");
+      const res = await api.get("http://168.107.51.143:8080/pokemon/list");
       console.log("res.data : ", res.data);
       // setLoading(false);
-      return res.data as {
-        count: number;
-        results: { name: string; url: string }[];
-      };
+      return res.data;
     },
   });
 
-  // 서버에서 가져온 포켓몬 데이터를 그리드용 행 데이터로 변환한다.
-  // 만약 pokeData가 없으면 기존의 static rows 데이터를 사용한다.
-  const gridRows: RowData[] = pokeData?.results
-    ? pokeData.results.map((p, i) => ({
-        id: i + 1,
-        firstName: p.name,
-        lastName: p.name + i,
-        age: i + Math.random() * 10,
-        taxRate: i + Math.random() * 10,
-        gross: i + Math.random() * 10,
-        costs: i + Math.random() * 10,
-      }))
-    : [];
-  // 실습 2 끝
+  // pokeData가 배열인지 확인하고 직접 map을 돌립니다.
+const gridRows: RowData[] = Array.isArray(pokeData)
+  ? pokeData.map((p, i) => ({
+      // p.id가 있으면 쓰고, 없으면 인덱스 i를 사용
+      id: p.id || i + 1, 
+      // 서버의 name 데이터를 firstName 컬럼에 매핑
+      firstName: p.name || "", 
+      // 서버의 variant 데이터를 lastName 컬럼에 매핑
+      lastName: p.variant || "", 
+      // 나머지 숫자 데이터들 (없으면 0이나 랜덤값)
+      age: p.height || 0,
+      taxRate: p.weight || 0,
+      gross: p.isFavorite || 0,
+      costs: p.isPublic || 0,
+    }))
+  : [];
 
   // 실습 9 시작
   // 1. useMutation 훅 정의

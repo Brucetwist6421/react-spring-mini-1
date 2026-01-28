@@ -11,6 +11,7 @@ import theme from "./theme";
 import NavigationBar from "./layout/NavigationBar";
 import MainDashboard from "./pages/dashboard/MainDashboard";
 import PokemonList from "./pages/lists/PokemonList";
+import NewPokemonList from "./pages/lists/NewPokemonList";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<MainDashboard />} />
                 <Route path="/pokemonList" element={<PokemonList />} />
+                <Route path="/newPokemonList" element={<NewPokemonList />} />
                 <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon/create" element={<PokemonCreatePage />} />
                 <Route path="/pokemon2/:id" element={<PokemonDetailPage2 />} />
