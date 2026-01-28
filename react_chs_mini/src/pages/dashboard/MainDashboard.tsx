@@ -11,104 +11,43 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
 
 import RandomSpinner from "../../components/RandomSpinner";
 import ActionCard from "./components/ActionCard";
 import AllTypeBarChart from "./components/AllTypeBarChart";
+import PokemonSkillTable from "./components/PokemonSkillTable";
+import RecommendedSkills from "./components/RecommendedSkills";
 import StatRadarChart from "./components/StatRadarChart";
 import TodayPickCard from "./components/TodayPickCard";
 import TopRankerCard from "./components/TopRankerCard";
 import TypePieChart from "./components/TypePieChart";
+import { usePokemonDashboard } from "./components/hooks/usePokemonDashboard";
+import { usePokemonMoves } from "./components/hooks/usePokemonMoves";
 import { TYPE_STAT_DATA } from "./components/types/dashboardType";
 import { getPrimaryColor } from "./utils/pokemonUtils";
-import PokemonSkillTable from "./components/PokemonSkillTable";
-import RecommendedSkills from "./components/RecommendedSkills";
-import { usePokemonMoves } from "./components/hooks/usePokemonMoves";
 
 export default function MainDashboard() {
-  const [pokemon, setPokemon] = useState<any>(null);
-  const [topRankers, setTopRankers] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  // 1. 커스텀 훅으로 로직 분리
+  const { pokemon, topRankers, totalCount, loading, handleFetchPokemon } = usePokemonDashboard();
+  
+  // 2. 파생 데이터 계산 (가벼운 로직만 남김)
   const pokemonMoves = pokemon?.moves || [];
   const { detailedMoves, isLoading: movesLoading } = usePokemonMoves(pokemonMoves);
+  const primaryColor = getPrimaryColor(pokemon?.types);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const randomId = Math.floor(Math.random() * 800) + 1;
-        const [countRes, pokeRes] = await Promise.all([
-          fetch("https://pokeapi.co/api/v2/pokemon?limit=1"),
-          fetch(`https://pokeapi.co/api/v2/pokemon/${randomId}`),
-        ]);
-        const countData = await countRes.json();
-        const currentPoke = await pokeRes.json();
-
-        // 1. 해당 타입의 포켓몬 목록 가져오기
-        const typeRes = await fetch(currentPoke.types[0].type.url);
-        const typeData = await typeRes.json();
-
-        // 2. 상위 10마리 정도의 상세 데이터를 가져오면서 한글 이름(Species)도 함께 호출
-        const sampleList = typeData.pokemon.slice(0, 15);
-        const detailedList = await Promise.all(
-          sampleList.map(async (p: any) => {
-            // 포켓몬 상세 데이터 호출
-            const pokeData = await fetch(p.pokemon.url).then((r) => r.json());
-            // 포켓몬 종(Species) 데이터 호출 (한글 이름을 위해)
-            const speciesData = await fetch(pokeData.species.url).then((r) => r.json());
-            
-            // 한글 이름 찾기
-            const koName = speciesData.names.find(
-              (n: any) => n.language.name === "ko"
-            )?.name || pokeData.name;
-
-            // 기존 데이터에 koName 추가하여 반환
-            return { ...pokeData, koName };
-          })
-        );
-
-        // 3. 핵심: 종족값 합계(BST) 계산 후 내림차순 정렬
-        const rankedList = detailedList.sort((a, b) => {
-          const bstA = a.stats.reduce(
-            (acc: number, cur: any) => acc + cur.base_stat,
-            0,
-          );
-          const bstB = b.stats.reduce(
-            (acc: number, cur: any) => acc + cur.base_stat,
-            0,
-          );
-          return bstB - bstA; // 높은 순서대로 (내림차순)
-        });
-
-        setTotalCount(countData.count);
-        setPokemon(currentPoke);
-        // 정렬된 리스트에서 최상위 3마리만 추출
-        setTopRankers(rankedList.slice(0, 3));
-      } catch (e) {
-        console.error("데이터 정렬 중 오류 발생", e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
 
   if (loading || !pokemon)
     return (
       <RandomSpinner/>
     );
 
-  // 1. 현재 포켓몬의 타입에 해당하는 평균 데이터 찾기
-  // pokemon.type이 '전기'라면 ALL_TYPE_STATS에서 '전기' 항목을 찾는다.
-  // 1. 포켓몬 타입 이름 가져오기 (예: 'electric')
+
+  // 포켓몬 타입 이름 가져오기 (예: 'electric')
   const typeName = pokemon?.types?.[0]?.type?.name;
 
-  // 2. TYPE_STAT_DATA에서 해당 타입의 스탯 객체 가져오기
+  // TYPE_STAT_DATA에서 해당 타입의 스탯 객체 가져오기
   const currentTypeAverage = typeName ? TYPE_STAT_DATA[typeName] : null;
 
-  const primaryColor = getPrimaryColor(pokemon.types);
 
   return (
     <Box sx={{ flexGrow: 1, p: 3, backgroundColor: "#f8fafc", minHeight: "100vh" }}>
@@ -122,7 +61,7 @@ export default function MainDashboard() {
           }}
         >
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#1e293b" }}>
-            포켓몬 관리 대시보드
+            포켓몬 분석 대시보드
           </Typography>
           <Paper sx={{ p: 2, border: "2px solid #1e293b", borderRadius: 0 }}>
             <Typography variant="caption" display="block">
@@ -137,7 +76,7 @@ export default function MainDashboard() {
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 5 }}>
             <Stack spacing={3}>
-              <TodayPickCard pokemon={pokemon} color={primaryColor} />
+              <TodayPickCard pokemon={pokemon} color={primaryColor} onSelect={handleFetchPokemon}/>
               <RecommendedSkills 
                 movesWithDetail={detailedMoves} 
                 loading={movesLoading}

@@ -56,7 +56,7 @@ export default function PokemonMovesTable({ moves }: { moves: any[] }) {
           총 {moves.length}개 기술 표시
         </Typography>
       </Box>
-      <TableContainer sx={{ maxHeight: 370 }}>
+      <TableContainer sx={{ maxHeight: 390 }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>

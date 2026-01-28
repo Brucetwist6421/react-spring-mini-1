@@ -3,7 +3,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
 import { useState, type MouseEvent } from "react"; // 1. MouseEvent 추가
 import LoginModal from "../pages/modal/LoginModal";
-import MenuProfile from "../components/MenuProfile";
+import MenuProfile from "../pages/MenuProfile";
 
 interface HeaderProps {
   title?: string;

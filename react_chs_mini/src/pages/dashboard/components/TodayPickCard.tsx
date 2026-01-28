@@ -2,15 +2,15 @@
 import { Card, Typography, Avatar, Box, Chip, Divider, Stack, LinearProgress } from "@mui/material";
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import PublicIcon from '@mui/icons-material/Public'; 
-import EastIcon from '@mui/icons-material/East';
 import MapIcon from '@mui/icons-material/Map';
 import InsightsIcon from '@mui/icons-material/Insights';
 
 import { usePokemonAnalytics } from "./hooks/usePokemonAnalytics";
 import { STAT_LABELS, TYPE_MAP, TYPE_STAT_DATA } from "./types/dashboardType";
 import RandomSpinner from "../../../components/RandomSpinner";
+import EvolutionSection from "./EvolutionSection";
 
-export default function TodayPickCard({ pokemon, color }: any) {
+export default function TodayPickCard({ pokemon, color, onSelect}: any) {
   const { strengths, weaknesses, evoChain, habitat, typeRank, globalRank, isLoading } = usePokemonAnalytics(pokemon);
 
   if (!pokemon) return null;
@@ -137,26 +137,13 @@ export default function TodayPickCard({ pokemon, color }: any) {
 
       <Divider sx={{ my: 2 }} />
 
-      {/* 진화 과정 섹션 */}
-      <Box sx={{ my: 2, p: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 1 }}>
-        <Typography variant="caption" fontWeight={900} color="#94a3b8" display="block" mb={1.5} textAlign="left">진화 과정</Typography>
-        <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
-          {evoChain.map((node, i) => (
-            <Stack key={node.name} direction="row" alignItems="center">
-              <Box sx={{ textAlign: 'center' }}>
-                <Avatar 
-                  src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${node.id}.png`} 
-                  sx={{ width: 65, height: 65, border: node.name === pokemon.name ? `3px solid ${color}` : '1px solid #cbd5e1', p: 0.5, bgcolor: 'white', mx: 'auto' }} 
-                />
-                <Typography variant="caption" sx={{ display: 'block', mt: 1, fontSize: '0.75rem', fontWeight: node.name === pokemon.name ? 900 : 600, color: node.name === pokemon.name ? color : '#64748b' }}>
-                  {node.koName}({node.name})
-                </Typography>
-              </Box>
-              {i < evoChain.length - 1 && <EastIcon sx={{ fontSize: 20, color: '#cbd5e1', mx: 0.8, mb: 4 }} />}
-            </Stack>
-          ))}
-        </Stack>
-      </Box>
+      {/* 모듈화된 진화 섹션 적용 */}
+      <EvolutionSection 
+        evoChain={evoChain} 
+        currentPokemonName={pokemon.name} 
+        activeColor={color} 
+        onSelectPokemon={onSelect}
+      />
 
       {/* 상성 정보 */}
       <Box sx={{ textAlign: 'left', mb: 2 }}>
