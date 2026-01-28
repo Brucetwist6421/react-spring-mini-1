@@ -6,7 +6,7 @@ import Footer from "./layout/Footer";
 import Header from "./layout/Header";
 import PokemonCreatePage from "./pages/PokemonCreatePage";
 import PokemonDetailPage from "./pages/details/PokemonDetailPage";
-import PokemonDetailPage2 from "./pages/details/PokemonDetailPage2";
+import PokemonDetailPage2 from "./pages/details/NewPokemonDetailPage";
 import theme from "./theme";
 import NavigationBar from "./layout/NavigationBar";
 import MainDashboard from "./pages/dashboard/MainDashboard";

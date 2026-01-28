@@ -38,23 +38,6 @@ const columns: GridColDef<RowData>[] = [
     width: 90, // 컬럼 너비
   },
   {
-    field: "firstName",
-    headerName: "First Name",
-    width: 150,
-    flex: 1,
-    editable: true, // true면 셀 더블클릭 후 수정 가능
-    renderCell: (params: GridRenderCellParams<RowData>) => {
-      const id = params.row.id;
-      const label = params.value ?? "";
-      const url = `/profile/${id}`; // 원하는 URL 패턴으로 변경하세요
-      return (
-        <a href={url} style={{ color: "#1976d2", textDecoration: "none" }}>
-          {label}
-        </a>
-      );
-    },
-  },
-  {
     field: "lastName",
     headerName: "Last Name",
     width: 150,
@@ -67,18 +50,6 @@ const columns: GridColDef<RowData>[] = [
     type: "number", // 숫자 타입
     width: 110,
     editable: true,
-  },
-  {
-    field: "fullName",
-    headerName: "Full Name",
-    sortable: false, // false면 컬럼 정렬 불가
-    width: 160,
-    flex: 1,
-    valueGetter: (value, row) => {
-      console.log(value, row);
-      // params.row에서 데이터를 가져와 fullName 생성
-      return `${row.firstName || ""} ${row.lastName || ""}`;
-    },
   },
   {
     field: "taxRate",
@@ -99,6 +70,49 @@ const columns: GridColDef<RowData>[] = [
         return null;
       }
       return row.gross - row.costs;
+    },
+  },
+  {
+    field: "mainImagePath",
+    headerName: "Thumbnail",
+    width: 100,
+    sortable: false,
+    filterable: false,
+    renderCell: (params: GridRenderCellParams<RowData>) => {
+      const fileName = params.value; // "86fa..._핑가.gif"
+      
+      if (!fileName) return "No Image";
+
+      // 서버의 이미지 업로드 경로 주소 (IP 주소 확인 필요)
+      const imageUrl = `http://168.107.51.143:8080/upload/images/${fileName}`;
+
+      return (
+        <Box
+          sx={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src={imageUrl}
+            alt="pokemon"
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "4px",
+              objectFit: "cover",
+              border: "1px solid #eee",
+            }}
+            // 이미지 로드 실패 시 대체 텍스트나 기본 이미지 설정
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = "https://via.placeholder.com/40?text=No";
+            }}
+          />
+        </Box>
+      );
     },
   },
 ];
@@ -130,7 +144,7 @@ const gridRows: RowData[] = Array.isArray(pokeData)
       // 서버의 name 데이터를 firstName 컬럼에 매핑
       firstName: p.name || "", 
       // 서버의 variant 데이터를 lastName 컬럼에 매핑
-      lastName: p.variant || "", 
+      lastName: p.name || "", 
       // 나머지 숫자 데이터들 (없으면 0이나 랜덤값)
       age: p.height || 0,
       taxRate: p.weight || 0,

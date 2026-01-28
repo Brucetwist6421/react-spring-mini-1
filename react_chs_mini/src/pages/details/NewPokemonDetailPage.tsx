@@ -407,7 +407,7 @@ export default function PokemonDetailPage() {
 
   const handleCancel = () => {
     // 이전 페이지로
-    navigate("/pokemonList");
+    navigate("/newPokemonList");
   };
 
   const imageSrc =
