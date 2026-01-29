@@ -159,7 +159,7 @@ export default function PokemonSearch({ onSearch }: Props) {
                 '&:last-child': { borderBottom: 'none' }
               }}
             >
-              <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 800, width: 45 }}>
+              <Typography variant="caption" sx={{ fontWeight: 800, width: 45 }}>
                 #{String(option.id).padStart(3, '0')}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 700, flexGrow: 1 }}>
