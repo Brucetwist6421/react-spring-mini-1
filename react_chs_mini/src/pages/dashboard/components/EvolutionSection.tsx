@@ -11,7 +11,7 @@ interface EvolutionSectionProps {
   evoChain: EvolutionNode[];
   currentPokemonName: string;
   activeColor: string;
-  // ⭐ 클릭 시 호출될 함수 추가
+  // 클릭 시 호출될 함수 추가
   onSelectPokemon: (name: string) => void; 
 }
 

@@ -77,7 +77,7 @@ export default function TypePieChart({ types }: { types: any[] }) {
             {types.length}
           </Typography>
           <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 700 }}>
-            TYPES
+            {types.length > 1 ? `TYPES` : `TYPE`}
           </Typography>
         </Box>
       </Box>
