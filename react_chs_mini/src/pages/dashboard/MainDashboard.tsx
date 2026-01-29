@@ -29,6 +29,7 @@ import { usePokemonDashboard } from "./components/hooks/usePokemonDashboard";
 import { usePokemonMoves } from "./components/hooks/usePokemonMoves";
 import { TYPE_STAT_DATA } from "./components/types/dashboardType";
 import { getPrimaryColor } from "./utils/pokemonUtils";
+import FavoriteButton from "./components/FavoriteButton";
 
 export default function MainDashboard() {
   const navigate = useNavigate();
@@ -90,7 +91,7 @@ export default function MainDashboard() {
               </Typography>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.8 }}>
                 <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>
-                  현재 분석 포켓몬:
+                  현재 포켓몬:
                 </Typography>
                 <Chip 
                   label={`${pokemon.koName} (${pokemon.name})`}
@@ -103,6 +104,8 @@ export default function MainDashboard() {
                     border: `1px solid ${primaryColor}30`
                   }} 
                 />
+                {/* 즐겨찾기 버튼 */}
+                {pokemon && <FavoriteButton pokemonName={pokemon.name} />}
               </Stack>
             </Box>
 
