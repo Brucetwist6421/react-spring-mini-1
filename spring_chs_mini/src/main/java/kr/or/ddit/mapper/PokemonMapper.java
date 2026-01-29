@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import kr.or.ddit.vo.FavoriteVO;
 import kr.or.ddit.vo.PokemonAttachmentVO;
 import kr.or.ddit.vo.PokemonVO;
 
@@ -35,5 +36,11 @@ public interface PokemonMapper {
 	// 실습 4 시작
 	public int deletePokemon(Long id);
 	// 실습 4 끝
+
+	public int checkFavorite(FavoriteVO favoriteVO);
+
+	public void insertFavorite(FavoriteVO favoriteVO);
+
+	public void deleteFavorite(FavoriteVO favoriteVO);
 	
 }

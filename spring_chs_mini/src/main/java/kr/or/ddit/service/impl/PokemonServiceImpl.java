@@ -2,6 +2,7 @@ package kr.or.ddit.service.impl;
 
 import kr.or.ddit.mapper.PokemonMapper;
 import kr.or.ddit.service.PokemonService;
+import kr.or.ddit.vo.FavoriteVO;
 import kr.or.ddit.vo.PokemonAttachmentVO;
 import kr.or.ddit.vo.PokemonVO;
 import lombok.RequiredArgsConstructor;
@@ -223,6 +224,22 @@ public class PokemonServiceImpl implements PokemonService {
 			e.printStackTrace();
 			return 0; // 예외 발생 시 실패
 		}
+	}
+
+	@Override
+	public boolean toggleFavorite(FavoriteVO favoriteVO) {
+		// 1. 이미 즐겨찾기 되어있는지 확인
+        int count = pokemonMapper.checkFavorite(favoriteVO.getPokemonId());
+
+        if (count > 0) {
+            // 2. 있으면 삭제
+            pokemonMapper.deleteFavorite(favoriteVO);
+            return false;
+        } else {
+            // 3. 없으면 추가
+            pokemonMapper.insertFavorite(favoriteVO);
+            return true;
+        }
 	}
 
 	

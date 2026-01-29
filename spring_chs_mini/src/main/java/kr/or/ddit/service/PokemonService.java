@@ -29,4 +29,6 @@ public interface PokemonService {
 	// 실습 5 시작
 	public int deletePokemons(List<Long> idList);
 	// 실습 5 끝
+
+	public boolean toggleFavorite(kr.or.ddit.vo.FavoriteVO favoriteVO);
 }

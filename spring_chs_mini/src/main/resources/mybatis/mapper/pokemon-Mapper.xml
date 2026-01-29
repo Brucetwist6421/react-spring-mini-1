@@ -106,4 +106,19 @@
 		 WHERE id = #{id}
 	</delete>
 	<!-- 실습 4 끝 -->
+
+	<select id="checkFavorite" parameterType="FavoriteVO" resultType="int">
+        SELECT COUNT(*) FROM favorites 
+        WHERE pokemon_id = #{pokemonId}
+    </select>
+
+    <insert id="insertFavorite" parameterType="FavoriteVO">
+        INSERT INTO favorites (pokemon_id, pokemon_name, created_at)
+        VALUES (#{pokemonId}, #{pokemonName}, NOW())
+    </insert>
+
+    <delete id="deleteFavorite" parameterType="FavoriteVO">
+        DELETE FROM favorites 
+        WHERE pokemon_id = #{pokemonId}
+    </delete>
 </mapper>

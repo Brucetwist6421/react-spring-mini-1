@@ -13,7 +13,7 @@ public class BeanController {
 	// 파일이 업로드 되는 윈도우 경로
 	private String uploadFolder = "C:\\upload";
 	// 연 월 일
-	private String folder = "";
+	// private String folder = "";
 
 	// 연 월 일 폴더 생성
 	public String getFolder() {

@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class PokemonVO {
-	private long id;
+	private Long id;
 	private String name;
 	private String description;
 	private String type;
