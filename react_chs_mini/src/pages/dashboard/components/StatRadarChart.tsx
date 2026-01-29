@@ -29,7 +29,7 @@ export default function StatRadarChart({ stats, typeAverage, color, name, typeNa
             <Box 
               sx={{ 
                 width: 24,           // 선의 길이
-                height: 4,           // 선의 두께
+                height: 3,           // 선의 두께
                 bgcolor: color,  // 포켓몬 타입 색상
                 borderRadius: '2px'
               }} 
@@ -42,10 +42,10 @@ export default function StatRadarChart({ stats, typeAverage, color, name, typeNa
           {/* 타입 평균 범례 */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Box sx={{ 
-              width: 16, 
+              width: 24, 
               height: 2, 
               bgcolor: '#cbd5e1', 
-              border: '1px dashed #94a3b8' // 대시(점선) 느낌 추가
+              border: '0.5px dashed #94a3b8' // 대시(점선) 느낌 추가
             }} />
             <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
               {typeName || '미정'} 타입 평균

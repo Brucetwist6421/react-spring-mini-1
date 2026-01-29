@@ -24,8 +24,10 @@ import { usePokemonDashboard } from "./components/hooks/usePokemonDashboard";
 import { usePokemonMoves } from "./components/hooks/usePokemonMoves";
 import { TYPE_STAT_DATA } from "./components/types/dashboardType";
 import { getPrimaryColor } from "./utils/pokemonUtils";
+import { useNavigate } from "react-router-dom";
 
 export default function MainDashboard() {
+  const navigate = useNavigate();
   // 1. 커스텀 훅으로 로직 분리
   const { pokemon, topRankers, totalCount, loading, handleFetchPokemon } = usePokemonDashboard();
   
@@ -62,8 +64,8 @@ export default function MainDashboard() {
           <Typography variant="h4" sx={{ fontWeight: 800, color: "#1e293b" }}>
             포켓몬 분석 대시보드
           </Typography>
-          <Paper sx={{ p: 2, border: "2px solid #1e293b", borderRadius: 0 }}>
-            <Typography variant="caption" display="block">
+          <Paper sx={{ p: 2, border: "2px solid #1e293b", borderRadius: 0, cursor: "pointer" }} onClick={() => navigate("/pokemonList")}>
+            <Typography variant="caption" display="block" >
               전체 등록 포켓몬 수
             </Typography>
             <Typography variant="h5" fontWeight={900}>

@@ -21,6 +21,21 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
   const primaryType = pokemon.types[0].type.name;
   const avgStats = TYPE_STAT_DATA[primaryType] || { hp: 70, attack: 70, defense: 70, "special-attack": 70, "special-defense": 70, speed: 70 };
   const performanceScore = Math.max(1, Math.min(10, Number(((bst - 180) / (720 - 180) * 10).toFixed(1))));
+  const pokedexNumber = `#${String(pokemon.id).padStart(4, '0')}`;
+  //세대 및 지역 판별 함수
+  const getPokemonOrigin = (id: number) => {
+    if (id <= 151) return { gen: 1, region: "관동" };
+    if (id <= 251) return { gen: 2, region: "성도" };
+    if (id <= 386) return { gen: 3, region: "호연" };
+    if (id <= 493) return { gen: 4, region: "신오" };
+    if (id <= 649) return { gen: 5, region: "하나" };
+    if (id <= 721) return { gen: 6, region: "칼로스" };
+    if (id <= 809) return { gen: 7, region: "알로라" };
+    if (id <= 898) return { gen: 8, region: "가라르" };
+    if (id <= 1025) return { gen: 9, region: "팔데아" };
+    return { gen: 0, region: "기타" };
+  };
+  const origin = getPokemonOrigin(pokemon.id);
 
   const getRole = () => {
     if (statsMap.speed >= 110 && (statsMap.attack >= 100 || statsMap['special-attack'] >= 100)) return "고속 스위퍼";
@@ -50,6 +65,30 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
       
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, my: 1 }}>
         {/* 타입 및 기본 정보 */}
+        <Chip 
+          label={pokedexNumber} 
+          size="small" 
+          sx={{ bgcolor: '#1e293b', color: 'white', fontWeight: 500, borderRadius: 0, fontSize: '0.8rem' }} 
+        />
+        {/* 세대 표시 */}
+        <Chip 
+          label={`${origin.gen}세대`} 
+          size="small" 
+          sx={{ bgcolor: '#475569', color: 'white', fontWeight: 500, borderRadius: 0, fontSize: '0.8rem'}} 
+        />
+
+        {/* 지역 표시 */}
+        <Chip 
+          label={`지역: ${origin.region}`} 
+          size="small" 
+          variant="outlined"
+          sx={{ color: '#475569', borderColor: '#cbd5e1', fontWeight: 500, borderRadius: 0, fontSize: '0.8rem', bgcolor: '#ffffff' }} 
+        />
+        <Chip icon={<MapIcon style={{ fontSize: '12px' }} />} label={`서식지: ${habitat}`} size="small" sx={{ fontWeight: 500, borderRadius: 0, fontSize: '0.8rem', bgcolor: '#f1f5f9' }} />
+      </Box>
+
+      {/* 타입, 역할, 전투력 칩 섹션 */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexWrap: 'wrap', mb: 2 }}>
         {pokemon.types.map((t: any) => {
           const typeName = t.type.name;
           // TYPE_COLORS에서 색상을 찾고, 없으면 기본 회색(#94a3b8)을 사용합니다.
@@ -63,18 +102,17 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
               sx={{ 
                 bgcolor: backgroundColor, 
                 color: 'white', 
-                fontWeight: 800, 
+                fontWeight: 500, 
                 borderRadius: 0, 
-                fontSize: '0.65rem',
+                fontSize: '0.8rem',
                 // 색상에 따라 텍스트 가독성을 높이기 위해 그림자 살짝 추가 (선택 사항)
                 textShadow: '0px 1px 2px rgba(0,0,0,0.2)'
               }} 
             />
           );
-  })}
-        <Chip label={getRole()} size="small" sx={{ bgcolor: '#1e293b', color: 'white', fontWeight: 800, borderRadius: 0, fontSize: '0.65rem' }} />
-        <Chip icon={<MapIcon style={{ fontSize: '12px' }} />} label={`서식지: ${habitat}`} size="small" sx={{ fontWeight: 800, borderRadius: 0, fontSize: '0.65rem', bgcolor: '#f1f5f9' }} />
-        <Chip label={`전투력 : ${bst}`} size="small" variant="outlined" sx={{ fontWeight: 800, borderRadius: 0, fontSize: '0.65rem' }} />
+        })}
+        <Chip label={getRole()} size="small" sx={{ bgcolor: '#1e293b', color: 'white', fontWeight: 500, borderRadius: 0, fontSize: '0.8rem' }} />
+        <Chip label={`전투력 : ${bst}`} size="small" variant="outlined" sx={{ fontWeight: 500, borderRadius: 0, fontSize: '0.8rem' }} />
       </Box>
 
       {/* 스탯 상세 분석 */}
