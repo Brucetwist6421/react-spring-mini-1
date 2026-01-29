@@ -23,7 +23,7 @@ export default function FavoriteButton({ pokemonId, pokemonName, pokemonKoName }
 
   // 1. 초기 즐겨찾기 상태 조회 (GET)
   const { data: checkData } = useQuery({
-    queryKey: ["favoriteCheck", userId, pokemonId],
+    queryKey: ["favoriteCheck", userId, pokemonId], //userId 가 생기면 userId로 조회
     queryFn: () => checkFavoriteApi(userId, pokemonId),
     enabled: !!pokemonId, // id가 있을 때만 실행
     retry: false,

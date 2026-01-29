@@ -42,6 +42,36 @@ public class PokemonController {
 	// 실습 1 시작
     private final PokemonService pokemonService;
 
+    // 즐겨찾기 확인
+    @GetMapping("/favoriteCheck")
+    public ResponseEntity<Map<String, Object>> checkFavorite(
+            @RequestParam("userId") String userId,
+            @RequestParam("pokemonId") Long pokemonId
+    ) {
+        Map<String, Object> resultMap = new HashMap<>();
+        
+        try {
+            log.info("checkFavorite -> userId: {}, pokemonId: {}", userId, pokemonId);
+            
+            // FavoriteVO 객체에 담아 서비스로 전달 (혹은 파라미터로 직접 전달 가능)
+            FavoriteVO vo = new FavoriteVO();
+            vo.setUserId(userId);
+            vo.setPokemonId(pokemonId);
+            
+            // 서비스에서 count 등을 활용해 존재 여부 확인
+            boolean isFavorite = pokemonService.isFavorite(vo);
+            
+            resultMap.put("isFavorite", isFavorite);
+            return ResponseEntity.ok(resultMap);
+            
+        } catch (Exception e) {
+            log.error("즐겨찾기 확인 중 오류 발생", e);
+            resultMap.put("isFavorite", false);
+            resultMap.put("message", "상태 확인 실패");
+            return ResponseEntity.internalServerError().body(resultMap);
+        }
+    }
+
     @PostMapping("/createPokemon")
     public ResponseEntity<Map<String, Object>> createPokemon(
             @ModelAttribute PokemonVO pokemonVO,
@@ -235,4 +265,6 @@ public class PokemonController {
             return ResponseEntity.internalServerError().body(resultMap);
         }
     }
+
+    
 }
