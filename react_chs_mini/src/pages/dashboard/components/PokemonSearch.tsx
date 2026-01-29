@@ -163,11 +163,11 @@ export default function PokemonSearch({ onSearch }: Props) {
                 #{String(option.id).padStart(3, '0')}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 700, flexGrow: 1 }}>
-                {option.koName}
+                {option.koName}({option.name})
               </Typography>
-              <Typography variant="caption" sx={{ color: "#cbd5e1", fontStyle: 'italic' }}>
+              {/* <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
                 {option.name}
-              </Typography>
+              </Typography> */}
             </Box>
           );
         }}
