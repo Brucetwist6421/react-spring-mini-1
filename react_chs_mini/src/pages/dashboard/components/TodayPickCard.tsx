@@ -6,7 +6,7 @@ import MapIcon from '@mui/icons-material/Map';
 import InsightsIcon from '@mui/icons-material/Insights';
 
 import { usePokemonAnalytics } from "./hooks/usePokemonAnalytics";
-import { STAT_LABELS, TYPE_MAP, TYPE_STAT_DATA } from "./types/dashboardType";
+import { STAT_LABELS, TYPE_COLORS, TYPE_MAP, TYPE_STAT_DATA } from "./types/dashboardType";
 import RandomSpinner from "../../../components/RandomSpinner";
 import EvolutionSection from "./EvolutionSection";
 
@@ -30,7 +30,7 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
   };
 
   const currentKoName = evoChain.find(e => e.name === pokemon.name)?.koName || pokemon.name.toUpperCase();
-
+  console.log(pokemon);
   // 2. 로딩 처리
   if (isLoading) {
     return (
@@ -49,6 +49,29 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
       <Typography variant="h5" fontWeight={900}>{currentKoName}({pokemon.name})</Typography>
       
       <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, my: 1 }}>
+        {/* 타입 및 기본 정보 */}
+        {pokemon.types.map((t: any) => {
+          const typeName = t.type.name;
+          // TYPE_COLORS에서 색상을 찾고, 없으면 기본 회색(#94a3b8)을 사용합니다.
+          const backgroundColor = TYPE_COLORS[typeName] || "#94a3b8";
+
+          return (
+            <Chip 
+              key={typeName}
+              label={typeName.toUpperCase()} 
+              size="small" 
+              sx={{ 
+                bgcolor: backgroundColor, 
+                color: 'white', 
+                fontWeight: 800, 
+                borderRadius: 0, 
+                fontSize: '0.65rem',
+                // 색상에 따라 텍스트 가독성을 높이기 위해 그림자 살짝 추가 (선택 사항)
+                textShadow: '0px 1px 2px rgba(0,0,0,0.2)'
+              }} 
+            />
+          );
+  })}
         <Chip label={getRole()} size="small" sx={{ bgcolor: '#1e293b', color: 'white', fontWeight: 800, borderRadius: 0, fontSize: '0.65rem' }} />
         <Chip icon={<MapIcon style={{ fontSize: '12px' }} />} label={`서식지: ${habitat}`} size="small" sx={{ fontWeight: 800, borderRadius: 0, fontSize: '0.65rem', bgcolor: '#f1f5f9' }} />
         <Chip label={`전투력 : ${bst}`} size="small" variant="outlined" sx={{ fontWeight: 800, borderRadius: 0, fontSize: '0.65rem' }} />

@@ -18,7 +18,41 @@ export default function StatRadarChart({ stats, typeAverage, color, name, typeNa
   });
   return (
     <Paper sx={{ p: 3, height: '100%', borderRadius: 0, border: '1px solid #e2e8f0', boxShadow: 'none' }}>
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2, color: '#64748b' }}>기본 스탯 비교 (실선:현재 포켓몬 / 점선:{typeName || '미정'} 타입 평균)</Typography>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1e293b', mb: 1 }}>
+          기본 스탯 비교
+        </Typography>
+        
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          {/* 현재 포켓몬 범례 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box 
+              sx={{ 
+                width: 24,           // 선의 길이
+                height: 4,           // 선의 두께
+                bgcolor: color,  // 포켓몬 타입 색상
+                borderRadius: '2px'
+              }} 
+            />
+            <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
+              현재 포켓몬
+            </Typography>
+          </Box>
+
+          {/* 타입 평균 범례 */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box sx={{ 
+              width: 16, 
+              height: 2, 
+              bgcolor: '#cbd5e1', 
+              border: '1px dashed #94a3b8' // 대시(점선) 느낌 추가
+            }} />
+            <Typography variant="caption" sx={{ fontWeight: 600, color: '#64748b' }}>
+              {typeName || '미정'} 타입 평균
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
       <Box sx={{ width: '100%', height: 300 }}>
         <ResponsiveContainer>
           <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
