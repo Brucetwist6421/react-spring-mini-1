@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import kr.or.ddit.vo.FavoriteVO;
 import kr.or.ddit.vo.PokemonVO;
 
 public interface PokemonService {
@@ -30,5 +31,7 @@ public interface PokemonService {
 	public int deletePokemons(List<Long> idList);
 	// 실습 5 끝
 
-	public boolean toggleFavorite(kr.or.ddit.vo.FavoriteVO favoriteVO);
+	public boolean toggleFavorite(FavoriteVO favoriteVO);
+
+	public boolean isFavorite(FavoriteVO favoriteVO);
 }

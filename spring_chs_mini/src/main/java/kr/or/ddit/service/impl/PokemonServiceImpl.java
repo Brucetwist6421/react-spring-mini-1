@@ -243,6 +243,12 @@ public class PokemonServiceImpl implements PokemonService {
         }
 	}
 
+	@Override
+	public boolean isFavorite(FavoriteVO favoriteVO) {
+		// Mapper에서 COUNT(*) 쿼리를 실행하여 0보다 크면 true 반환
+    	return pokemonMapper.checkFavorite(favoriteVO) > 0;
+	}
+
 	
 
 }
