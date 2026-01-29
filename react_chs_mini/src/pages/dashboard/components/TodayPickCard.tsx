@@ -63,28 +63,73 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
       <Avatar src={pokemon.sprites.other['official-artwork'].front_default} sx={{ width: 120, height: 120, mx: 'auto', borderRadius: 0, mb: 1 }} />
       <Typography variant="h5" fontWeight={900}>{currentKoName}({pokemon.name})</Typography>
       
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, my: 1 }}>
-        {/* 타입 및 기본 정보 */}
-        <Chip 
-          label={pokedexNumber} 
-          size="small" 
-          sx={{ bgcolor: '#1e293b', color: 'white', fontWeight: 500, borderRadius: 0, fontSize: '0.8rem' }} 
-        />
-        {/* 세대 표시 */}
-        <Chip 
-          label={`${origin.gen}세대`} 
-          size="small" 
-          sx={{ bgcolor: '#475569', color: 'white', fontWeight: 500, borderRadius: 0, fontSize: '0.8rem'}} 
-        />
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          gap: 0.75, 
+          my: 2, 
+          flexWrap: 'wrap', //  화면이 좁아지면 자연스럽게 다음 줄로 이동
+          px: 1 
+        }}
+      >
+        {/* [그룹 1: 고유 식별 정보] */}
+        <Stack direction="row" spacing={0.5}>
+          <Chip 
+            label={pokedexNumber} 
+            size="small" 
+            sx={{ 
+              bgcolor: '#1e293b', 
+              color: 'white', 
+              fontWeight: 700, 
+              borderRadius: '6px', 
+              fontSize: '0.75rem' 
+            }} 
+          />
+          <Chip 
+            label={`${origin.gen}세대`} 
+            size="small" 
+            sx={{ 
+              bgcolor: '#475569', 
+              color: 'white', 
+              fontWeight: 700, 
+              borderRadius: '6px', 
+              fontSize: '0.75rem'
+            }} 
+          />
+        </Stack>
 
-        {/* 지역 표시 */}
-        <Chip 
-          label={`지역: ${origin.region}`} 
-          size="small" 
-          variant="outlined"
-          sx={{ color: '#475569', borderColor: '#cbd5e1', fontWeight: 500, borderRadius: 0, fontSize: '0.8rem', bgcolor: '#ffffff' }} 
-        />
-        <Chip icon={<MapIcon style={{ fontSize: '12px' }} />} label={`서식지: ${habitat}`} size="small" sx={{ fontWeight: 500, borderRadius: 0, fontSize: '0.8rem', bgcolor: '#f1f5f9' }} />
+        {/* [그룹 2: 위치 및 지역 정보] */}
+        <Stack direction="row" spacing={0.5}>
+          <Chip 
+            label={origin.region} 
+            size="small" 
+            variant="outlined"
+            sx={{ 
+              color: '#64748b', 
+              borderColor: '#e2e8f0', 
+              fontWeight: 700, 
+              borderRadius: '6px', 
+              fontSize: '0.75rem', 
+              bgcolor: '#ffffff',
+              '::before': { content: '"📍"', fontSize: '0.7rem', mr: -0.8 } 
+            }} 
+          />
+          <Chip 
+            icon={<MapIcon sx={{ fontSize: '14px !important', color: '#64748b' }} />} 
+            label={habitat} 
+            size="small" 
+            sx={{ 
+              fontWeight: 700, 
+              borderRadius: '6px', 
+              fontSize: '0.75rem', 
+              bgcolor: '#f1f5f9',
+              color: '#475569',
+              border: '1px solid #e2e8f0'
+            }} 
+          />
+        </Stack>
       </Box>
 
       {/* 타입, 역할, 전투력 칩 섹션 */}
@@ -198,13 +243,34 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
 
       <Divider sx={{ my: 2 }} />
 
-      {/* 모듈화된 진화 섹션 적용 */}
-      <EvolutionSection 
-        evoChain={evoChain} 
-        currentPokemonName={pokemon.name} 
-        activeColor={color} 
-        onSelectPokemon={onSelect}
-      />
+      {/* 진화 섹션: 내용 초과 시 내부 스크롤 생성 */}
+      <Box 
+        sx={{ 
+          maxHeight: '230px', // 적절한 높이 제한
+          overflowY: 'auto',   // 세로 스크롤 활성화
+          pr: 0.5,            // 스크롤바와 내용 사이 간격
+          // 커스텀 스크롤바 스타일 (선택 사항)
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: '#f1f5f9',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: '#cbd5e1',
+            borderRadius: '10px',
+          },
+        }}
+      >
+        <EvolutionSection 
+          evoChain={evoChain} 
+          currentPokemonName={pokemon.name} 
+          activeColor={color} 
+          onSelectPokemon={onSelect}
+        />
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
 
       {/* 상성 정보 */}
       <Box sx={{ textAlign: 'left', mb: 2 }}>

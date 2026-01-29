@@ -72,7 +72,7 @@ export default function PokemonMovesTable({ moves }: { moves: any[] }) {
 
   return (
     <Paper sx={{ borderRadius: 0, border: "1px solid #e2e8f0", boxShadow: "none" }}>
-      <TableContainer sx={{ maxHeight: 475 }}>
+      <TableContainer sx={{ maxHeight: 540 }}>
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
