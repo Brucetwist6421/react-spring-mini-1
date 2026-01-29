@@ -112,10 +112,13 @@
         WHERE pokemon_id = #{pokemonId}
     </select>
 
-    <insert id="insertFavorite" parameterType="FavoriteVO">
-        INSERT INTO favorites (pokemon_id, pokemon_name, created_at)
-        VALUES (#{pokemonId}, #{pokemonName}, NOW())
-    </insert>
+    <insert id="insertFavorite" parameterType="FavoriteVO" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO favorites (
+			user_id, pokemon_id, pokemon_name, pokemon_ko_name, reg_id
+		) VALUES (
+			#{userId}, #{pokemonId}, #{pokemonName}, #{pokemonKoName}, #{regId}
+		)
+	</insert>
 
     <delete id="deleteFavorite" parameterType="FavoriteVO">
         DELETE FROM favorites 

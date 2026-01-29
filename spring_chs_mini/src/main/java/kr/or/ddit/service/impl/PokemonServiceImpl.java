@@ -225,11 +225,12 @@ public class PokemonServiceImpl implements PokemonService {
 			return 0; // 예외 발생 시 실패
 		}
 	}
+	// 실습 5 끝
 
 	@Override
 	public boolean toggleFavorite(FavoriteVO favoriteVO) {
 		// 1. 이미 즐겨찾기 되어있는지 확인
-        int count = pokemonMapper.checkFavorite(favoriteVO.getPokemonId());
+        int count = pokemonMapper.checkFavorite(favoriteVO);
 
         if (count > 0) {
             // 2. 있으면 삭제
@@ -243,6 +244,5 @@ public class PokemonServiceImpl implements PokemonService {
 	}
 
 	
-	// 실습 5 끝
 
 }
