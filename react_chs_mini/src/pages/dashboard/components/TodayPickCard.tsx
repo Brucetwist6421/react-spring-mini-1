@@ -57,7 +57,7 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
 
   return (
     <Card sx={{ borderRadius: 0, p: 3, border: '1px solid #e2e8f0', boxShadow: 'none', textAlign: 'center', overflow: "auto" }}>
-      <Typography variant="caption" sx={{ fontWeight: 900, color: '#94a3b8', display: 'block', mb: 1.5 }}>POKÉMON 분석</Typography>
+      <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1e293b', mb: 1 }}>POKÉMON 분석</Typography>
 
       {/* 헤더 섹션 */}
       <Avatar src={pokemon.sprites.other['official-artwork'].front_default} sx={{ width: 120, height: 120, mx: 'auto', borderRadius: 0, mb: 1 }} />

@@ -24,7 +24,7 @@ export default function TypePieChart({ types }: { types: any[] }) {
         flexDirection: 'column'
       }}
     >
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: '#64748b' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1e293b', mb: 1 }}>
         보유 속성 구성
       </Typography>
 

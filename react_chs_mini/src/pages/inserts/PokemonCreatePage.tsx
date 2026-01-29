@@ -236,41 +236,6 @@ export default function PokemonCreatePage() {
       return <RandomSpinner />;
     }
 
-  // axios를 직접 호출하는 전통적인 비동기 방식
-  // const handleSubmit = async () => {
-  //   if (!validate()) return;
-
-  //   console.log("전송 데이터 예시:", form);
-  //   // 예시: FormData로 전송하는 방식 (실제로 백엔드 엔드포인트 필요)
-  //   const fd = new FormData();
-  //   fd.append("name", form.name);
-  //   fd.append("description", form.description);
-  //   fd.append("type", form.type);
-  //   fd.append("height", String(form.height));
-  //   fd.append("weight", String(form.weight));
-  //   fd.append("isFavorite", boolToNum(form.isFavorite));
-  //   fd.append("isPublic", boolToNum(form.isPublic));
-  //   fd.append("isNotify", boolToNum(form.isNotify));
-  //   fd.append("variant", form.variant);
-  //   if (mainFile) fd.append("mainImage", mainFile);
-  //   // attachments.forEach((a, idx) => fd.append(`attachments[${idx}]`, a.file));
-  //   attachments.forEach((a) => fd.append("attachments", a.file));
-
-  //   try {
-  //     // 실제 API가 있다면 아래처럼 전송
-  //     await api.post("/pokemon/createPokemon", fd, { headers: { "Content-Type": "multipart/form-data" } });
-  //     console.log("전송 데이터 예시(FormData keys):", Array.from(fd.keys()));
-  //     for (const [key, value] of fd.entries()) {
-  //       console.log(`${key}:`, value);
-  //     }
-  //     alert("포켓몬이 등록되었습니다. (데모)");
-  //     //navigate("/"); // 목록으로 이동
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("등록 중 오류가 발생했습니다.");
-  //   }
-  // };
-
   return (
     <Container sx={{ py: 4 }}>
       <Paper sx={{ p: 3}}>

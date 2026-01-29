@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import LanguageIcon from "@mui/icons-material/Language";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import StarIcon from "@mui/icons-material/Star";
@@ -121,12 +122,14 @@ export default function MainDashboard() {
             >
               <WorkspacePremiumIcon sx={{ color: "#f59e0b" }} />
               <Typography variant="h6" fontWeight={800}>
-                {pokemon.types[0].type.name.toUpperCase()} 속성 상위 랭커
+                {pokemon.types.map((t :any) => t.type.name.toUpperCase()).join(", ")} 속성 상위 랭커
               </Typography>
             </Box>
             <Grid container spacing={2}>
               {topRankers.map((p, i) => (
-                <TopRankerCard key={p.id} p={p} rank={i + 1} />
+                <TopRankerCard key={p.id} p={p} rank={i + 1} 
+                  onSelect={handleFetchPokemon}// 여기서 대시보드 갱신 함수 전달
+                />
               ))}
             </Grid>
           </Grid>
