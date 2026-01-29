@@ -246,7 +246,12 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
       {/* 진화 섹션: 내용 초과 시 내부 스크롤 생성 */}
       <Box 
         sx={{ 
-          maxHeight: '230px', // 적절한 높이 제한
+          mx: -4.5,           // 왼쪽, 오른쪽으로 24px(3*8px)만큼 마진을 당김
+          width: 'calc(100% + 48px)', // 늘어난 마진만큼 너비를 계산해서 보정
+          px: 3,            // 배경은 끝까지 차되, 내부 아이콘들은 다시 안쪽으로 정렬
+          py: 1,
+          maxHeight: '260px', // 적절한 높이 제한
+          height: 'auto',
           overflowY: 'auto',   // 세로 스크롤 활성화
           pr: 0.5,            // 스크롤바와 내용 사이 간격
           // 커스텀 스크롤바 스타일 (선택 사항)

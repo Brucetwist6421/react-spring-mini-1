@@ -85,8 +85,8 @@ export default function EvolutionSection({
                       src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${node.id}.png`} 
                       onClick={() => !isCurrent && onSelectPokemon(node.name)} 
                       sx={{ 
-                        width: 64, 
-                        height: 64, 
+                        width: 70, 
+                        height: 70, 
                         border: isCurrent ? `3px solid ${activeColor}` : '1px solid #e2e8f0', 
                         p: 0.5, 
                         bgcolor: 'white', 
@@ -109,7 +109,7 @@ export default function EvolutionSection({
                     sx={{ 
                       display: 'block', 
                       mt: 1.5, 
-                      fontSize: '0.7rem', 
+                      fontSize: '0.9rem', 
                       fontWeight: isCurrent ? 900 : 700, 
                       color: isCurrent ? '#1e293b' : '#64748b',
                       whiteSpace: 'nowrap',
@@ -117,7 +117,7 @@ export default function EvolutionSection({
                     }}
                   >
                     {node.koName}
-                    <Box component="span" sx={{ display: 'block', fontSize: '0.6rem', fontWeight: 500, opacity: 0.7 }}>
+                    <Box component="span" sx={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, opacity: 0.7 }}>
                       {node.name}
                     </Box>
                   </Typography>

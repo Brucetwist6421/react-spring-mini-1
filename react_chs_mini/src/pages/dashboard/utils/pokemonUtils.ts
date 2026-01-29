@@ -1,8 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const TYPE_COLORS: { [key: string]: string } = {
-  fire: '#ef4444', water: '#3b82f6', grass: '#22c55e', electric: '#f59e0b',
-  psychic: '#ec4899', ice: '#6ee7b7', dragon: '#8b5cf6', dark: '#334155',
-  normal: '#94a3b8', fighting: '#b91c1c', flying: '#818cf8', poison: '#a855f7'
+  // 기존 데이터
+  fire: '#ef4444', 
+  water: '#3b82f6', 
+  grass: '#22c55e', 
+  electric: '#f59e0b',
+  psychic: '#ec4899', 
+  ice: '#6ee7b7', 
+  dragon: '#8b5cf6', 
+  dark: '#334155',
+  normal: '#94a3b8', 
+  fighting: '#b91c1c', 
+  flying: '#818cf8', 
+  poison: '#a855f7',
+  bug: '#84cc16',      // 밝은 연두색 (Lime 500)
+  steel: '#64748b',    // 차가운 금속색 (Slate 500)
+  ground: '#d97706',   // 짙은 흙색 (Amber 600)
+  rock: '#78350f',     // 바위색 (Brown/Stone 계열)
+  ghost: '#6366f1',    // 영적인 보라/청색 (Indigo 500)
+  fairy: '#f472b6',    // 화사한 핑크 (Pink 400)
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
