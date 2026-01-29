@@ -33,10 +33,10 @@ export function usePokemonDashboard() {
         };
       });
 
-      console.log("✅ 한글 이름 매핑 완료:", formatted.slice(0, 5)); // 콘솔에서 확인용
+      console.log("한글 이름 매핑 완료:", formatted.slice(0, 5)); // 콘솔에서 확인용
       setAllPokemonOptions(formatted);
     } catch (e) {
-      console.error("❌ 데이터 로드 실패:", e);
+      console.error("데이터 로드 실패:", e);
     }
   }, []);
 
