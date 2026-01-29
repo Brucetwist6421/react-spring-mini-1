@@ -166,7 +166,7 @@ export default function MainDashboard() {
                 <TypePieChart types={pokemon.types} />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <Paper sx={{ borderRadius: "24px", overflow: "hidden", border: "1px solid #e2e8f0", boxShadow: "none" }}>
+                <Paper sx={{ overflow: "hidden", boxShadow: "none", borderRadius: 0, border: "1px solid #e2e8f0" }}>
                   <PokemonSkillTable moves={pokemon.moves} />
                 </Paper>
               </Grid>

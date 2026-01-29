@@ -56,7 +56,7 @@ export default function PokemonMovesTable({ moves }: { moves: any[] }) {
             sx={{ 
               width: 14,      // 크기 확대
               height: 14,     // 크기 확대
-              borderRadius: '50%', 
+              //borderRadius: '50%', 
               bgcolor: TYPE_COLORS[type], 
               border: '1.5px solid #ffffff',
               boxShadow: '0 1px 3px rgba(0,0,0,0.2)', // 입체감 추가
@@ -100,7 +100,7 @@ export default function PokemonMovesTable({ moves }: { moves: any[] }) {
                     <Chip 
                       label={m.type.toUpperCase()} 
                       size="small" 
-                      sx={{ bgcolor: TYPE_COLORS[m.type], color: 'white', fontWeight: 900, fontSize: '0.6rem', height: 18, borderRadius: '4px' }}
+                      sx={{ bgcolor: TYPE_COLORS[m.type], color: 'white', fontWeight: 900, fontSize: '0.6rem', height: 18}}
                     />
                   </TableCell>
                   <TableCell>{renderTypeCircles(m.doubleDamageTo)}</TableCell>
