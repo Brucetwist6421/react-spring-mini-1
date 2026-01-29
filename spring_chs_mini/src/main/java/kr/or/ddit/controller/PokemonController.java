@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
 import kr.or.ddit.service.PokemonService;
+import kr.or.ddit.vo.FavoriteVO;
 import kr.or.ddit.vo.PokemonVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -209,4 +210,29 @@ public class PokemonController {
         }
     }
     // 실습 6 끝
+
+    //즐겨찾기 토글
+    @PostMapping("/toggleFavorite")
+    public ResponseEntity<Map<String, Object>> toggleFavorite(
+            @RequestBody FavoriteVO favoriteVO
+            /* , @AuthenticationPrincipal CustomUser user */ // 나중에 인증 도입 시 사용
+    ) {
+        Map<String, Object> resultMap = new HashMap<>();
+        
+        // 임시로 userId를 1로 고정 (나중에 세션/토큰에서 가져옴)
+        if(favoriteVO.getUserId() == null) favoriteVO.setUserId("admin");
+
+        try {
+            boolean isFavorite = pokemonService.toggleFavorite(favoriteVO);
+            
+            resultMap.put("isFavorite", isFavorite);
+            resultMap.put("message", isFavorite ? "즐겨찾기에 추가되었습니다." : "즐겨찾기에서 제거되었습니다.");
+            
+            return ResponseEntity.ok(resultMap);
+        } catch (Exception e) {
+            log.error("즐겨찾기 토글 중 오류 발생", e);
+            resultMap.put("message", "처리에 실패했습니다.");
+            return ResponseEntity.internalServerError().body(resultMap);
+        }
+    }
 }

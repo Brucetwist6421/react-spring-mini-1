@@ -105,7 +105,7 @@ export default function MainDashboard() {
                   }} 
                 />
                 {/* 즐겨찾기 버튼 */}
-                {pokemon && <FavoriteButton pokemonName={pokemon.name} />}
+                {pokemon && <FavoriteButton pokemonId={pokemon.id} pokemonName={pokemon.name} pokemonKoName={pokemon.koName} />}
               </Stack>
             </Box>
 
