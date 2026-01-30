@@ -33,5 +33,9 @@ public interface PokemonService {
 
 	public boolean toggleFavorite(FavoriteVO favoriteVO);
 
+	//즐겨찾기 여부 확인
 	public boolean isFavorite(FavoriteVO favoriteVO);
+
+	//사용자 별 즐겨찾기 목록 조회
+	public List<FavoriteVO> getFavoritePokemonList(String userId);
 }

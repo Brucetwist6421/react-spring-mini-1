@@ -124,4 +124,18 @@
         DELETE FROM favorites 
         WHERE pokemon_id = #{pokemonId}
     </delete>
+
+	<select id="getFavoritePokemonList" resultType="FavoriteVO" parameterType="string">
+		SELECT 
+			id,
+			user_id,
+			pokemon_id,
+			pokemon_name,
+			pokemon_ko_name,
+			reg_id,
+			reg_date
+		FROM favorites
+		WHERE user_id = #{userId}
+		ORDER BY reg_date DESC
+	</select>
 </mapper>

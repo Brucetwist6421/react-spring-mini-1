@@ -72,6 +72,23 @@ public class PokemonController {
         }
     }
 
+    @GetMapping("/favoriteList")
+    public ResponseEntity<List<FavoriteVO>> getFavoritePokemonList(
+        @RequestParam(value = "userId", required = false, defaultValue = "GUEST_USER") String userId
+    ) {
+        try {
+            log.info("getFavoritePokemonList -> userId: {}", userId);
+            // 서비스에서 즐겨찾기 여부가 포함된 리스트를 가져옴
+            List<FavoriteVO> favoriteList = pokemonService.getFavoritePokemonList(userId);
+            
+            return ResponseEntity.ok(favoriteList);
+            
+        } catch (Exception e) {
+            log.error("리스트 조회 중 오류 발생", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @PostMapping("/createPokemon")
     public ResponseEntity<Map<String, Object>> createPokemon(
             @ModelAttribute PokemonVO pokemonVO,

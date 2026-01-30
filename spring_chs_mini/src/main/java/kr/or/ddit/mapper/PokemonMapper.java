@@ -42,5 +42,7 @@ public interface PokemonMapper {
 	public void insertFavorite(FavoriteVO favoriteVO);
 
 	public void deleteFavorite(FavoriteVO favoriteVO);
+
+	public List<FavoriteVO> selectFavoritePokemonList(String userId);
 	
 }

@@ -10,33 +10,42 @@ export function usePokemonList() {
   const queryClient = useQueryClient();
 
   // 1. 데이터 가져오기
+  const userId = "GUEST_USER"; // 실제 로그인 시스템이 있다면 해당 유저 ID 사용
+
   const query = useQuery({
-    queryKey: ["pokemonList"],
+    queryKey: ["pokemonList", userId],
     queryFn: async () => {
-      // 1. 검색 효율을 위해 로컬 데이터를 Map으로 변환 (이름 -> 한글명)
-      const koNameMap = new Map(
-        POKEMON_OPTIONS.map((item) => [item.name, item.koName])
-      );
+      // 1. 기초 데이터 준비 (한글명 맵 & 즐겨찾기 목록 병렬 호출)
+      const koNameMap = new Map(POKEMON_OPTIONS.map((item) => [item.name, item.koName]));
+      
+      // 백엔드 API 호출: 사용자의 즐겨찾기 리스트 가져오기
+      const [pokemonRes, favoriteRes] = await Promise.all([
+        api.get("https://pokeapi.co/api/v2/pokemon?limit=151"), // 성능을 위해 범위를 1세대로 예시
+        api.get(`/pokemon/favoriteList?userId=${userId}`)
+      ]);
 
-      // 2. 기본 목록 가져오기
-      const res = await api.get("https://pokeapi.co/api/v2/pokemon?limit=2000");
-      const baseList = res.data.results;
+      const baseList = pokemonRes.data.results;
+      const favoriteList = favoriteRes.data; // List<FavoriteVO>
 
-      // 3. 상세 정보 병렬 요청 및 한글 이름 합치기
+      // 즐겨찾기된 포켓몬 ID들만 모아서 Set 생성 (빠른 비교를 위해)
+      const favoriteIds = new Set(favoriteList.map((f: any) => f.pokemonId));
+
+      // 2. 상세 정보 병렬 요청 및 데이터 가공
       const detailedList = await Promise.all(
         baseList.map(async (pokemon: any) => {
           const detailRes = await api.get(pokemon.url);
-          
-          // 로컬 데이터에서 한글 이름 찾기 (없으면 영어 이름 그대로 사용)
+          const pId = detailRes.data.id;
           const koreanName = koNameMap.get(pokemon.name) || pokemon.name;
 
           return {
-            id: detailRes.data.id, // 실제 포켓몬 도감 번호
+            id: pId,
             name: pokemon.name,
-            koName: koreanName,    // ★ 한글 이름 추가
+            koName: koreanName,
             url: pokemon.url,
             image: detailRes.data.sprites.front_default,
             types: detailRes.data.types.map((t: any) => t.type.name),
+            // ★ 핵심: 즐겨찾기 목록에 포함되어 있는지 확인하여 속성 추가
+            isFavorite: favoriteIds.has(pId), 
           };
         })
       );

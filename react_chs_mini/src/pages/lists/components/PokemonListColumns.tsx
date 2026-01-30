@@ -1,5 +1,6 @@
 import { Avatar, Box, Button } from "@mui/material";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import FavoriteButton from "../../dashboard/components/FavoriteButton";
 
 /**
  * 포켓몬 리스트 컬럼 정의를 반환하는 함수
@@ -81,6 +82,20 @@ export const getPokemonColumns = (
           sx={{ width: 50, height: 60, bgcolor: "#f5f5f5" }}
         />
       </Box>
+    ),
+  },
+  {
+    field: "favorite",
+    headerName: "즐겨찾기",
+    width: 80,
+    sortable: false,
+    renderCell: (params: GridRenderCellParams) => (
+      // 리스트 각 행의 데이터를 props로 전달
+      <FavoriteButton 
+        pokemonId={params.row.id} 
+        pokemonName={params.row.name} 
+        pokemonKoName={params.row.koName} 
+      />
     ),
   },
 ];

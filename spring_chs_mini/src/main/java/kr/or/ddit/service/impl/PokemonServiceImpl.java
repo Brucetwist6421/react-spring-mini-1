@@ -249,6 +249,11 @@ public class PokemonServiceImpl implements PokemonService {
     	return pokemonMapper.checkFavorite(favoriteVO) > 0;
 	}
 
+	@Override
+	public List<FavoriteVO> getFavoritePokemonList(String userId) {
+		return pokemonMapper.selectFavoritePokemonList(userId);
+	}
+
 	
 
 }

@@ -69,7 +69,10 @@ export default function FavoriteButton({ pokemonId, pokemonName, pokemonKoName }
       <Tooltip title={isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}>
         <span>
           <IconButton
-            onClick={() => mutate()}
+            onClick={(e) => {
+              e.stopPropagation(); // 리스트 행 클릭 이벤트 전파 방지
+              mutate();
+            }}
             disabled={isPending}
             sx={{
               ml: 1.5,
