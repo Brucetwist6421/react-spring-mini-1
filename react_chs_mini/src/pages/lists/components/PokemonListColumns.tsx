@@ -85,16 +85,17 @@ export const getPokemonColumns = (
     ),
   },
   {
-    field: "favorite",
+    field: "isFavorite",
     headerName: "즐겨찾기",
-    width: 80,
-    sortable: false,
+    width: 100,
+    sortable: true, // 정렬 가능하도록 설정
     renderCell: (params: GridRenderCellParams) => (
       // 리스트 각 행의 데이터를 props로 전달
       <FavoriteButton 
         pokemonId={params.row.id} 
         pokemonName={params.row.name} 
         pokemonKoName={params.row.koName} 
+        initialIsFavorite={params.value}
       />
     ),
   },

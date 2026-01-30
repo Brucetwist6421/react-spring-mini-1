@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { Alert, IconButton, Snackbar, Tooltip } from "@mui/material";
@@ -9,9 +10,10 @@ interface Props {
   pokemonId: number;
   pokemonName: string;
   pokemonKoName: string;
+  initialIsFavorite?: boolean; // 👈 이 줄을 추가 (Optional로 설정)
 }
 
-export default function FavoriteButton({ pokemonId, pokemonName, pokemonKoName }: Props) {
+export default function FavoriteButton({ pokemonId, pokemonName, pokemonKoName, initialIsFavorite }: Props) {
   const queryClient = useQueryClient();
   const userId = "GUEST_USER";
 
@@ -25,6 +27,7 @@ export default function FavoriteButton({ pokemonId, pokemonName, pokemonKoName }
   const { data: checkData } = useQuery({
     queryKey: ["favoriteCheck", userId, pokemonId], //userId 가 생기면 userId로 조회
     queryFn: () => checkFavoriteApi(userId, pokemonId),
+    initialData: { isFavorite: initialIsFavorite },
     enabled: !!pokemonId, // id가 있을 때만 실행
     retry: false,
   });
@@ -38,25 +41,49 @@ export default function FavoriteButton({ pokemonId, pokemonName, pokemonKoName }
         pokemonName,
         pokemonKoName,
       }),
+    
+    // 비동기 처리의 핵심: 서버 응답 전 실행
+    onMutate: async () => {
+      // 1. 관련 쿼리 취소 (서버 응답이 수동 업데이트를 덮어쓰지 않게)
+      await queryClient.cancelQueries({ queryKey: ["pokemonList"] });
+      await queryClient.cancelQueries({ queryKey: ["favoriteCheck", userId, pokemonId] });
+
+      // 2. 현재 캐시 데이터 스냅샷 저장 (에러 발생 시 복구용)
+      const previousList = queryClient.getQueryData(["pokemonList"]);
+      const previousCheck = queryClient.getQueryData(["favoriteCheck", userId, pokemonId]);
+
+      // 3. 리스트 캐시 즉시 수정 (비동기 UI 반영)
+      queryClient.setQueryData(["pokemonList"], (old: any) => {
+        if (!old) return [];
+        return old.map((p: any) => 
+          p.id === pokemonId ? { ...p, isFavorite: !isFavorite } : p
+        );
+      });
+
+      // 4. 개별 체크 캐시 즉시 수정
+      queryClient.setQueryData(["favoriteCheck", userId, pokemonId], { isFavorite: !isFavorite });
+
+      return { previousList, previousCheck };
+    },
+
     onSuccess: (res) => {
-      // 성공 시 'favoriteCheck' 쿼리를 무효화하여 최신 상태를 서버에서 다시 읽어오게 함
-      queryClient.invalidateQueries({ queryKey: ["favoriteCheck", userId, pokemonId] });
+      setToast({ open: true, message: res.message, severity: "success" });
+    },
+
+    onError: (error, _, context) => {
+      // 실패 시 원래 데이터로 복구
+      console.error("즐겨찾기 토글 오류:", error);
+      queryClient.setQueryData(["pokemonList"], context?.previousList);
+      queryClient.setQueryData(["favoriteCheck", userId, pokemonId], context?.previousCheck);
       
-      setToast({
-        open: true,
-        message: res.message,
-        severity: "success",
-      });
+      setToast({ open: true, message: "오류가 발생했습니다.", severity: "error" });
     },
-    onError: (error) => {
-      setToast({
-        open: true,
-        message: "통신 중 오류가 발생했습니다.",
-        severity: "error",
-      });
-      console.error(error);
+
+    onSettled: () => {
+      // 마지막에 서버와 싱크를 맞춰 데이터 무결성 보장 (배경에서 실행됨)
+      queryClient.invalidateQueries({ queryKey: ["favoriteCheck", userId, pokemonId] });
+      queryClient.invalidateQueries({ queryKey: ["pokemonList"] });
     },
-    retry: false,
   });
 
   const handleClose = () => setToast({ ...toast, open: false });

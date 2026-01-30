@@ -16,7 +16,7 @@ export default function PokemonList() {
   const {
     data: pokeData,
     isLoading,
-    isFetching,
+    //isFetching,
     error,
     selection,
     modal,
@@ -37,13 +37,15 @@ export default function PokemonList() {
     // lastName: p.name + i,
     type: p.types ? p.types.join(", ") : "",
     image: p.image,
+    isFavorite: p.isFavorite,
     // age: Math.floor(i + Math.random() * 10),
     // taxRate: Math.random(),
     // gross: 100 + i,
     // costs: 50,
   })) || [];
 
-  if (isLoading || isFetching) return <RandomSpinner />;
+  //최초 로드시에만 스피너를 보여준다.
+  if (isLoading) return <RandomSpinner />;
   if (error) return <h1>404 ERROR</h1>;
 
   return (
