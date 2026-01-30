@@ -38,14 +38,16 @@ function App() {
             {/* 메인 본문: 페이지 이동 시 여기만 바뀝니다 */}
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
               <Routes>
-                <Route path="/" element={<MainDashboard />} />
-                {/* 리스트에서 클릭해서 넘어왔을 때 (특정 포켓몬 분석) */}
-                <Route path="/:pokemonName" element={<MainDashboard />} />
+                {/* 1. 구체적인 경로를 먼저 선언 */}
                 <Route path="/pokemonList" element={<PokemonList />} />
                 <Route path="/newPokemonList" element={<NewPokemonList />} />
-                <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon/create" element={<PokemonCreatePage />} />
+                <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon2/:id" element={<NewPokemonDetailPage />} />
+
+                {/* 2. 동적 파라미터는 가장 아래에 배치 */}
+                <Route path="/" element={<MainDashboard />} />
+                <Route path="/:pokemonName" element={<MainDashboard />} />
               </Routes>
             </Box>
 

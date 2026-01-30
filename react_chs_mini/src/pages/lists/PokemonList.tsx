@@ -35,7 +35,7 @@ export default function PokemonList() {
     name: p.name, // 한글 이름이 있으면 사용하고, 없으면 영문 이름 사용
     koName: p.koName,
     // lastName: p.name + i,
-    type: p.types.join(", "),
+    type: p.types ? p.types.join(", ") : "",
     image: p.image,
     // age: Math.floor(i + Math.random() * 10),
     // taxRate: Math.random(),

@@ -63,7 +63,9 @@ export const newPokemonListColumns: GridColDef<NewPokemonListType>[] = [
             }}
             // 이미지 로드 실패 시 대체 텍스트나 기본 이미지 설정
             onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://via.placeholder.com/40?text=No";
+              const target = e.target as HTMLImageElement;
+              target.onerror = null; // 재시도 방지 (핵심)
+              target.src = "https://mblogthumb-phinf.pstatic.net/MjAxOTEwMjdfMTI4/MDAxNTcyMTU4OTEwNzI2.XrBHHBuiTESxgjZ96cxz3I1FAsi1so1HpkuDxqGYjYAg.zQQKNoDVIGxzcxrz4__Dnt6nXbtWczXzgpdXjGP4MsUg.GIF.msjin93/IMG_8483.GIF?type=w800"
             }}
           />
         </Box>

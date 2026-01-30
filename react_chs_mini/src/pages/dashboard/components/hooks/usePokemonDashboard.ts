@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { POKEMON_OPTIONS } from "../../../../api/datas/pokemonData";
 
-const KOREAN_NAME_URL = "https://raw.githubusercontent.com/smldms/pokemon-korean/master/pokemon-korean.json";
 
 export function usePokemonDashboard() {
   const { pokemonName } = useParams<{ pokemonName?: string }>();
@@ -17,30 +17,24 @@ export function usePokemonDashboard() {
   // 1. 이름 데이터 로드 로직 (더 견고하게 수정)
   const fetchAllNames = useCallback(async () => {
     try {
-      const [apiRes, koRes] = await Promise.all([
-        fetch("https://pokeapi.co/api/v2/pokemon?limit=1025"), // 9세대까지 포함
-        fetch(KOREAN_NAME_URL)
-      ]);
-      
+      // 외부 URL 대신 PokeAPI 리스트만 가져옵니다.
+      const apiRes = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1025");
       const apiData = await apiRes.json();
-      const koData = await koRes.json(); 
 
-      const formatted = apiData.results.map((p: any, index: number) => {
-        // PokeAPI 리스트의 첫 번째 포켓몬은 ID 1번(이상해씨)입니다.
-        const id = index + 1;
-        // koData 배열에서 id가 일치하는 객체를 찾습니다.
-        const koEntry = koData.find((item: any) => Number(item.id) === id);
-        
-        return { 
-          name: p.name, 
-          koName: koEntry ? koEntry.name : p.name 
-        };
-      });
+      // 로컬 데이터를 Map으로 만들어 검색 최적화
+      const koNameMap = new Map(
+        POKEMON_OPTIONS.map((item) => [item.name, item.koName])
+      );
 
-      console.log("한글 이름 매핑 완료:", formatted.slice(0, 5)); // 콘솔에서 확인용
+      const formatted = apiData.results.map((p: any) => ({
+        name: p.name,
+        // 로컬 데이터에 있으면 한글명, 없으면 영문명 사용
+        koName: koNameMap.get(p.name) || p.name 
+      }));
+
       setAllPokemonOptions(formatted);
     } catch (e) {
-      console.error("데이터 로드 실패:", e);
+      console.error("이름 목록 로드 실패:", e);
     }
   }, []);
 

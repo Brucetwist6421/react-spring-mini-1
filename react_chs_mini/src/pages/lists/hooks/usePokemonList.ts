@@ -35,8 +35,8 @@ export function usePokemonList() {
             name: pokemon.name,
             koName: koreanName,    // ★ 한글 이름 추가
             url: pokemon.url,
-            types: detailRes.data.types.map((t: any) => t.type.name),
             image: detailRes.data.sprites.front_default,
+            types: detailRes.data.types.map((t: any) => t.type.name),
           };
         })
       );
