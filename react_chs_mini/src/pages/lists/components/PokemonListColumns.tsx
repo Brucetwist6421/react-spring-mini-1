@@ -87,7 +87,9 @@ export const getPokemonColumns = (
   {
     field: "isFavorite",
     headerName: "즐겨찾기",
-    width: 100,
+    headerAlign: "center",
+    align: "center",
+    width: 150,
     sortable: true, // 정렬 가능하도록 설정
     renderCell: (params: GridRenderCellParams) => (
       // 리스트 각 행의 데이터를 props로 전달
