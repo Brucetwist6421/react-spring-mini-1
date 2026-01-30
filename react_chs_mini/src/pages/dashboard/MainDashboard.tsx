@@ -114,23 +114,26 @@ export default function MainDashboard() {
               elevation={0}
               onClick={() => navigate("/pokemonList")}
               sx={{ 
-                p: 1.5, px: 3,
+                p: 3, px: 4,
                 border: "1px solid #e2e8f0", 
                 borderRadius: "16px", 
                 cursor: "pointer",
-                textAlign: "right", // 우측 정렬로 변경하여 엣지 강조
+                // textAlign: "right", // 우측 정렬로 변경하여 엣지 강조
                 transition: "all 0.2s ease",
                 "&:hover": { 
                   borderColor: primaryColor,
                   bgcolor: "#ffffff",
                   transform: "scale(1.02)"
                 },
+                justifyContent: "center",  // 세로 중앙
+                alignItems: "center",      // 가로 중앙
+                textAlign: "center",       // 텍스트 자체 중앙 정렬
               }}
             >
-              <Typography variant="caption" sx={{ fontWeight: 650, fontSize: '0.65rem', display: 'block' }}>
+              <Typography variant="caption" sx={{ fontWeight: 650, fontSize: '1.5rem', display: 'block' }}>
                 전체 포켓몬 개수
               </Typography>
-              <Typography variant="h5" fontWeight={1000} sx={{ color: '#1e293b', lineHeight: 1.2 }}>
+              <Typography variant="h5" fontWeight={1000} sx={{ color: '#1e293b', lineHeight: 1.2, fontSize: '1.7rem' }}>
                 {totalCount.toLocaleString()}
               </Typography>
             </Paper>
@@ -192,7 +195,7 @@ export default function MainDashboard() {
             }}>
               <WorkspacePremiumIcon sx={{ color: "#f59e0b", fontSize: "2rem" }} />
               <Typography variant="h5" fontWeight={900} sx={{ color: "#1e293b" }}>
-                {pokemon.types.map((t: any) => t.type.name.toUpperCase()).join(" / ")} 타입 랭커
+                {pokemon.types.map((t: any) => t.type.name.toUpperCase()).join(" / ")} 관련 타입 랭커
               </Typography>
             </Box>
             
