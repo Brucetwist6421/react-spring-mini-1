@@ -32,7 +32,8 @@ export default function PokemonList() {
   // 3. 데이터 변환 로직 (간결화)
   const gridRows = pokeData?.map((p: any, i: number) => ({
     id: i + 1,
-    name: p.name,
+    name: p.name, // 한글 이름이 있으면 사용하고, 없으면 영문 이름 사용
+    koName: p.koName,
     // lastName: p.name + i,
     type: p.types.join(", "),
     image: p.image,
@@ -96,7 +97,11 @@ export default function PokemonList() {
           },
         }}
         slots={{ pagination: CustomPagination }}
-        sx={{ "& .MuiDataGrid-row:hover": { backgroundColor: "#f3f9ff" } }}
+        sx={{ "& .MuiDataGrid-row:hover": { backgroundColor: "#f3f9ff" },
+              "& .MuiDataGrid-cell": {
+              fontSize: "1rem", // 전체 셀 글자 크기
+              },
+            }}
       />
 
       {/* 상세조회 모달 */}

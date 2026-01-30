@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { GridRowSelectionModel } from "@mui/x-data-grid";
 import api from "../../../api/axiosInstance";
 import SampleSwal from "../../../components/SampleSwal";
+import { POKEMON_OPTIONS } from "../../../api/datas/pokemonData";
 
 export function usePokemonList() {
   const queryClient = useQueryClient();
@@ -12,19 +13,30 @@ export function usePokemonList() {
   const query = useQuery({
     queryKey: ["pokemonList"],
     queryFn: async () => {
-      // 1. 기본 목록 가져오기
-      const res = await api.get("https://pokeapi.co/api/v2/pokemon?limit=2000"); // 1세대만 예시
+      // 1. 검색 효율을 위해 로컬 데이터를 Map으로 변환 (이름 -> 한글명)
+      const koNameMap = new Map(
+        POKEMON_OPTIONS.map((item) => [item.name, item.koName])
+      );
+
+      // 2. 기본 목록 가져오기
+      const res = await api.get("https://pokeapi.co/api/v2/pokemon?limit=2000");
       const baseList = res.data.results;
 
-      // 2. 각 포켓몬의 상세 정보(타입 포함) 병렬 요청
+      // 3. 상세 정보 병렬 요청 및 한글 이름 합치기
       const detailedList = await Promise.all(
         baseList.map(async (pokemon: any) => {
           const detailRes = await api.get(pokemon.url);
+          
+          // 로컬 데이터에서 한글 이름 찾기 (없으면 영어 이름 그대로 사용)
+          const koreanName = koNameMap.get(pokemon.name) || pokemon.name;
+
           return {
+            id: detailRes.data.id, // 실제 포켓몬 도감 번호
             name: pokemon.name,
+            koName: koreanName,    // ★ 한글 이름 추가
             url: pokemon.url,
-            types: detailRes.data.types.map((t: any) => t.type.name), // 타입 이름만 추출
-            image: detailRes.data.sprites.front_default, // 이미지도 덤으로!
+            types: detailRes.data.types.map((t: any) => t.type.name),
+            image: detailRes.data.sprites.front_default,
           };
         })
       );
@@ -54,7 +66,7 @@ export function usePokemonList() {
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
 
-  // 4. 🔥 handleDelete 함수 정의 (핵심!)
+  // 4. handleDelete 함수 정의
   const handleDelete = (selectionModel: GridRowSelectionModel) => {
     const selectedIds = Array.from(selectionModel.ids).map(id => Number(id));
     

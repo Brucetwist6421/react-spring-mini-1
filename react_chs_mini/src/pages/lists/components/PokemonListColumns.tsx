@@ -14,7 +14,7 @@ export const getPokemonColumns = (
     field: "id",
     headerName: "ID",
     headerAlign: "center",
-    width: 90,
+    width: 150,
     align: "center",
     // renderCell: (params: GridRenderCellParams) => (
     //   <Button
@@ -27,20 +27,36 @@ export const getPokemonColumns = (
     // ),
   },
   {
-    field: "name",
-    headerName: "포켓몬 이름",
+    field: 'name',
+    headerName: "포켓몬 영문명",
     width: 150,
     flex: 1,
     renderCell: (params: GridRenderCellParams) => (
       <Button
         variant="text"
-        sx={{ textTransform: "none", fontWeight: 700 }}
+        sx={{ textTransform: "none", fontWeight: 700,fontSize: "1rem"}}
         // "/" 경로 뒤에 이름을 붙여 이동 (예: /pikachu)
         onClick={() => onNavigate(`/${params.value}`)}
       >
         {params.value}
       </Button>
     ),
+  },
+  {
+    field: 'koName',
+    headerName: "포켓몬 한글명",
+    width: 150,
+    flex: 1,
+    // renderCell: (params: GridRenderCellParams) => (
+    //   <Button
+    //     variant="text"
+    //     sx={{ textTransform: "none", fontWeight: 700,fontSize: "1rem"}}
+    //     // "/" 경로 뒤에 이름을 붙여 이동 (예: /pikachu)
+    //     onClick={() => onNavigate(`/${params.value}`)}
+    //   >
+    //     {params.value}
+    //   </Button>
+    // ),
   },
   {
     field: "type",
