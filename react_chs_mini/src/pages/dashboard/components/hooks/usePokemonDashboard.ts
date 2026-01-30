@@ -99,37 +99,47 @@ export function usePokemonDashboard() {
   }, []);
 
   // 3. 초기 실행 (순서 보장)
-  useEffect(() => {
-    const init = async () => {
-      // 1. 기초 데이터 로드 (이름 리스트가 없을 때만 최초 1회 로드)
-      if (allPokemonOptions.length === 0) {
-        try {
-          const countRes = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1");
-          const countData = await countRes.json();
-          setTotalCount(countData.count);
-          await fetchAllNames();
-        } catch (error) {
-          console.error("기초 데이터 로드 실패", error);
-        }
-      }
+  // [1] 기초 데이터 로드 (전체 개수 및 이름 목록) - 최초 1회만 실행
+useEffect(() => {
+  const loadBaseData = async () => {
+    // 이미 데이터가 있다면 로드하지 않음
+    if (totalCount > 0 && allPokemonOptions.length > 0) return;
 
-      // 2. 분석 대상 호출
-      // 이미 분석된 포켓몬이 현재 URL의 포켓몬과 같다면 중복 호출을 방지하는 조건문(선택 사항)
-      if (pokemonName) {
-        // pokemon?.name과 비교하여 중복 fetch 방지 가능
-        if (pokemon?.name !== pokemonName) {
-          await handleFetchPokemon(pokemonName);
-        }
-      } else {
-        // 루트("/") 접속 시 랜덤 호출
+    try {
+      const countRes = await fetch("https://pokeapi.co/api/v2/pokemon?limit=1");
+      const countData = await countRes.json();
+      setTotalCount(countData.count);
+      await fetchAllNames();
+    } catch (error) {
+      console.error("기초 데이터 로드 실패", error);
+    }
+  };
+
+  loadBaseData();
+  // fetchAllNames는 useCallback으로 감싸져 있어야 한다.
+}, [fetchAllNames]); 
+
+
+// [2] 분석 대상 포켓몬 호출 - URL 파라미터가 바뀔 때만 실행
+useEffect(() => {
+  const loadTargetPokemon = async () => {
+    if (pokemonName) {
+      // 현재 표시된 포켓몬과 URL의 포켓몬이 다를 때만 fetch
+      if (!pokemon || pokemon.name !== pokemonName) {
+        await handleFetchPokemon(pokemonName);
+      }
+    } else {
+      // 경로에 이름이 없을 때 (메인 접속 시) 랜덤 호출
+      // 단, 이미 포켓몬 데이터가 있다면(뒤로가기 등) 다시 부르지 않음
+      if (!pokemon) {
         const randomId = Math.floor(Math.random() * 151) + 1;
         await handleFetchPokemon(randomId);
       }
-    };
+    }
+  };
 
-    init();
-    // 의존성 배열에 allPokemonOptions.length를 포함하면 데이터 로드 후 상태 업데이트를 보장합니다.
-  }, [pokemonName, handleFetchPokemon, fetchAllNames, allPokemonOptions.length]);
+  loadTargetPokemon();
+}, [pokemonName, handleFetchPokemon]); // pokemon은 조건문 안에서만 사용 (의존성 제외)
 
   return { pokemon, topRankers, totalCount, loading, handleFetchPokemon, allPokemonOptions };
 }
