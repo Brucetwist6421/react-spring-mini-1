@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Typography, Box, Button } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { koKR } from "@mui/x-data-grid/locales";
 import { useNavigate } from "react-router-dom";
-import { usePokemonList } from "./hooks/usePokemonList"; // 커스텀 훅 임포트
-import PokemonDetailModal from "../modal/PokemonDetailModal";
 import RandomSpinner from "../../components/RandomSpinner";
+import PokemonDetailModal from "../modal/PokemonDetailModal";
 import CustomPagination from "./components/CustomPagination";
 import { getPokemonColumns } from "./components/PokemonListColumns";
+import { usePokemonList } from "./hooks/usePokemonList"; // 커스텀 훅 임포트
 
 export default function PokemonList() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export default function PokemonList() {
     selection,
     modal,
     pagination,
-    handleDelete, // 삭제 핸들러 (훅 내부에 정의 추천)
+    //handleDelete, // 삭제 핸들러 (훅 내부에 정의 추천)
   } = usePokemonList();
 
   // 2. 외부 모듈화된 컬럼을 가져옵니다. (중복 로직 삭제)
@@ -56,7 +56,7 @@ export default function PokemonList() {
           포켓몬 목록
         </Typography>
         <Box sx={{ display: "flex", gap: "8px" }}>
-          <Button
+          {/* <Button
             variant="contained"
             color="info"
             onClick={() => handleDelete(selection.rowSelectionModel)}
@@ -72,7 +72,7 @@ export default function PokemonList() {
             sx={{ borderRadius: '8px', fontWeight: 700, boxShadow: 'none', px: 3 }}
           >
             포켓몬 등록
-          </Button>
+          </Button> */}
         </Box>
       </Box>
 
@@ -102,6 +102,10 @@ export default function PokemonList() {
         sx={{ "& .MuiDataGrid-row:hover": { backgroundColor: "#f3f9ff" },
               "& .MuiDataGrid-cell": {
               fontSize: "1rem", // 전체 셀 글자 크기
+              },
+              "& .MuiDataGrid-columnHeaderTitle": {
+                fontSize: "1rem",   // 헤더 글자 크기
+                fontWeight: 700,
               },
             }}
       />

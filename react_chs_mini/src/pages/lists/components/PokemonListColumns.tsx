@@ -13,9 +13,9 @@ export const getPokemonColumns = (
 ): GridColDef[] => [
   {
     field: "id",
-    headerName: "ID",
+    headerName: "포켓몬 번호",
     headerAlign: "center",
-    width: 150,
+    width: 200,
     align: "center",
     // renderCell: (params: GridRenderCellParams) => (
     //   <Button
@@ -62,6 +62,8 @@ export const getPokemonColumns = (
   {
     field: "type",
     headerName: "타입",
+    align: "center",
+    headerAlign: "center",
     width: 150,
     flex: 1,
   },
@@ -69,17 +71,19 @@ export const getPokemonColumns = (
   {
     field: "image",
     headerName: "썸네일",
+    align:"center",
+    headerAlign: "center",
     width: 150,
     flex: 1,
     sortable: false,
     filterable: false,
     renderCell: (params: GridRenderCellParams) => (
-      <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+      <Box sx={{ display: "flex", alignItems: "center", height: "100%",width: "100%", justifyContent: "center" }}>
         <Avatar
           src={params.value} // p.image 값이 들어옴
           alt={params.row.firstName}
           variant="rounded"
-          sx={{ width: 50, height: 60, bgcolor: "#f5f5f5" }}
+          sx={{ width: 50, height: 60, bgcolor: "#f5f5f5",alignContent:'center' }}
         />
       </Box>
     ),
@@ -89,7 +93,7 @@ export const getPokemonColumns = (
     headerName: "즐겨찾기",
     headerAlign: "center",
     align: "center",
-    width: 150,
+    width: 200,
     sortable: true, // 정렬 가능하도록 설정
     renderCell: (params: GridRenderCellParams) => (
       // 리스트 각 행의 데이터를 props로 전달
