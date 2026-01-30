@@ -125,7 +125,7 @@
         WHERE pokemon_id = #{pokemonId}
     </delete>
 
-	<select id="getFavoritePokemonList" resultType="FavoriteVO" parameterType="string">
+	<select id="selectFavoritePokemonList" resultType="FavoriteVO" parameterType="string">
 		SELECT 
 			id,
 			user_id,

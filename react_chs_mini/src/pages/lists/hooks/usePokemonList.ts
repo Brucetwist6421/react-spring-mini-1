@@ -20,7 +20,7 @@ export function usePokemonList() {
       
       // 백엔드 API 호출: 사용자의 즐겨찾기 리스트 가져오기
       const [pokemonRes, favoriteRes] = await Promise.all([
-        api.get("https://pokeapi.co/api/v2/pokemon?limit=151"), // 성능을 위해 범위를 1세대로 예시
+        api.get("https://pokeapi.co/api/v2/pokemon?limit=1500"), // 성능을 위해 범위를 1세대로 예시
         api.get(`/pokemon/favoriteList?userId=${userId}`)
       ]);
 
@@ -44,7 +44,7 @@ export function usePokemonList() {
             url: pokemon.url,
             image: detailRes.data.sprites.front_default,
             types: detailRes.data.types.map((t: any) => t.type.name),
-            // ★ 핵심: 즐겨찾기 목록에 포함되어 있는지 확인하여 속성 추가
+            // 즐겨찾기 목록에 포함되어 있는지 확인하여 속성 추가
             isFavorite: favoriteIds.has(pId), 
           };
         })
