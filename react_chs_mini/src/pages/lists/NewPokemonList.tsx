@@ -18,90 +18,12 @@ import * as React from "react";
 
 import { useMutation } from "@tanstack/react-query";
 import RandomSpinner from "../../components/RandomSpinner";
+import type { NewPokemonListType } from "./types/NewPokemonListType";
+import { newPokemonListColumns } from "./components/NewPokemonListColumns";
 
-// Row 타입 정의
-interface RowData {
-  id: number;
-  firstName: string | null;
-  lastName: string | null;
-  age: number | null;
-  gross?: number;
-  costs?: number;
-  taxRate?: number;
-  mainImagePath?: string | null; // 추가
-  name?: string | null;
-  description?: string | null;
-}
 
-// 컬럼 정의 (타입 안전)
-const columns: GridColDef<RowData>[] = [
-  {
-    field: "id", // 컬럼 key
-    headerName: "ID", // 컬럼 헤더 이름
-    headerAlign: "center",
-    width: 90, // 컬럼 너비
-  },
-  {
-    field: "name",
-    headerName: "포켓몬 이름",
-    headerAlign: "center",
-    width: 150,
-    flex: 1,
-    editable: true,
-  },
-  {  
-    field: "description",
-    headerName: "설명",
-    headerAlign: "center",
-    flex: 1,
-    width: 110,
-    editable: true,
-  },
-  {
-    field: "mainImagePath",
-    headerName: "썸네일",
-    headerAlign: "center",
-    width: 120,
-    sortable: false,
-    filterable: false,
-    renderCell: (params: GridRenderCellParams<RowData>) => {
-      const fileName = params.value; // "86fa..._핑가.gif"
-      
-      if (!fileName) return "No Image";
 
-      // 서버의 이미지 업로드 경로 주소 (IP 주소 확인 필요)
-      const imageUrl = `http://168.107.51.143:8080/upload/${fileName}`;
 
-      return (
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <img
-            src={imageUrl}
-            alt="pokemon"
-            style={{
-              width: "55px",
-              height: "55px",
-              borderRadius: "4px",
-              objectFit: "cover",
-              border: "1px solid #eee",
-            }}
-            // 이미지 로드 실패 시 대체 텍스트나 기본 이미지 설정
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://via.placeholder.com/40?text=No";
-            }}
-          />
-        </Box>
-      );
-    },
-  },
-];
 
 export default function NewPokemonList() {
   const navigate = useNavigate();
@@ -125,7 +47,7 @@ export default function NewPokemonList() {
   });
 
   // pokeData가 배열인지 확인하고 직접 map을 돌립니다.
-const gridRows: RowData[] = Array.isArray(pokeData)
+const gridRows: NewPokemonListType[] = Array.isArray(pokeData)
   ? pokeData.map((p, i) => ({
       // p.id가 있으면 쓰고, 없으면 인덱스 i를 사용
       id: p.id || i + 1, 
@@ -206,7 +128,7 @@ const gridRows: RowData[] = Array.isArray(pokeData)
   // 실습 4 시작
   // 상세조회 상태
   const [detailOpen, setDetailOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<RowData | null>(null);
+  const [selectedRow, setSelectedRow] = useState<NewPokemonListType | null>(null);
 
   //실습 3 시작
   //로딩 / 에러 표시 (선택사항: gridRows는 fetch 전에도 기존 rows로 대체됨)
@@ -217,12 +139,12 @@ const gridRows: RowData[] = Array.isArray(pokeData)
   // 실습 3 끝
 
   // ID, FirstName 클릭 핸들러 포함한 컬럼 복사
-  const columnsWithHandler = columns.map((col) => {
+  const columnsWithHandler = newPokemonListColumns.map((col) => {
     // ID 클릭: 상세 페이지로 이동 (이 예제는 id 기반 경로 사용)
     if (col.field === "id") {
       return {
         ...col,
-        renderCell: (params: GridRenderCellParams<RowData>) => {
+        renderCell: (params: GridRenderCellParams<NewPokemonListType>) => {
           const label = params.value ?? "";
           const id = params.row.id ?? "";
           return (
@@ -238,14 +160,14 @@ const gridRows: RowData[] = Array.isArray(pokeData)
             </Button>
           );
         },
-      } as GridColDef<RowData>;
+      } as GridColDef<NewPokemonListType>;
     }
 
     // FirstName 클릭: 상세조회 모달 오픈
     if (col.field === "firstName") {
       return {
         ...col,
-        renderCell: (params: GridRenderCellParams<RowData>) => {
+        renderCell: (params: GridRenderCellParams<NewPokemonListType>) => {
           const label = params.value ?? "";
           return (
             <Button
@@ -261,7 +183,7 @@ const gridRows: RowData[] = Array.isArray(pokeData)
             </Button>
           );
         },
-      } as GridColDef<RowData>;
+      } as GridColDef<NewPokemonListType>;
     }
     // 실습 4 끝
 
@@ -269,7 +191,7 @@ const gridRows: RowData[] = Array.isArray(pokeData)
     if (col.field === "name") {
       return {
         ...col,
-        renderCell: (params: GridRenderCellParams<RowData>) => {
+        renderCell: (params: GridRenderCellParams<NewPokemonListType>) => {
           const label = params.value ?? "";
           const id = params.row.id ?? "";
           return (
@@ -285,7 +207,7 @@ const gridRows: RowData[] = Array.isArray(pokeData)
             </Button>
           );
         },
-      } as GridColDef<RowData>;
+      } as GridColDef<NewPokemonListType>;
     }
     // 실습 8 끝
 

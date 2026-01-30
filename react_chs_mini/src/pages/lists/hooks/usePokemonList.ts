@@ -12,8 +12,24 @@ export function usePokemonList() {
   const query = useQuery({
     queryKey: ["pokemonList"],
     queryFn: async () => {
-      const res = await api.get("https://pokeapi.co/api/v2/pokemon?limit=2000");
-      return res.data;
+      // 1. 기본 목록 가져오기
+      const res = await api.get("https://pokeapi.co/api/v2/pokemon?limit=2000"); // 1세대만 예시
+      const baseList = res.data.results;
+
+      // 2. 각 포켓몬의 상세 정보(타입 포함) 병렬 요청
+      const detailedList = await Promise.all(
+        baseList.map(async (pokemon: any) => {
+          const detailRes = await api.get(pokemon.url);
+          return {
+            name: pokemon.name,
+            url: pokemon.url,
+            types: detailRes.data.types.map((t: any) => t.type.name), // 타입 이름만 추출
+            image: detailRes.data.sprites.front_default, // 이미지도 덤으로!
+          };
+        })
+      );
+
+      return detailedList;
     },
   });
 

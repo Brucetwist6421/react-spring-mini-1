@@ -4,10 +4,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import { koKR } from "@mui/x-data-grid/locales";
 import { useNavigate } from "react-router-dom";
 import { usePokemonList } from "./hooks/usePokemonList"; // 커스텀 훅 임포트
-import { getPokemonColumns } from "./components/PokemonColumns"; // 컬럼 모듈 임포트
 import PokemonDetailModal from "../modal/PokemonDetailModal";
 import RandomSpinner from "../../components/RandomSpinner";
 import CustomPagination from "./components/CustomPagination";
+import { getPokemonColumns } from "./components/PokemonListColumns";
 
 export default function PokemonList() {
   const navigate = useNavigate();
@@ -26,22 +26,20 @@ export default function PokemonList() {
 
   // 2. 외부 모듈화된 컬럼을 가져옵니다. (중복 로직 삭제)
   const columns = getPokemonColumns(
-    (row) => {
-      modal.setSelectedRow(row);
-      modal.setDetailOpen(true);
-    },
-    (path) => navigate(path)
+    (path) => navigate(path) // 첫 번째 인자: 페이지 이동 함수
   );
 
   // 3. 데이터 변환 로직 (간결화)
-  const gridRows = pokeData?.results?.map((p: any, i: number) => ({
+  const gridRows = pokeData?.map((p: any, i: number) => ({
     id: i + 1,
-    firstName: p.name,
-    lastName: p.name + i,
-    age: Math.floor(i + Math.random() * 10),
-    taxRate: Math.random(),
-    gross: 100 + i,
-    costs: 50,
+    name: p.name,
+    // lastName: p.name + i,
+    type: p.types.join(", "),
+    image: p.image,
+    // age: Math.floor(i + Math.random() * 10),
+    // taxRate: Math.random(),
+    // gross: 100 + i,
+    // costs: 50,
   })) || [];
 
   if (isLoading || isFetching) return <RandomSpinner />;
@@ -79,13 +77,24 @@ export default function PokemonList() {
       <DataGrid
         rows={gridRows}
         columns={columns} // 변환된 columnsWithHandler 대신 순수 columns 사용
-        checkboxSelection
+        // checkboxSelection
         disableRowSelectionOnClick
+        showToolbar // 기본 툴바 표시 (GridToolbar import 불필요)
         rowSelectionModel={selection.rowSelectionModel}
         onRowSelectionModelChange={selection.setRowSelectionModel}
         paginationModel={pagination.paginationModel}
         onPaginationModelChange={pagination.setPaginationModel}
         localeText={koKR.components.MuiDataGrid.defaultProps.localeText}
+        // Excel 내보내기 옵션 커스터마이징
+        slotProps={{
+          toolbar: {
+            csvOptions: {
+              fileName: "포켓몬리스트_" + Date.now().toString(),
+              delimiter: ";",
+              utf8WithBom: true,
+            },
+          },
+        }}
         slots={{ pagination: CustomPagination }}
         sx={{ "& .MuiDataGrid-row:hover": { backgroundColor: "#f3f9ff" } }}
       />
