@@ -38,6 +38,25 @@ export default function PokemonLocationMap() {
     }, []);
   }, [locations, regionData]);
 
+  // 드래그 시작 (마우스 & 터치)
+  const handleStart = (clientX: number, clientY: number) => {
+    if (zoom <= 1) return;
+    setIsDragging(true);
+    setDragStart({ x: clientX - position.x, y: clientY - position.y });
+  };
+
+  // 드래그 중 (마우스 & 터치)
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging || zoom <= 1) return;
+    setPosition({
+      x: clientX - dragStart.x,
+      y: clientY - dragStart.y
+    });
+  };
+
+  // 드래그 종료
+  const handleEnd = () => setIsDragging(false);
+
   // 3. 핸들러 함수들
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => {
@@ -71,7 +90,17 @@ export default function PokemonLocationMap() {
     setPosition({ x: newX, y: newY });
   };
 
-  const onMouseUp = () => setIsDragging(false);
+  // 터치 이벤트 (모바일)
+  const onTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    handleStart(touch.clientX, touch.clientY);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    handleMove(touch.clientX, touch.clientY);
+  };
+
+  // const onMouseUp = () => setIsDragging(false);
 
   if (pokemonLoading || !pokemon || !regionData) {
     return (
@@ -132,12 +161,17 @@ export default function PokemonLocationMap() {
                 border: "1px solid #e2e8f0", 
                 bgcolor: "#f8fafc",
                 cursor: zoom > 1 ? (isDragging ? "grabbing" : "grab") : "default",
-                touchAction: "none" // 모바일 드래그 충돌 방지
+                // ✅ 중요: 모바일 브라우저의 기본 스크롤/새로고침 방지
+                touchAction: "none", 
+                userSelect: "none"
               }}
               onMouseDown={onMouseDown}
               onMouseMove={onMouseMove}
-              onMouseUp={onMouseUp}
-              onMouseLeave={onMouseUp} // 마우스가 영역을 벗어나도 드래그 중지
+              onMouseUp={handleEnd}
+              onMouseLeave={handleEnd}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={handleEnd}
             >
               
               {/* 컨트롤 버튼 (우측 상단 고정) */}
