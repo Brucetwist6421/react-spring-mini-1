@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { REGION_METADATA, type RegionId } from "./datas/PokemonMapTabData";
+import { REGION_METADATA, type RegionId } from "./datas/pokemonMapData";
 
 export default function PokemonLocationMap() {
   const { pokemon, loading: pokemonLoading } = usePokemonDashboard();
