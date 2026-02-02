@@ -132,18 +132,44 @@ export default function PokemonLocationMap() {
           value={currentRegion} 
           onChange={handleRegionChange} 
           variant="scrollable"
-          sx={{ bgcolor: '#f1f5f9', borderRadius: '12px', p: 0.5 }}
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{ 
+            bgcolor: '#f8fafc', // 전체 배경은 아주 연한 회색
+            borderRadius: '14px', 
+            p: 0.6,
+            minHeight: '48px',
+            border: '1px solid #e2e8f0',
+            '& .MuiTabs-indicator': {
+              display: 'none', // 이상한 파란색 밑줄 제거
+            },
+          }}
         >
           {Object.values(REGION_METADATA).map((reg) => (
-            <Tab key={reg.id} value={reg.id} label={reg.koName} sx={{ 
-              fontWeight: 800,
-              minHeight: '40px',
-              borderRadius: '8px',
-              '&.Mui-selected': {
-                bgcolor: '#ffffff', // 선택된 탭 강조
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-              }
-            }} />
+            <Tab 
+              key={reg.id} 
+              value={reg.id} 
+              label={reg.koName} 
+              sx={{ 
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                minHeight: '38px',
+                borderRadius: '10px',
+                mx: 0.5, // 탭 사이 간격
+                transition: 'all 0.2s ease-in-out',
+                color: '#64748b', // 기본 글자색
+                
+                '&.Mui-selected': {
+                  bgcolor: '#3b82f6', // ✅ 강조될 파란색 (레이아웃 포인트 컬러)
+                  color: '#ffffff',   // ✅ 선택 시 글자색 흰색
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)', // 파란색 그림자 효과
+                },
+                '&:hover': {
+                  bgcolor: '#eff6ff', // 호버 시 연한 파란색
+                  color: '#3b82f6',
+                }
+              }} 
+            />
           ))}
         </Tabs>
       </Box>
