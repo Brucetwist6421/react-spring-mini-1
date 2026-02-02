@@ -68,4 +68,5 @@ export const KANTO_LOCATIONS: Record<
   "route-23": { x: 9.5, y: 30.0, koName: "23번 도로" }, // 챔피언로드 입구
   "fuchsia-city-safari-zone": { x: 53.0, y: 68.0, koName: "사파리존" }, // 키값 중복 방어용
   "seafoam-islands-1f": { x: 45.0, y: 91.0, koName: "쌍둥이섬" }, // 구역 세분화 대응
+  "one-island": { x: 80.0, y: 80.0, koName: "1섬" }, // 포괄적 매칭용
 };

@@ -5,7 +5,7 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { usePokemonDashboard } from "./hooks/usePokemonDashboard";
 import { usePokemonLocation } from "../../map/hooks/usePokemonLocation";
 import { useMapRegion } from "./hooks/useMapRegion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -16,6 +16,26 @@ export default function PokemonLocationMap() {
   const { locations, loading: locationLoading } = usePokemonLocation(pokemon?.id);
   
   const { currentRegion, setCurrentRegion, regionData } = useMapRegion(locations);
+
+  // ✅ useMemo를 사용하여 locations나 regionData가 바뀔 때만 실행되도록 최적화
+  const filteredLocations = useMemo(() => {
+    if (!locations || !regionData || !regionData.locations) return [];
+
+    return locations.reduce((acc: any[], current: any) => {
+      const apiName = current.location_area.name.toLowerCase();
+      console.log("Matching location:", apiName);
+      
+      // ✅ 매칭 로직 (로그에서 확인한 패턴 반영)
+      const matchKey = Object.keys(regionData.locations).find(key => 
+        apiName.includes(key.toLowerCase())
+      );
+      
+      if (matchKey && !acc.some(item => item.matchKey === matchKey)) {
+        acc.push({ ...current, matchKey });
+      }
+      return acc;
+    }, []);
+  }, [locations, regionData]); // 이 값들이 바뀔 때만 다시 계산합니다.
 
   // ✅ 확대/축소 상태 관리
   const [zoom, setZoom] = useState(1);
@@ -35,16 +55,6 @@ export default function PokemonLocationMap() {
       </Box>
     );
   }
-
-  const filteredLocations = locations.reduce((acc: any[], current: any) => {
-    const apiName = current.location_area.name;
-    const matchKey = Object.keys(regionData.locations).find(key => apiName.includes(key));
-    
-    if (matchKey && !acc.some(item => item.matchKey === matchKey)) {
-      acc.push({ ...current, matchKey });
-    }
-    return acc;
-  }, []);
 
   return (
     // ✅ Grid v2(Grid2) 기준: item 속성을 삭제하고 size를 사용합니다.
