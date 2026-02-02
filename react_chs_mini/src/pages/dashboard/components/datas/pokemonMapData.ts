@@ -2,6 +2,7 @@
 import { KANTO_LOCATIONS } from "../../../../api/datas/gen1MapData";
 import { JOHTO_LOCATIONS } from "../../../../api/datas/gen2MapData";
 import { HOENN_LOCATIONS } from "../../../../api/datas/gen3MapData";
+import { SINNOH_LOCATIONS } from "../../../../api/datas/gen4MapData";
 // ✅ 성도지방 데이터가 준비되었다면 주석을 해제하세요.
 // import { JOHTO_LOCATIONS } from "../../../../api/datas/gen2MapData";
 // import { HOENN_LOCATIONS } from "../../../../api/datas/gen3MapData";
@@ -25,6 +26,12 @@ export const REGION_METADATA = {
     img: '/images/maps/hoenn_map.png',
     locations: HOENN_LOCATIONS,
   },
+  sinnoh: {
+  id: "sinnoh",
+  koName: "신오",
+  img: "/images/maps/sinnoh_map.png", // 신오 지방 지도 이미지 경로
+  locations: SINNOH_LOCATIONS,
+},
 };
 
 // ✅ 자동으로 'kanto' | 'johto' | 'hoenn' 타입이 생성됩니다.
