@@ -1,6 +1,7 @@
 // src/constants/regions.ts
 import { KANTO_LOCATIONS } from "../../../../api/datas/gen1MapData";
 import { JOHTO_LOCATIONS } from "../../../../api/datas/gen2MapData";
+import { HOENN_LOCATIONS } from "../../../../api/datas/gen3MapData";
 // ✅ 성도지방 데이터가 준비되었다면 주석을 해제하세요.
 // import { JOHTO_LOCATIONS } from "../../../../api/datas/gen2MapData";
 // import { HOENN_LOCATIONS } from "../../../../api/datas/gen3MapData";
@@ -22,7 +23,7 @@ export const REGION_METADATA = {
     id: 'hoenn' as const,
     koName: '호연',
     img: '/images/maps/hoenn_map.png',
-    locations: {},
+    locations: HOENN_LOCATIONS,
   },
 };
 
