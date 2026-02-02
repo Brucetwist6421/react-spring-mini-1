@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/hooks/useMapRegion.ts
 import { useState, useEffect} from 'react';
-import { REGION_METADATA, type RegionId } from '../datas/PokemonMapTabData';
+import { REGION_METADATA, type RegionId } from '../datas/pokemonMapData';
 
 export function useMapRegion(locations: any[]) {
   const [currentRegion, setCurrentRegion] = useState<RegionId>('kanto');
