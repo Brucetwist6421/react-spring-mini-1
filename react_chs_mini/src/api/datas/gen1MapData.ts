@@ -1,4 +1,7 @@
-export const KANTO_LOCATIONS: Record<string, { x: number; y: number; koName: string }> = {
+export const KANTO_LOCATIONS: Record<
+  string,
+  { x: number; y: number; koName: string }
+> = {
   // --- 주요 도시 ---
   "pallet-town": { x: 23.5, y: 64.5, koName: "태초마을" },
   "viridian-city": { x: 23.5, y: 53.0, koName: "상록시티" },
@@ -58,4 +61,11 @@ export const KANTO_LOCATIONS: Record<string, { x: number; y: number; koName: str
   "sevault-canyon": { x: 92.0, y: 85.0, koName: "세븐 캐니언" },
   "tanoby-ruins": { x: 92.0, y: 92.0, koName: "아스카나 유적" },
   "treasure-beach": { x: 75.0, y: 85.0, koName: "보물 해변" },
+
+  // KANTO_LOCATIONS 객체 안에 추가 권장
+  "route-19": { x: 53.0, y: 85.0, koName: "19번 수로" },
+  "route-20": { x: 35.0, y: 91.0, koName: "20번 수로" },
+  "route-23": { x: 9.5, y: 30.0, koName: "23번 도로" }, // 챔피언로드 입구
+  "fuchsia-city-safari-zone": { x: 53.0, y: 68.0, koName: "사파리존" }, // 키값 중복 방어용
+  "seafoam-islands-1f": { x: 45.0, y: 91.0, koName: "쌍둥이섬" }, // 구역 세분화 대응
 };

@@ -5,19 +5,22 @@ import StarIcon from "@mui/icons-material/Star";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import {
   Box,
+  Chip,
   Container,
+  Grid,
   Paper,
   Stack,
   Typography,
-  useTheme,
   useMediaQuery,
-  Grid,
-  Chip,
+  useTheme,
 } from "@mui/material";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import RandomSpinner from "../../components/RandomSpinner";
 import ActionCard from "./components/ActionCard";
 import AllTypeBarChart from "./components/AllTypeBarChart";
+import FavoriteButton from "./components/FavoriteButton";
+import PokemonLocationMap from "./components/PokemonLocationMap";
 import PokemonSearch from "./components/PokemonSearch";
 import PokemonSkillTable from "./components/PokemonSkillTable";
 import RecommendedSkills from "./components/RecommendedSkills";
@@ -29,12 +32,7 @@ import { usePokemonDashboard } from "./components/hooks/usePokemonDashboard";
 import { usePokemonMoves } from "./components/hooks/usePokemonMoves";
 import { TYPE_STAT_DATA } from "./components/types/dashboardType";
 import { getPrimaryColor } from "./utils/pokemonUtils";
-import FavoriteButton from "./components/FavoriteButton";
-import { useRef } from "react";
-import { usePokemonLocation } from "../map/hooks/usePokemonLocation";
-import PokemonMap from "../map/PokemonMap";
-import { KANTO_LOCATIONS } from "../../api/datas/gen1MapData";
-import LocationOn from "@mui/icons-material/LocationOn";
+
 
 export default function MainDashboard() {
   const navigate = useNavigate();
@@ -46,8 +44,7 @@ export default function MainDashboard() {
 
   const { pokemon, topRankers, totalCount, loading, handleFetchPokemon } = usePokemonDashboard();
 
-  // 서식지 데이터 호출 (추가)
-  const { locations, loading: locationLoading } = usePokemonLocation(pokemon?.id);
+  
 
   const pokemonMoves = pokemon?.moves || [];
   const { detailedMoves, isLoading: movesLoading } = usePokemonMoves(pokemonMoves);
@@ -240,69 +237,9 @@ export default function MainDashboard() {
           </Grid>
               
           {/* --- [3] 서식지 분석 섹션 (추가) --- */}
-          <Grid size={{ xs: 12 }} ref={mapSectionRef} sx={{ mt: 8 }}>
-            <Box sx={{ 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: { xs: 'center', md: 'flex-start' }, 
-              gap: 1.5, 
-              mb: 3 
-            }}>
-              <LanguageIcon sx={{ color: "#10b981", fontSize: "2rem" }} />
-              <Typography variant="h5" fontWeight={900} sx={{ color: "#1e293b" }}>
-                서식지 분석 (관동지방)
-              </Typography>
-            </Box>
-
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: { xs: 2, md: 4 }, 
-                border: "1px solid #e2e8f0", 
-                borderRadius: "24px", 
-                bgcolor: "#ffffff"
-              }}
-            >
-              <Grid container spacing={4}>
-                {/* 왼쪽: 지도 */}
-                <Grid size={{ xs: 12, lg: 8 }}>
-                  <PokemonMap locations={locations} loading={locationLoading} />
-                </Grid>
-
-                {/* 오른쪽: 상세 장소 리스트 */}
-                <Grid size={{ xs: 12, lg: 4 }}>
-                  <Typography variant="h6" fontWeight={800} sx={{ mb: 3, color: "#475569", display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LocationOn color="error" /> 출현 지역
-                  </Typography>
-                  <Stack spacing={1.5} sx={{ maxHeight: '500px', overflowY: 'auto', pr: 1 }}>
-                    {locations.length > 0 ? (
-                      locations.map((loc, idx) => {
-                        const areaName = loc.location_area.name;
-                        const matchKey = Object.keys(KANTO_LOCATIONS).find(key => areaName.includes(key));
-                        const koName = matchKey ? KANTO_LOCATIONS[matchKey].koName : areaName;
-
-                        return (
-                          <Box key={idx} sx={{ 
-                            p: 2, bgcolor: "#f8fafc", borderRadius: "12px", border: "1px solid #f1f5f9",
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                          }}>
-                            <Typography variant="body2" fontWeight={700} color="#1e293b">{koName}</Typography>
-                            <Chip label="야생" size="small" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
-                          </Box>
-                        );
-                      })
-                    ) : (
-                      <Box sx={{ textAlign: 'center', py: 8, bgcolor: '#f8fafc', borderRadius: '12px' }}>
-                        <Typography variant="body2" color="text.secondary">
-                          이 포켓몬은 관동지방 야생에서<br/>발견되지 않는 희귀종입니다.
-                        </Typography>
-                      </Box>
-                    )}
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
+          <Box ref={mapSectionRef}>
+            <PokemonLocationMap />
+          </Box>
 
           {/* 권장 관리 작업 */}
           {/* --- 하단 빠른 작업 (Quick Actions) --- */}

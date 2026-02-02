@@ -21,7 +21,6 @@ export const TYPE_COLORS: { [key: string]: string } = {
   fairy: '#f472b6',    // 화사한 핑크 (Pink 400)
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getPrimaryColor = (types: any[]) => {
   if (!types || types.length === 0) return '#94a3b8';
   return TYPE_COLORS[types[0].type.name] || '#94a3b8';
