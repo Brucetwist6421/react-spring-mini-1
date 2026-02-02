@@ -27,6 +27,7 @@ export default function PokemonLocationMap() {
     if (!locations || !regionData || !regionData.locations) return [];
     return locations.reduce((acc: any[], current: any) => {
       const apiName = current.location_area.name.toLowerCase();
+      // console.log("API 장소 이름:", apiName);
       const matchKey = Object.keys(regionData.locations).find(key => 
         apiName.includes(key.toLowerCase())
       );
