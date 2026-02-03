@@ -240,7 +240,12 @@ export default function MainDashboard() {
               
           {/* --- [3] 서식지 분석 섹션 (추가) --- */}
           <Box ref={mapSectionRef}>
-            <PokemonLocationMap pokemon={pokemon} />
+            <PokemonLocationMap pokemon={pokemon} loading={loading} 
+              // 클릭 시 상단으로 이동하며 데이터 변경
+              onPokemonSelect={(name: string) => {
+                handleFetchPokemon(name);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}/>
             {/* <PokemonLocationMap/> */}
           </Box>
 
