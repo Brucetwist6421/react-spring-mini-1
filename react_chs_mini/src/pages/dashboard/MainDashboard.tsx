@@ -69,7 +69,7 @@ export default function MainDashboard() {
           {/* [1] 최상단 검색 영역: 사용자가 가장 먼저 접근하는 도구 */}
           <Box sx={{ 
             width: "100%", 
-            mb: 3, 
+            mb: 4, 
             p: 2.5, 
             bgcolor: "#f8fafc", 
             border: "1px solid #e2e8f0",

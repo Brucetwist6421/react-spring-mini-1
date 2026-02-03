@@ -244,35 +244,61 @@ export default function TodayPickCard({ pokemon, color, onSelect}: any) {
       <Divider sx={{ my: 2 }} />
 
       {/* 진화 섹션: 내용 초과 시 내부 스크롤 생성 */}
-      <Box 
-        sx={{ 
-          mx: -4.5,           // 왼쪽, 오른쪽으로 24px(3*8px)만큼 마진을 당김
-          width: 'calc(100% + 48px)', // 늘어난 마진만큼 너비를 계산해서 보정
-          px: 3,            // 배경은 끝까지 차되, 내부 아이콘들은 다시 안쪽으로 정렬
-          py: 1,
-          maxHeight: '260px', // 적절한 높이 제한
-          height: 'auto',
-          overflowY: 'auto',   // 세로 스크롤 활성화
-          pr: 0.5,            // 스크롤바와 내용 사이 간격
-          // 커스텀 스크롤바 스타일 (선택 사항)
-          '&::-webkit-scrollbar': {
-            width: '4px',
-          },
-          '&::-webkit-scrollbar-track': {
-            backgroundColor: '#f1f5f9',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#cbd5e1',
-            borderRadius: '10px',
-          },
-        }}
-      >
-        <EvolutionSection 
-          evoChain={evoChain} 
-          currentPokemonName={pokemon.name} 
-          activeColor={color} 
-          onSelectPokemon={onSelect}
-        />
+      {/* [핵심 개선] 진화 및 폼 섹션 - 스크롤 제거 및 컴팩트화 */}
+      <Box sx={{ py: 2, px: 1 }}>
+        {/* 1. 진화 트리 */}
+        <Box sx={{ mb: pokemon.forms?.length > 1 ? 2 : 0 }}>
+          <EvolutionSection 
+            evoChain={evoChain} 
+            currentPokemonName={pokemon.name} 
+            activeColor={color} 
+            onSelectPokemon={onSelect}
+          />
+        </Box>
+
+        {/* 2. 폼 체인지 - 텍스트와 아이콘 크기 최적화 */}
+        {pokemon.forms && pokemon.forms.length > 1 && (
+          <Box sx={{ 
+            pt: 1.5, 
+            borderTop: '1px dashed #e2e8f0',
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center' 
+          }}>
+            <Typography variant="caption" fontWeight={900} sx={{ color: '#94a3b8', mb: 1, letterSpacing: 0.5 }}>
+              전체 폼 종류
+            </Typography>
+            <Stack direction="row" spacing={3} justifyContent="center" flexWrap="wrap">
+              {pokemon.forms.map((form: any) => (
+                <Box 
+                  key={form.name}
+                  onClick={() => onSelect(form.name)}
+                  sx={{ 
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'transform 0.2s',
+                    '&:hover': { transform: 'translateY(-2px)' }
+                  }}
+                >
+                  <Avatar 
+                    src={`https://img.pokemondb.net/sprites/home/normal/${form.name}.png`}
+                    sx={{ 
+                      width: 70, 
+                      height: 70, 
+                      border: form.isCurrent ? `2px solid ${color}` : '1px solid #e2e8f0',
+                      bgcolor: form.isCurrent ? `${color}10` : 'transparent',
+                      p: 0.2,
+                      mx: 'auto'
+                    }}
+                  />
+                  <Typography sx={{ fontSize: '10px', fontWeight: 800, mt: 0.5, color: form.isCurrent ? color : '#94a3b8' }}>
+                    {form.label}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Box>
+        )}
       </Box>
 
       <Divider sx={{ my: 2 }} />
