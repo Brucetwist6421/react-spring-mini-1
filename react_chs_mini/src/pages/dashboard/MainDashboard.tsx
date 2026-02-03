@@ -55,6 +55,8 @@ export default function MainDashboard() {
   const typeName = pokemon?.types?.[0]?.type?.name;
   const currentTypeAverage = typeName ? TYPE_STAT_DATA[typeName] : null;
 
+  // console.log("선택된 포켓몬:", pokemon.id);
+
   return (
     <Box sx={{ 
       flexGrow: 1, 
@@ -238,7 +240,8 @@ export default function MainDashboard() {
               
           {/* --- [3] 서식지 분석 섹션 (추가) --- */}
           <Box ref={mapSectionRef}>
-            <PokemonLocationMap />
+            <PokemonLocationMap pokemon={pokemon} />
+            {/* <PokemonLocationMap/> */}
           </Box>
 
           {/* 권장 관리 작업 */}

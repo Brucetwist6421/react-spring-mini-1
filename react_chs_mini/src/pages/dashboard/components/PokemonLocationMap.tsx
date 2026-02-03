@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Box, Chip, Grid, Stack, Tabs, Tab, Paper, Typography, CircularProgress, Tooltip, IconButton } from "@mui/material"; // Grid2 권장
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import LanguageIcon from "@mui/icons-material/Language";
-import { usePokemonDashboard } from "./hooks/usePokemonDashboard";
-import { usePokemonLocation } from "../../map/hooks/usePokemonLocation";
-import { useMapRegion } from "./hooks/useMapRegion";
-import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
+import LanguageIcon from "@mui/icons-material/Language";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import RemoveIcon from "@mui/icons-material/Remove";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import { Box, Chip, CircularProgress, Grid, IconButton, Paper, Stack, Tab, Tabs, Tooltip, Typography } from "@mui/material"; // Grid2 권장
+import { useMemo, useState } from "react";
+import { usePokemonLocation } from "../../map/hooks/usePokemonLocation";
 import { REGION_METADATA, type RegionId } from "./datas/pokemonMapData";
+import { useMapRegion } from "./hooks/useMapRegion";
 
-export default function PokemonLocationMap() {
-  const { pokemon, loading: pokemonLoading } = usePokemonDashboard();
+// export default function PokemonLocationMap({pokemon}: {pokemon?: any}) {
+export default function PokemonLocationMap({pokemon, loading}: {pokemon: any, loading: boolean}) {
+  // const { pokemon, loading: pokemonLoading } = usePokemonDashboard();
   const { locations, loading: locationLoading } = usePokemonLocation(pokemon?.id);
   const { currentRegion, setCurrentRegion, regionData } = useMapRegion(locations);
 
@@ -21,6 +21,8 @@ export default function PokemonLocationMap() {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  console.log(pokemon, "포켓몬데이터");
 
   // 2. 필터링 로직 (useMemo)
   const filteredLocations = useMemo(() => {
@@ -102,7 +104,7 @@ export default function PokemonLocationMap() {
 
   // const onMouseUp = () => setIsDragging(false);
 
-  if (pokemonLoading || !pokemon || !regionData) {
+  if (loading || !pokemon || !regionData) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
         <CircularProgress />
@@ -110,7 +112,7 @@ export default function PokemonLocationMap() {
     );
   }
 
-  if (pokemonLoading || !pokemon || !regionData) {
+  if (loading || !pokemon || !regionData) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
         <CircularProgress />
