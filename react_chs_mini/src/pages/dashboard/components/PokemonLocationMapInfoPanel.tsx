@@ -33,6 +33,7 @@ interface InfoPanelProps {
   currentPokemonName: string;
   onLocationClick: (loc: any) => void;
   onPokemonSelect?: (id: string) => void; 
+  currentPokemonKoName?: string;
 }
 
 // 스크롤바 스타일 공통 적용
@@ -58,6 +59,7 @@ export default function PokemonLocationMapInfoPanel({
   currentPokemonName,
   onLocationClick,
   onPokemonSelect,
+  currentPokemonKoName,
 }: InfoPanelProps) {
   
   // 공통 Empty State 컴포넌트
@@ -162,8 +164,8 @@ export default function PokemonLocationMapInfoPanel({
               </>
             ) : (
               <EmptyState 
-                message={`${currentPokemonName}의 서식지 없음`}
-                subMessage={`현재 ${regionName}지방에서는 야생 ${currentPokemonName}이(가) 발견되지 않습니다.`}
+                message={`${currentPokemonKoName}(${currentPokemonName})의 서식지 없음`}
+                subMessage={`현재 ${regionName}지방에서는 야생 ${currentPokemonKoName}(${currentPokemonName})이(가) 발견되지 않습니다.`}
               />
             )}
           </Box>

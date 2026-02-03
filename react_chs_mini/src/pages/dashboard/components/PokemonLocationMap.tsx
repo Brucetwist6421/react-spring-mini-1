@@ -116,6 +116,7 @@ export default function PokemonLocationMap({ pokemon, loading, onPokemonSelect }
               areaPokemons={areaPokemons} isAreaLoading={isAreaLoading}
               currentPokemonName={pokemon.name} onLocationClick={handleFetchAreaPokemons}
               onPokemonSelect={onPokemonSelect}
+              currentPokemonKoName={pokemon.koName}
             />
           </Grid>
         </Grid>
