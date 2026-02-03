@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import LanguageIcon from "@mui/icons-material/Language";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import StarIcon from "@mui/icons-material/Star";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import {
   Box,
@@ -17,7 +14,6 @@ import {
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import RandomSpinner from "../../components/RandomSpinner";
-import ActionCard from "./components/ActionCard";
 import AllTypeBarChart from "./components/AllTypeBarChart";
 import FavoriteButton from "./components/FavoriteButton";
 import PokemonLocationMap from "./components/PokemonLocationMap";
@@ -68,12 +64,12 @@ export default function MainDashboard() {
       <Container maxWidth={false} sx={{ px: { xl: 8 } }}>
         
         {/* --- 헤더 통합 컨테이너 --- */}
-        <Box sx={{ mb: 6, width: "100%" }}>
+        <Box sx={{ mb: 3, width: "100%" }}>
   
           {/* [1] 최상단 검색 영역: 사용자가 가장 먼저 접근하는 도구 */}
           <Box sx={{ 
             width: "100%", 
-            mb: 4, 
+            mb: 3, 
             p: 2.5, 
             bgcolor: "#f8fafc", 
             border: "1px solid #e2e8f0",
@@ -201,7 +197,7 @@ export default function MainDashboard() {
               justifyContent: { xs: 'center', md: 'flex-start' }, // 모바일은 중앙, 데스크탑은 좌측 정렬
               gap: 1.5, 
               mb: 3, 
-              mt: 6 
+              mt: 0.5, 
             }}>
               <WorkspacePremiumIcon sx={{ color: "#f59e0b", fontSize: "2rem" }} />
               <Typography variant="h5" fontWeight={900} sx={{ color: "#1e293b" }}>
@@ -251,7 +247,7 @@ export default function MainDashboard() {
 
           {/* 권장 관리 작업 */}
           {/* --- 하단 빠른 작업 (Quick Actions) --- */}
-          <Grid size={{ xs: 12 }}>
+          {/* <Grid size={{ xs: 12 }}>
             <Typography 
               variant="h6" 
               sx={{ 
@@ -296,7 +292,6 @@ export default function MainDashboard() {
                     flexGrow: 1 // 남는 미세한 공간까지 꽉 채움
                   }}
                 >
-                  {/* 카드 너비가 너무 무한정 늘어나면 안 예쁘므로 maxWidth를 살짝 잡아줍니다 */}
                   <Box sx={{ width: '100%', maxWidth: '450px', mx: 'auto' }}
                     onClick={action.action} // ✅ 클릭 이벤트 연결
                   >
@@ -305,7 +300,7 @@ export default function MainDashboard() {
                 </Grid>
               ))}
             </Grid>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Container>
     </Box>

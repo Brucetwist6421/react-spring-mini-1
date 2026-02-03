@@ -80,7 +80,7 @@ export default function PokemonLocationMap({ pokemon, loading, onPokemonSelect }
   }
 
   return (
-    <Grid container sx={{ mt: 8 }}>
+    <Grid container sx={{ mt: 2 }}>
       <PokemonLocationMapHeader 
         currentRegion={currentRegion} 
         onRegionChange={(_: any, val: any) => { setCurrentRegion(val); handleReset(); setViewMode('list'); }} 
