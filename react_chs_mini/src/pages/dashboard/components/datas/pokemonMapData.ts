@@ -6,6 +6,8 @@ import { SINNOH_LOCATIONS } from "../../../../api/datas/gen4MapData";
 import { UNOVA_LOCATIONS } from "../../../../api/datas/gen5MapData";
 import { KALOS_LOCATIONS } from "../../../../api/datas/gen6MapData";
 import { ALOLA_LOCATIONS } from "../../../../api/datas/gen7MapData";
+import { GALAR_LOCATIONS } from "../../../../api/datas/gen8MapData";
+import { PALDEA_LOCATIONS } from "../../../../api/datas/gen9MapData";
 // ✅ 성도지방 데이터가 준비되었다면 주석을 해제하세요.
 // import { JOHTO_LOCATIONS } from "../../../../api/datas/gen2MapData";
 // import { HOENN_LOCATIONS } from "../../../../api/datas/gen3MapData";
@@ -52,6 +54,18 @@ export const REGION_METADATA = {
     koName: '알로라',
     img: '/images/maps/alola_map.jpg', // 
     locations: ALOLA_LOCATIONS,
+  },
+  galar: {
+    id: 'galar' as const, // 8세대 추가
+    koName: '가라르',
+    img: '/images/maps/galar_map.png', // 이미지 파일 확인
+    locations: GALAR_LOCATIONS,
+  },
+  paldea: {
+    id: 'paldea' as const, // 9세대
+    koName: '팔데아',
+    img: '/images/maps/paldea_map.jpeg',
+    locations: PALDEA_LOCATIONS,
   },
 };
 

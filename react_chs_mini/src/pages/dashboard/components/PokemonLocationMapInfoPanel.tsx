@@ -58,7 +58,7 @@ export default function PokemonLocationMapInfoPanel({
   onPokemonSelect,
 }: InfoPanelProps) {
   return (
-    <Box sx={{ height: "85%", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column",maxHeight: { xs: "500px", lg: "700px" } }}>
       <Typography
         variant="h6"
         fontWeight={800}
@@ -71,7 +71,7 @@ export default function PokemonLocationMapInfoPanel({
       <Paper
         variant="outlined"
         sx={{
-          height: { xs: "400px", lg: "600px" },
+          height: { xs: "450px", md: "100%" },
           borderRadius: "24px",
           bgcolor: "#ffffff",
           overflow: "hidden",
@@ -136,24 +136,30 @@ export default function PokemonLocationMapInfoPanel({
                           </ListItemAvatar>
                           <ListItemText
                             primary={
-                              <Stack direction="row" spacing={1} alignItems="center">
-                                <Typography
-                                  variant="body2"
-                                  fontWeight={800}
-                                  sx={{ color: p.name === currentPokemonName ? "#1d4ed8" : "#1e293b" }}
+                                <Stack 
+                                direction="column" // 9:3 비율에서는 가로보다 세로 배치가 텍스트 잘림을 방지합니다.
+                                spacing={0.5} 
+                                alignItems="flex-start"
                                 >
-                                  {p.koName}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', flexWrap: 'wrap' }}>
+                                    <Typography variant="body2" fontWeight={800} sx={{ color: p.name === currentPokemonName ? "#1d4ed8" : "#1e293b" }}>
+                                    {p.koName}
+                                    </Typography>
+                                    {p.name === currentPokemonName && (
+                                    <Chip label="현재" size="small" color="primary" sx={{ height: 16, fontSize: "0.55rem" }} />
+                                    )}
+                                </Box>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
+                                    ({p.name.toUpperCase()})
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
-                                  ({p.name.toUpperCase()})
-                                </Typography>
-                                {p.name === currentPokemonName && (
-                                  <Chip label="현재" size="small" color="primary" sx={{ height: 18, fontSize: "0.6rem" }} />
-                                )}
-                              </Stack>
-                            }
-                            secondary={`No. ${String(p.id).padStart(3, "0")}`}
-                          />
+                                </Stack>
+                                }
+                                slotProps={{
+                                    secondary: {
+                                    sx: { fontSize: '0.7rem', color: '#94a3b8' }
+                                    }
+                                }}
+                                />
                         </ListItemButton>
                       </ListItem>
                       {idx < areaPokemons.length - 1 && <Divider variant="inset" component="li" />}

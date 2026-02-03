@@ -85,11 +85,17 @@ export default function PokemonLocationMap({ pokemon, loading, onPokemonSelect }
         currentRegion={currentRegion} 
         onRegionChange={(_: any, val: any) => { setCurrentRegion(val); handleReset(); setViewMode('list'); }} 
       />
-      <Paper elevation={0} sx={{ p: { xs: 2, md: 4 }, width: '100%', border: "1px solid #e2e8f0", borderRadius: "24px",
-        minHeight: { xs: 'auto', lg: '630px' }, 
-        maxHeight: { xs: 'auto', lg: '630px' } }}>
-        <Grid container spacing={4}>
-          <Grid size={{ xs: 12, lg: 7 }}>
+      <Paper elevation={0} sx={{ 
+        p: { xs: 2, md: 4 }, 
+        width: '100%', 
+        border: "1px solid #e2e8f0", 
+        borderRadius: "24px",
+        minHeight: { xs: 'auto', lg: '100%' }, 
+        maxHeight: { xs: 'auto', lg: '100%' } 
+      }}>
+        <Grid container spacing={{ xs: 2, md: 4 }}>
+          {/* [좌측 지도 영역]  */}
+          <Grid size={{ xs: 12, lg: 9 }}>
             <PokemonLocationMapDisplay 
               regionImg={regionData.img} zoom={zoom} position={position} isDragging={isDragging}
               locations={filteredLocations} regionMetadata={regionData.locations}
@@ -99,7 +105,9 @@ export default function PokemonLocationMap({ pokemon, loading, onPokemonSelect }
               onDragStart={onDragStart} onDragMove={onDragMove} onDragEnd={onDragEnd}
             />
           </Grid>
-          <Grid size={{ xs: 12, lg: 5 }}>
+
+          {/* [우측 패널 영역]  */}
+          <Grid size={{ xs: 12, lg: 3 }}>
             <PokemonLocationMapInfoPanel 
               viewMode={viewMode} setViewMode={setViewMode}
               regionName={regionData.koName}
