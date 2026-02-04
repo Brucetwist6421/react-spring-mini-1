@@ -84,9 +84,12 @@ const gridRows: NewPokemonListType[] = Array.isArray(pokeData)
         title: "삭제되었습니다.",
         // text: "text 속성 ",
         icon: "success",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // 주소창을 직접 변경하여 페이지를 아예 새로 로드합니다.
+          window.location.href = "/newPokemonList";
+        }
       });
-      // 성공 시 이동
-      navigate("/");
     },
     onError: (error) => {
       console.error("삭제 중 오류 발생:", error);
