@@ -127,7 +127,7 @@ export default function EvolutionSection({
                   <EastIcon sx={{ 
                     fontSize: 16, 
                     color: '#cbd5e1', 
-                    mx: { xs: 1, sm: 2 }, 
+                    mx: { xs: 1, sm: 1 }, 
                     mb: 4 // 화살표 위치를 중앙으로 재조정
                   }} />
                 )}
