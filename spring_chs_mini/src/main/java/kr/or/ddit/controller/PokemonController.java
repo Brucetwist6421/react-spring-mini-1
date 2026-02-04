@@ -246,7 +246,7 @@ public class PokemonController {
     // 실습 5 끝
     
     // 실습 6 시작
-    @DeleteMapping("/pokemon/deletePokemons")
+    @DeleteMapping("/deletePokemons")
     public ResponseEntity<?> deletePokemons(@RequestBody List<Long> idList) {
         int result = pokemonService.deletePokemons(idList);
         if (result == 1) {
