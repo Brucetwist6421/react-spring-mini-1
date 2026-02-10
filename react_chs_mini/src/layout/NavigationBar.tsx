@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // useEffect 추가
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Avatar, IconButton } from "@mui/material";
 import { Dashboard, CatchingPokemon, AddCircle, Settings, CatchingPokemonTwoTone, Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const fullWidth = 260;
-const collapsedWidth = 88; // 접혔을 때의 너비
+const collapsedWidth = 88;
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [open, setOpen] = useState(true); // 사이드바 상태 관리
+  const [open, setOpen] = useState(true);
+  
+  // 1. 로그인 상태 관리
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // 페이지 로드 및 경로 변경 시마다 토큰 확인
+    const token = localStorage.getItem("accessToken");
+    setIsLoggedIn(!!token);
+  }, [location]); // 경로가 바뀔 때마다 로그인 상태를 다시 체크 (로그인/로그아웃 대응)
 
   const toggleDrawer = () => setOpen(!open);
 
@@ -21,6 +30,13 @@ const NavigationBar = () => {
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];
 
+  // 2. 로그인 상태에 따라 보여줄 메뉴 필터링
+  // 로그인 안 된 경우(false): "대시보드"만 유지
+  // 로그인 된 경우(true): 전체 메뉴 노출
+  const visibleMenuItems = isLoggedIn 
+    ? menuItems.filter(item => item.text === "대시보드" || item.text === "기존 포켓몬 목록") 
+    : menuItems;
+
   const currentWidth = open ? fullWidth : collapsedWidth;
 
   return (
@@ -29,20 +45,18 @@ const NavigationBar = () => {
       sx={{
         width: currentWidth,
         flexShrink: 0,
-        whiteSpace: "nowrap", // 텍스트 줄바꿈 방지 (애니메이션 자연스럽게)
+        whiteSpace: "nowrap",
         "& .MuiDrawer-paper": {
           width: currentWidth,
-          transition: "width 0.3s ease-in-out", // 부드러운 애니메이션
+          transition: "width 0.3s ease-in-out",
           overflowX: "hidden",
           boxSizing: "border-box",
           backgroundColor: "#1e293b",
           color: "#f8fafc",
           borderRight: "1px solid rgba(255, 255, 255, 0.1)",
-          borderRadius: 0,
         },
       }}
     >
-      {/* 사이드바 상단 로고 및 토글 버튼 */}
       <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: open ? "space-between" : "center", borderBottom: "1px solid #334155" }}>
         {open && (
           <Typography variant="h6" fontWeight="bold" color="#38bdf8" sx={{ ml: 1 }}>
@@ -54,10 +68,10 @@ const NavigationBar = () => {
         </IconButton>
       </Box>
 
-      {/* 메뉴 리스트 */}
       <Box sx={{ overflow: "auto", mt: 2 }}>
         <List sx={{ px: open ? 2 : 1.5 }}>
-          {menuItems.map((item) => {
+          {/* 3. 필터링된 메뉴 리스트(visibleMenuItems) 사용 */}
+          {visibleMenuItems.map((item) => {
             const isSelected = location.pathname === item.path;
             return (
               <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
@@ -95,16 +109,18 @@ const NavigationBar = () => {
         </List>
       </Box>
 
-      {/* 하단 프로필 영역 */}
-      <Box sx={{ p: 2, mt: "auto", borderTop: "1px solid #334155", display: "flex", justifyContent: open ? "flex-start" : "center", alignItems: "center", gap: 2 }}>
-        <Avatar sx={{ bgcolor: "#38bdf8", width: 32, height: 32, fontSize: '0.8rem' }}>AD</Avatar>
-        {open && (
-          <Box sx={{ overflow: "hidden" }}>
-            <Typography variant="body2" fontWeight="bold" noWrap>Admin User</Typography>
-            <Typography variant="caption" color="#94a3b8" noWrap>Premium Plan</Typography>
-          </Box>
-        )}
-      </Box>
+      {/* 4. 하단 프로필 영역도 로그인 상태일 때만 노출하거나 정보를 다르게 표시 */}
+      {isLoggedIn && (
+        <Box sx={{ p: 2, mt: "auto", borderTop: "1px solid #334155", display: "flex", justifyContent: open ? "flex-start" : "center", alignItems: "center", gap: 2 }}>
+          <Avatar sx={{ bgcolor: "#38bdf8", width: 32, height: 32, fontSize: '0.8rem' }}>AD</Avatar>
+          {open && (
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight="bold" noWrap>Admin User</Typography>
+              <Typography variant="caption" color="#94a3b8" noWrap>Premium Plan</Typography>
+            </Box>
+          )}
+        </Box>
+      )}
     </Drawer>
   );
 };

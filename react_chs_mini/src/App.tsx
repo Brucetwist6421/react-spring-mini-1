@@ -12,6 +12,7 @@ import PokemonList from "./pages/lists/PokemonList";
 import NewPokemonList from "./pages/lists/NewPokemonList";
 import PokemonCreatePage from "./pages/inserts/PokemonCreatePage";
 import NewPokemonDetailPage from "./pages/details/NewPokemonDetailPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -44,10 +45,15 @@ function App() {
                 <Route path="/pokemon/create" element={<PokemonCreatePage />} />
                 <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon2/:id" element={<NewPokemonDetailPage />} />
-
                 {/* 2. 동적 파라미터는 가장 아래에 배치 */}
-                <Route path="/" element={<MainDashboard />} />
-                <Route path="/:pokemonName" element={<MainDashboard />} />
+                  <Route path="/" element={<MainDashboard />} />
+                  <Route path="/:pokemonName" element={<MainDashboard />} />
+
+                <Route element={<ProtectedRoute />}>
+                  {/* 2. 동적 파라미터는 가장 아래에 배치 */}
+                  <Route path="/" element={<MainDashboard />} />
+                  <Route path="/:pokemonName" element={<MainDashboard />} />
+                </Route>
               </Routes>
             </Box>
 
