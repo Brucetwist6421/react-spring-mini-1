@@ -4,17 +4,17 @@
 <mapper namespace="kr.or.ddit.mapper.MemberMapper">
 
     <select id="findByEmail" parameterType="string" resultType="kr.or.ddit.vo.MemberVO">
-    SELECT 
-        MEMBER_NO       AS "memNo",
-        MEMBER_EMAIL    AS "email",
-        MEMBER_PASS     AS "password",
-        MEMBER_NICKNAME AS "nickname",
-        MEMBER_TYPE     AS "memType",
-        REG_DATE        AS "regDate",
-        UPDATE_ID       AS "updateId",
-        UPDATE_DATE     AS "updateDate"
-    FROM MEMBER
-    WHERE MEMBER_EMAIL = #{email}
-</select>
+        SELECT 
+            MEMBER_NO       AS memNo,
+            MEMBER_EMAIL    AS email,
+            MEMBER_PASS     AS password,
+            MEMBER_NICKNAME AS nickname,
+            MEMBER_TYPE     AS memType,
+            REG_DATE        AS regDate,
+            UPDATE_ID       AS updateId,
+            UPDATE_DATE     AS updateDate
+        FROM MEMBER
+        WHERE MEMBER_EMAIL = #{email}
+    </select>
 
 </mapper>

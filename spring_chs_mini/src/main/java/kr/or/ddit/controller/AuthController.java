@@ -21,13 +21,23 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestVO loginVO) {
         try {
-            log.info("로그인 시도: {}", loginVO.getEmail());
-            // 실제 서비스 로직 호출
+            // 1. 리액트에서 보낸 데이터가 VO에 잘 담겼는지 확인 (매우 중요!)
+            log.info("로그인 요청 데이터 - Email: {}, Password: {}", loginVO.getEmail(),
+                    (loginVO.getPassword() != null ? "입력됨" : "NULL!!!"));
+
+            // 2. 실제 서비스 로직 호출
             LoginResponseVO response = authService.authenticate(loginVO);
+
+            log.info("로그인 성공: {}", loginVO.getEmail());
             return ResponseEntity.ok(response);
+
         } catch (RuntimeException e) {
-            // 로그인 실패 시 (비밀번호 틀림, 유저 없음 등) 401 Unauthorized 반환
-            // 에러 메시지를 포함하여 리액트에서 alert()으로 띄울 수 있게 합니다.
+            // 3. 서버 콘솔에 구체적인 에러 원인 출력 (비번 불일치 여부 등)
+            log.error("로그인 실패 원인: {}", e.getMessage());
+
+            // 실패 시 스택 트레이스를 찍어보면 어느 줄에서 에러가 났는지 알 수 있습니다.
+            // e.printStackTrace();
+
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(e.getMessage());
