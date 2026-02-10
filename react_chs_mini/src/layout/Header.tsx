@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
 import { useState, useEffect, type MouseEvent } from "react";
-import LoginModal from "../pages/modal/LoginModal";
+import LoginModal from "./components/LoginModal";
 import MenuProfile from "../pages/MenuProfile";
 import { LoggedInMenu, LoggedOutMenu } from "./components/HeaderComponents";
 // 분리한 컴포넌트 임포트
@@ -20,9 +21,17 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isProfileOpen = Boolean(anchorEl);
 
+  // 사용자 정보 state
+  const [userInfo, setUserInfo] = useState<{ email: string; memName: string; memType: string } | null>(null);
+
   // 1. 초기 로드 시 로그인 상태 체크
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
+    const savedInfo = localStorage.getItem("userInfo");
+    if (savedInfo) {
+      setUserInfo(JSON.parse(savedInfo));
+    }
+    console.log("savedInfo:", savedInfo);
     setIsLoggedIn(!!token);
   }, []);
 
@@ -107,6 +116,7 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
         anchorEl={anchorEl} 
         open={isProfileOpen} 
         onClose={handleProfileClose} 
+        onLogout={handleLogout} // 추가된 부분
       />
     </AppBar>
   );

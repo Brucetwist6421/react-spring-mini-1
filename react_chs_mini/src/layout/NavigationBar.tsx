@@ -17,6 +17,7 @@ const NavigationBar = () => {
   useEffect(() => {
     // 페이지 로드 및 경로 변경 시마다 토큰 확인
     const token = localStorage.getItem("accessToken");
+    console.log("토큰 확인:", token);
     setIsLoggedIn(!!token);
   }, [location]); // 경로가 바뀔 때마다 로그인 상태를 다시 체크 (로그인/로그아웃 대응)
 
@@ -54,6 +55,7 @@ const NavigationBar = () => {
           backgroundColor: "#1e293b",
           color: "#f8fafc",
           borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: 0,
         },
       }}
     >

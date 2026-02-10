@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class LoginResponseVO {
     String accessToken;
     String email;
-    String nickname;
-    String type;
+    String memName;
+    String memType;
 }

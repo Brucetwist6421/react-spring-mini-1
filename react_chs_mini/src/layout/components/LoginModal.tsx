@@ -43,13 +43,16 @@ export default function LoginModal({ open, onClose }: LoginProps) {
     setLoading(true);
     try {
       const response = await api.post("/api/auth/login", formData);
-      const token = response.data.accessToken || response.data.token;
-      
-      if (token) {
-        localStorage.setItem("accessToken", token);
-        alert("성공적으로 로그인되었습니다.");
-        onClose();
-        window.location.reload();
+      const { accessToken, email, memName, memType } = response.data; // 응답 데이터 구조에 맞게 구조분해할당
+
+      if (accessToken) {
+          localStorage.setItem("accessToken", accessToken);
+          // 사용자 정보를 JSON 문자열로 변환하여 저장
+          localStorage.setItem("userInfo", JSON.stringify({ email, memName, memType }));
+          
+          alert(`${memName}님, 환영합니다!`);
+          onClose();
+          window.location.reload(); 
       }
     } catch (error: any) {
       console.error("Login Failure:", error);

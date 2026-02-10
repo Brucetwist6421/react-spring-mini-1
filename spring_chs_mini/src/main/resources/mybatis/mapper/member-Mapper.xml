@@ -8,7 +8,7 @@
             MEMBER_NO       AS memNo,
             MEMBER_EMAIL    AS email,
             MEMBER_PASS     AS password,
-            MEMBER_NICKNAME AS nickname,
+            MEMBER_NAME     AS memName,
             MEMBER_TYPE     AS memType,
             REG_DATE        AS regDate,
             UPDATE_ID       AS updateId,
