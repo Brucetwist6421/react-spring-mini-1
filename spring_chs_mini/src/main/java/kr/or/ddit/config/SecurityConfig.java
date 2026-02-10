@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -27,8 +28,6 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-                // 1. 기본 폼 로그인과 HTTP Basic 인증을 비활성화해야 합니다.
-                // 이 설정을 안 하면 스프링이 계속 임시 비밀번호를 생성합니다.
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -36,11 +35,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/pokemonList", "/newPokemonList").permitAll()
                         .requestMatchers("/pokemon/**").permitAll()
-                        // 리액트에서 외부 API를 직접 호출하면 상관없지만, 서버를 거친다면 아래처럼 허용
-                        // .requestMatchers("/api/proxy/**").permitAll()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                // 인증 예외 발생 시 401 에러를 반환하도록 설정
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"message\":\"로그인 세션이 만료되었거나 유효하지 않습니다.\"}");
+                        }));
 
-        // [중요] JWT 필터를 시큐리티 체인에 등록해야 토큰 인증이 작동합니다.
+        // JWT 필터 등록
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtProvider);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
