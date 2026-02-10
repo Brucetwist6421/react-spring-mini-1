@@ -11,4 +11,5 @@ public class LoginResponseVO {
     String accessToken;
     String email;
     String nickname;
+    String type;
 }

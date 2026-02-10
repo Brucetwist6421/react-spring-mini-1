@@ -5,6 +5,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import java.security.Key;
@@ -25,10 +29,10 @@ public class JwtProvider {
     }
 
     public String createToken(String email) {
-        // 2. 최신 버전에서는 Jwts.claims() 대신 builder를 바로 사용하거나 
+        // 2. 최신 버전에서는 Jwts.claims() 대신 builder를 바로 사용하거나
         // Claims 객체를 명시적으로 생성하는 것을 권장합니다.
         Claims claims = Jwts.claims().setSubject(email);
-        
+
         // 추가 정보(권한 등)를 넣고 싶다면 이렇게 추가 가능합니다.
         // claims.put("role", "USER");
 
@@ -42,5 +46,25 @@ public class JwtProvider {
                 // 3. 최신 버전에서는 signWith(key, SignatureAlgorithm.HS256) 형태를 사용합니다.
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    // 토큰이 유효한지(만료되지 않았는지) 확인
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 토큰에서 사용자 정보를 꺼내 시큐리티 인증 객체 생성
+    public Authentication getAuthentication(String token) {
+        String email = Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token).getBody().getSubject();
+
+        // 권한은 우선 빈 리스트로 설정 (필요시 DB의 memType 추가)
+        User principal = new User(email, "", Collections.emptyList());
+        return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
     }
 }
