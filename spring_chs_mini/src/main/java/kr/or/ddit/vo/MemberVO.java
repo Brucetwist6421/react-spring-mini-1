@@ -13,7 +13,7 @@ public class MemberVO {
     private Long memNo;        // MEMBER_NO AS memNo
     private String email;      // MEMBER_EMAIL AS email
     private String password;   // MEMBER_PASS AS password
-    private String nickname;   // MEMBER_NICKNAME AS nickname
+    private String memName;   // MEMBER_NAME AS memName
     private String memType;    // MEMBER_TYPE AS memType (권한 구분용)
     private Date regDate;    // REG_DATE AS regDate
     private String updateId;   // UPDATE_ID AS updateId

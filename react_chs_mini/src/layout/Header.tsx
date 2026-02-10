@@ -45,7 +45,8 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
 
   // 2. 로그아웃 로직
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
+    // 모든 로컬 스토리지 데이터 삭제 (accessToken, userInfo 등 한 번에)
+    localStorage.clear();
     setIsLoggedIn(false);
     alert("로그아웃 되었습니다.");
     window.location.reload(); // 세션 초기화를 위해 새로고침

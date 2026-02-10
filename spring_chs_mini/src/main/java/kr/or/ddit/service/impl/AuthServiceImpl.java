@@ -45,6 +45,6 @@ public class AuthServiceImpl implements AuthService {
 
         // 3. 토큰 생성 및 반환
         String token = jwtProvider.createToken(user.getEmail());
-        return new LoginResponseVO(token, user.getEmail(), user.getNickname(), user.getMemType());
+        return new LoginResponseVO(token, user.getEmail(), user.getMemName(), user.getMemType());
     }
 }
