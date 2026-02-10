@@ -7,9 +7,10 @@ interface ProfileMenuProps {
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: () => void;
+  onLogout: () => void; // 로그아웃 처리를 위한 프롭 추가
 }
 
-export default function MenuProfile({ anchorEl, open, onClose }: ProfileMenuProps) {
+export default function MenuProfile({ anchorEl, open, onClose, onLogout }: ProfileMenuProps) {
   return (
     <Menu
       anchorEl={anchorEl}
@@ -18,15 +19,35 @@ export default function MenuProfile({ anchorEl, open, onClose }: ProfileMenuProp
       onClick={onClose}
       transformOrigin={{ horizontal: 'right', vertical: 'top' }}
       anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      PaperProps={{
-        elevation: 3,
-        sx: { width: 220, mt: 1.5, borderRadius: 2, overflow: 'visible' }
+      // Deprecated 된 PaperProps 대신 slotProps 사용
+      slotProps={{
+        paper: {
+          elevation: 3,
+          sx: { 
+            width: 220, 
+            mt: 1.5, 
+            borderRadius: 2, 
+            overflow: 'visible',
+            '&:before': { // 메뉴 화살표 효과 (선택 사항)
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0,
+            },
+          }
+        }
       }}
     >
       <Box sx={{ px: 2, py: 1.5, textAlign: 'center' }}>
-        <Avatar sx={{ mx: 'auto', mb: 1, bgcolor: '#38bdf8' }}>P</Avatar>
+        <Avatar sx={{ mx: 'auto', mb: 1, bgcolor: '#38bdf8' }}>A</Avatar>
         <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>포켓몬 마스터</Typography>
-        <Typography variant="body2" color="text.secondary">admin@pokemon.com</Typography>
+        <Typography variant="body2" color="text.secondary">admin@test.com</Typography>
       </Box>
       <Divider />
       <MenuItem onClick={onClose}>
@@ -38,7 +59,14 @@ export default function MenuProfile({ anchorEl, open, onClose }: ProfileMenuProp
         설정
       </MenuItem>
       <Divider />
-      <MenuItem onClick={onClose} sx={{ color: 'error.main' }}>
+      {/* 실제 로그아웃 함수 호출 */}
+      <MenuItem 
+        onClick={() => {
+          onClose();
+          onLogout();
+        }} 
+        sx={{ color: 'error.main' }}
+      >
         <ListItemIcon><Logout fontSize="small" color="error" /></ListItemIcon>
         로그아웃
       </MenuItem>

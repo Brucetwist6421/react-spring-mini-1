@@ -14,34 +14,47 @@ interface LoginProps {
 export default function LoginModal({ open, onClose }: LoginProps) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  
+  // 1. 에러 상태 관리를 위한 state 추가
+  const [errors, setErrors] = useState({ email: false, password: false });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // 입력을 시작하면 에러 메시지 실시간 제거
+    if (value !== "") {
+      setErrors(prev => ({ ...prev, [name]: false }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    // 2. 입력값 검증 (유효성 검사)
+    const emailEmpty = formData.email.trim() === "";
+    const passwordEmpty = formData.password.trim() === "";
+
+    if (emailEmpty || passwordEmpty) {
+      setErrors({ email: emailEmpty, password: passwordEmpty });
+      return; // 서버 요청 중단
+    }
+
     setLoading(true);
     try {
-      // 1. 스프링 부트 서버로 로그인 요청
-      // 백엔드의 @PostMapping("/login") 엔드포인트와 맞춰주세요.
       const response = await api.post("/api/auth/login", formData);
-      
-      // 2. 서버에서 보낸 응답 데이터 확인 (예: { accessToken: "..." })
-      // 필드명은 백엔드 DTO 설계에 따라 다를 수 있습니다 (token, accessToken 등)
       const token = response.data.accessToken || response.data.token;
       
       if (token) {
         localStorage.setItem("accessToken", token);
         alert("성공적으로 로그인되었습니다.");
         onClose();
-        window.location.reload(); // 토큰이 적용된 상태로 UI를 갱신하기 위해 새로고침
+        window.location.reload();
       }
     } catch (error: any) {
       console.error("Login Failure:", error);
-      const errorMessage = error.response?.data?.message || "로그인에 실패했습니다. 정보를 확인해주세요.";
+      // 서버에서 온 에러 메시지 처리
+      const errorMessage = error.response?.data || "로그인에 실패했습니다. 정보를 확인해주세요.";
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -50,7 +63,7 @@ export default function LoginModal({ open, onClose }: LoginProps) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit} noValidate>
         <DialogTitle sx={{ textAlign: "center", fontWeight: 700, pt: 3 }}>
           로그인
         </DialogTitle>
@@ -65,6 +78,9 @@ export default function LoginModal({ open, onClose }: LoginProps) {
               autoComplete="email"
               value={formData.email}
               onChange={handleChange}
+              // 3. MUI Error 속성 적용
+              error={errors.email}
+              helperText={errors.email ? "이메일을 입력해주세요." : ""}
             />
             <TextField 
               name="password"
@@ -75,6 +91,9 @@ export default function LoginModal({ open, onClose }: LoginProps) {
               autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
+              // 4. MUI Error 속성 적용
+              error={errors.password}
+              helperText={errors.password ? "비밀번호를 입력해주세요." : ""}
             />
           </Box>
         </DialogContent>
@@ -87,7 +106,11 @@ export default function LoginModal({ open, onClose }: LoginProps) {
             fullWidth 
             variant="contained" 
             disabled={loading}
-            sx={{ bgcolor: "#1e293b", "&:hover": { bgcolor: "#334155" } }}
+            sx={{ 
+              bgcolor: "#1e293b", 
+              "&:hover": { bgcolor: "#334155" },
+              // 에러가 있을 때 버튼을 살짝 흔드는 효과 등을 줄 수도 있습니다.
+            }}
           >
             {loading ? <CircularProgress size={24} color="inherit" /> : "로그인"}
           </Button>

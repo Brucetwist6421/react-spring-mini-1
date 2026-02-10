@@ -1,15 +1,12 @@
 import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import type { GridColDef, GridRenderCellParams, GridRowSelectionModel } from "@mui/x-data-grid";
 import { DataGrid } from "@mui/x-data-grid";
-import type { GridRowSelectionModel } from "@mui/x-data-grid";
 import { koKR } from "@mui/x-data-grid/locales";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 // 실습 1 시작
 import { useQuery } from "@tanstack/react-query";
 import api from "../../api/axiosInstance";
-import PokemonDetailModal from "../modal/PokemonDetailModal";
 
 import SampleSwal from "../../components/SampleSwal";
 
@@ -18,8 +15,8 @@ import * as React from "react";
 
 import { useMutation } from "@tanstack/react-query";
 import RandomSpinner from "../../components/RandomSpinner";
-import type { NewPokemonListType } from "./types/NewPokemonListType";
 import { newPokemonListColumns } from "./components/NewPokemonListColumns";
+import type { NewPokemonListType } from "./types/NewPokemonListType";
 
 
 
@@ -130,8 +127,6 @@ const gridRows: NewPokemonListType[] = Array.isArray(pokeData)
 
   // 실습 4 시작
   // 상세조회 상태
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<NewPokemonListType | null>(null);
 
   //실습 3 시작
   //로딩 / 에러 표시 (선택사항: gridRows는 fetch 전에도 기존 rows로 대체됨)
@@ -165,30 +160,6 @@ const gridRows: NewPokemonListType[] = Array.isArray(pokeData)
         },
       } as GridColDef<NewPokemonListType>;
     }
-
-    // FirstName 클릭: 상세조회 모달 오픈
-    if (col.field === "firstName") {
-      return {
-        ...col,
-        renderCell: (params: GridRenderCellParams<NewPokemonListType>) => {
-          const label = params.value ?? "";
-          return (
-            <Button
-              variant="text"
-              color="primary"
-              sx={{ textTransform: "none", p: 0 }}
-              onClick={() => {
-                setSelectedRow(params.row);
-                setDetailOpen(true);
-              }}
-            >
-              {label}
-            </Button>
-          );
-        },
-      } as GridColDef<NewPokemonListType>;
-    }
-    // 실습 4 끝
 
     // 실습 8 시작
     if (col.field === "name") {
@@ -309,11 +280,6 @@ const gridRows: NewPokemonListType[] = Array.isArray(pokeData)
             },
           },
         }}
-      />
-      <PokemonDetailModal
-        open={detailOpen}
-        onClose={() => setDetailOpen(false)}
-        row={selectedRow}
       />
     </Box>
   );
