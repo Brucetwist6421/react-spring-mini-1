@@ -29,6 +29,7 @@ public class AuthServiceImpl implements AuthService {
         if (user != null) {
             log.info("리액트가 보낸 비번: [{}]", loginVO.getPassword());
             log.info("DB에서 가져온 비번: [{}]", user.getPassword());
+            log.info("1234의 진짜 암호문: {}", passwordEncoder.encode("1234"));
         } else {
             log.error("DB에 해당 이메일을 가진 유저가 없습니다.");
         }
