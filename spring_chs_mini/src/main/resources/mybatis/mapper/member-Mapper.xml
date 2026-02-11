@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.or.ddit.mapper.AccountMapper">
+<mapper namespace="kr.or.ddit.mapper.MemberMapper">
 
-    <select id="findByAccId" parameterType="string" resultType="kr.or.ddit.vo.AccountVO">
+    <select id="findByMemId" parameterType="string" resultType="kr.or.ddit.vo.MemberVO">
         SELECT 
-            a.acc_seq,
-            a.account_id,
-            a.account_name,
-            a.account_email,
-            a.status,
-            a.account_type,
-            c.cur_name AS curriculum_name, -- 교육과정 테이블과 조인
-            a.reg_date
-        FROM lms.tb_account a
-        LEFT JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
-        WHERE a.account_id = #{accountId}
+            MEMBER_NO       AS memNo,
+            MEMBER_ID       AS memId,
+            MEMBER_EMAIL    AS email,
+            MEMBER_PASS     AS password,
+            MEMBER_NAME     AS memName,
+            MEMBER_TYPE     AS memType,
+            REG_DATE        AS regDate,
+            UPDATE_ID       AS updateId,
+            UPDATE_DATE     AS updateDate
+        FROM MEMBER
+        WHERE MEMBER_EMAIL = #{email}
     </select>
 
 </mapper>
