@@ -29,6 +29,7 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     const savedInfo = localStorage.getItem("userInfo");
+    console.log("Saved userInfo:", savedInfo);
     if (savedInfo) {
       setUserInfo(JSON.parse(savedInfo));
     }
