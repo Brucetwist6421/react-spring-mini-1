@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 
 import kr.or.ddit.config.JwtProvider;
 import kr.or.ddit.mapper.AccountMapper;
-import kr.or.ddit.mapper.MemberMapper; // UserMapper에서 MemberMapper로 명칭 통일 권장
 import kr.or.ddit.service.AuthService;
 import kr.or.ddit.vo.AccountVO;
 import kr.or.ddit.vo.LoginRequestVO;
@@ -25,7 +24,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponseVO authenticate(LoginRequestVO loginVO) {
         // 1. 유저 조회
-        AccountVO user = accountMapper.findByAccId(loginVO.getAccountId());
+        AccountVO user = accountMapper.findByAccId(loginVO.getAccId());
 
         if (user != null) {
             // log.info("리액트가 보낸 비번: [{}]", loginVO.getPassword());

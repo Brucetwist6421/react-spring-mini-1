@@ -22,13 +22,13 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequestVO loginVO) {
         try {
             // 1. 리액트에서 보낸 데이터가 VO에 잘 담겼는지 확인 
-            log.info("로그인 요청 데이터 - Account ID: {}, Password: {}", loginVO.getAccountId(),
+            log.info("로그인 요청 데이터 - Account ID: {}, Password: {}", loginVO.getAccId(),
                     (loginVO.getPassword() != null ? "입력됨" : "NULL!!!"));
 
             // 2. 실제 서비스 로직 호출
             LoginResponseVO response = authService.authenticate(loginVO);
 
-            log.info("로그인 성공: {}", loginVO.getAccountId());
+            log.info("로그인 성공: {}", loginVO.getAccId());
             return ResponseEntity.ok(response);
 
         } catch (RuntimeException e) {

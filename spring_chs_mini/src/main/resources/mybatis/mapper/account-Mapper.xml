@@ -15,7 +15,7 @@
             a.reg_date
         FROM lms.tb_account a
         LEFT JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
-        ORDER BY a.reg_date DESC;
+        WHERE a.account_id = #{accountId}
     </select>
 
 </mapper>

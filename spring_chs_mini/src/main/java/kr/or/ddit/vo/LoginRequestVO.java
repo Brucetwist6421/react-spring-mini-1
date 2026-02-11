@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // 마이바티스용 기본 생성자
 @AllArgsConstructor // 전체 필드 생성자
 public class LoginRequestVO {
-    String accountId;
+    String accId;
     String email;
     String password;
 }
