@@ -14,13 +14,9 @@ const LmsDashboard: React.FC = () => {
   const [data, setData] = useState<LmsDashboardData[]>([]);
 
   useEffect(() => {
-    console.log("LmsDashboard mounted, fetching data...");  
     const fetchData = async () => {
       try {
         const res = await axios.get("/api/lmsDashboard/stats");
-        // 데이터가 배열인지 확인 후 설정 (null 방지)
-        console.log("Fetched data:", res.data);
-        console.log("Fetched data2:", res);
         setData(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("데이터 로딩 실패:", err);

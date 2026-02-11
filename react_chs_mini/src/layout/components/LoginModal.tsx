@@ -35,11 +35,11 @@ export default function LoginModal({ open, onClose }: LoginProps) {
     e.preventDefault();
     
     // 2. 입력값 검증 (유효성 검사)
-    const emailEmpty = formData.accId.trim() === "";
+    const idEmpty = formData.accId.trim() === "";
     const passwordEmpty = formData.password.trim() === "";
 
-    if (emailEmpty || passwordEmpty) {
-      setErrors({ accId: emailEmpty, password: passwordEmpty });
+    if (idEmpty || passwordEmpty) {
+      setErrors({ accId: idEmpty, password: passwordEmpty });
       return; // 서버 요청 중단
     }
 
