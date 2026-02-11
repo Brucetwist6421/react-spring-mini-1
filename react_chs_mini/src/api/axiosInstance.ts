@@ -4,7 +4,7 @@ const api = axios.create({
   // baseURL: "https://jsonplaceholder.typicode.com", // baseURL 은 axios 요청의 기본 URL 설정
   // baseURL: "http://localhost:5174", // 로컬 백엔드 서버 주소
   baseURL: "http://168.107.51.143:8080",
-  timeout: 5000,
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
