@@ -70,7 +70,7 @@ const NavigationBar = () => {
   // 로그인 상태에 따른 메뉴 필터링 (로그인 안 되면 대시보드만)
   const visibleMenuItems = isLoggedIn 
     ? menuItems 
-    : menuItems.filter(item => item.text === "대시보드");
+    : menuItems.filter(item => item.text === "대시보드" || item.text === "기존 포켓몬 목록" || item.text === "새 포켓몬 목록" || item.text === "새 포켓몬 등록");
 
   const currentWidth = open ? fullWidth : collapsedWidth;
 
