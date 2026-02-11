@@ -1,25 +1,61 @@
-import { useState, useEffect } from "react"; // useEffect 추가
+import { useState, useEffect, useCallback } from "react";
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Avatar, IconButton } from "@mui/material";
 import { Dashboard, CatchingPokemon, AddCircle, Settings, CatchingPokemonTwoTone, Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const fullWidth = 260;
 const collapsedWidth = 88;
+const AUTO_LOGOUT_TIME = 15 * 60 * 1000; // 15분을 밀리초로 환산
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(true);
-  
-  // 1. 로그인 상태 관리
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // --- 자동 로그아웃 로직 추가 시작 ---
+  
+  const handleLogout = useCallback(() => {
+    localStorage.clear();
+    setIsLoggedIn(false);
+    alert("오랫동안 활동이 없어 자동 로그아웃되었습니다.");
+    window.location.href = "/"; // 메인으로 이동
+  }, []);
+
   useEffect(() => {
-    // 페이지 로드 및 경로 변경 시마다 토큰 확인
     const token = localStorage.getItem("accessToken");
-    console.log("토큰 확인:", token);
     setIsLoggedIn(!!token);
-  }, [location]); // 경로가 바뀔 때마다 로그인 상태를 다시 체크 (로그인/로그아웃 대응)
+
+    if (!token) return; // 로그인 상태가 아니면 타이머 작동 안 함
+
+    let timer: number;
+
+    // 타이머 재설정 함수
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(handleLogout, AUTO_LOGOUT_TIME);
+    };
+
+    // 활동 감지 이벤트 리스너 등록
+    const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
+    
+    events.forEach((event) => {
+      window.addEventListener(event, resetTimer);
+    });
+
+    // 처음 로드될 때 타이머 시작
+    resetTimer();
+
+    // 언마운트 시 클린업
+    return () => {
+      if (timer) clearTimeout(timer);
+      events.forEach((event) => {
+        window.removeEventListener(event, resetTimer);
+      });
+    };
+  }, [location, handleLogout]);
+
+  // --- 자동 로그아웃 로직 추가 끝 ---
 
   const toggleDrawer = () => setOpen(!open);
 
@@ -31,12 +67,10 @@ const NavigationBar = () => {
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];
 
-  // 2. 로그인 상태에 따라 보여줄 메뉴 필터링
-  // 로그인 안 된 경우(false): "대시보드"만 유지
-  // 로그인 된 경우(true): 전체 메뉴 노출
+  // 로그인 상태에 따른 메뉴 필터링 (로그인 안 되면 대시보드만)
   const visibleMenuItems = isLoggedIn 
-    ? menuItems.filter(item => item.text === "대시보드" || item.text === "기존 포켓몬 목록") 
-    : menuItems;
+    ? menuItems 
+    : menuItems.filter(item => item.text === "대시보드");
 
   const currentWidth = open ? fullWidth : collapsedWidth;
 
@@ -46,12 +80,10 @@ const NavigationBar = () => {
       sx={{
         width: currentWidth,
         flexShrink: 0,
-        whiteSpace: "nowrap",
         "& .MuiDrawer-paper": {
           width: currentWidth,
           transition: "width 0.3s ease-in-out",
           overflowX: "hidden",
-          boxSizing: "border-box",
           backgroundColor: "#1e293b",
           color: "#f8fafc",
           borderRight: "1px solid rgba(255, 255, 255, 0.1)",
@@ -59,6 +91,7 @@ const NavigationBar = () => {
         },
       }}
     >
+      {/* 상단 로고 영역 */}
       <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: open ? "space-between" : "center", borderBottom: "1px solid #334155" }}>
         {open && (
           <Typography variant="h6" fontWeight="bold" color="#38bdf8" sx={{ ml: 1 }}>
@@ -70,9 +103,9 @@ const NavigationBar = () => {
         </IconButton>
       </Box>
 
+      {/* 메뉴 리스트 */}
       <Box sx={{ overflow: "auto", mt: 2 }}>
         <List sx={{ px: open ? 2 : 1.5 }}>
-          {/* 3. 필터링된 메뉴 리스트(visibleMenuItems) 사용 */}
           {visibleMenuItems.map((item) => {
             const isSelected = location.pathname === item.path;
             return (
@@ -86,24 +119,13 @@ const NavigationBar = () => {
                     px: 2.5,
                     borderRadius: "8px",
                     "&.Mui-selected": { backgroundColor: "#38bdf8", color: "#fff" },
-                    "&.Mui-selected:hover": { backgroundColor: "#0ea5e9" },
                     "&:hover": { backgroundColor: "#334155" },
                   }}
                 >
-                  <ListItemIcon sx={{ 
-                    color: isSelected ? "#fff" : "#94a3b8", 
-                    minWidth: 0, 
-                    mr: open ? 2 : "auto", 
-                    justifyContent: "center" 
-                  }}>
+                  <ListItemIcon sx={{ color: isSelected ? "#fff" : "#94a3b8", minWidth: 0, mr: open ? 2 : "auto" }}>
                     {item.icon}
                   </ListItemIcon>
-                  {open && (
-                    <ListItemText 
-                      primary={item.text} 
-                      primaryTypographyProps={{ fontSize: "14px", fontWeight: 500 }} 
-                    />
-                  )}
+                  {open && <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: "14px" }} />}
                 </ListItemButton>
               </ListItem>
             );
@@ -111,14 +133,14 @@ const NavigationBar = () => {
         </List>
       </Box>
 
-      {/* 4. 하단 프로필 영역도 로그인 상태일 때만 노출하거나 정보를 다르게 표시 */}
+      {/* 하단 프로필 영역 */}
       {isLoggedIn && (
-        <Box sx={{ p: 2, mt: "auto", borderTop: "1px solid #334155", display: "flex", justifyContent: open ? "flex-start" : "center", alignItems: "center", gap: 2 }}>
-          <Avatar sx={{ bgcolor: "#38bdf8", width: 32, height: 32, fontSize: '0.8rem' }}>AD</Avatar>
+        <Box sx={{ p: 2, mt: "auto", borderTop: "1px solid #334155", display: "flex", alignItems: "center", gap: 2 }}>
+          <Avatar sx={{ bgcolor: "#38bdf8", width: 32, height: 32 }}>AD</Avatar>
           {open && (
-            <Box sx={{ overflow: "hidden" }}>
-              <Typography variant="body2" fontWeight="bold" noWrap>Admin User</Typography>
-              <Typography variant="caption" color="#94a3b8" noWrap>Premium Plan</Typography>
+            <Box>
+              <Typography variant="body2" fontWeight="bold">Admin User</Typography>
+              <Typography variant="caption" color="#94a3b8">Administrator</Typography>
             </Box>
           )}
         </Box>

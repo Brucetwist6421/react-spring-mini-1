@@ -42,7 +42,7 @@ function App() {
                 {/* 1. 구체적인 경로를 먼저 선언 */}
                 <Route path="/pokemonList" element={<PokemonList />} />
                 <Route path="/newPokemonList" element={<NewPokemonList />} />
-                <Route path="/pokemon/create" element={<PokemonCreatePage />} />
+                {/* <Route path="/pokemon/create" element={<PokemonCreatePage />} /> */}
                 <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon2/:id" element={<NewPokemonDetailPage />} />
                 {/* 2. 동적 파라미터는 가장 아래에 배치 */}
@@ -50,6 +50,7 @@ function App() {
                   <Route path="/:pokemonName" element={<MainDashboard />} />
 
                 <Route element={<ProtectedRoute />}>
+                  <Route path="/pokemon/create" element={<PokemonCreatePage />} />
                   {/* 2. 동적 파라미터는 가장 아래에 배치 */}
                   <Route path="/" element={<MainDashboard />} />
                   <Route path="/:pokemonName" element={<MainDashboard />} />
