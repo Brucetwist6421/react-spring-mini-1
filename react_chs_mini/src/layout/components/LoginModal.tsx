@@ -5,6 +5,7 @@ import {
   DialogActions, Button, Box, CircularProgress 
 } from "@mui/material";
 import api from "../../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
   open: boolean;
@@ -14,6 +15,8 @@ interface LoginProps {
 export default function LoginModal({ open, onClose }: LoginProps) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
   
   // 1. 에러 상태 관리를 위한 state 추가
   const [errors, setErrors] = useState({ email: false, password: false });
@@ -52,7 +55,8 @@ export default function LoginModal({ open, onClose }: LoginProps) {
           
           alert(`${memName}님, 환영합니다!`);
           onClose();
-          window.location.reload(); 
+          navigate("/lmsDashboard");
+          //window.location.reload(); 
       }
     } catch (error: any) {
       console.error("Login Failure:", error);

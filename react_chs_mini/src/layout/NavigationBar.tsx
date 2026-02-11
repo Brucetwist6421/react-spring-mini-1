@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Avatar, IconButton } from "@mui/material";
 import { Dashboard, CatchingPokemon, AddCircle, Settings, CatchingPokemonTwoTone, Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
+import dditLogo from "../api/datas/dditLogo.png";
 
 const fullWidth = 260;
 const collapsedWidth = 88;
@@ -60,17 +61,18 @@ const NavigationBar = () => {
   const toggleDrawer = () => setOpen(!open);
 
   const menuItems = [
-    { text: "대시보드", icon: <Dashboard />, path: "/" },
+    { text: "포켓몬대시보드", icon: <Dashboard />, path: "/" },
     { text: "기존 포켓몬 목록", icon: <CatchingPokemon />, path: "/pokemonList" },
     { text: "새 포켓몬 목록", icon: <CatchingPokemonTwoTone />, path: "/newPokemonList" },
     { text: "새 포켓몬 등록", icon: <AddCircle />, path: "/pokemon/create" },
+    { text: "LMS 대시보드", icon: <CatchingPokemonTwoTone />, path: "/lmsDashboard" },
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];
 
   // 로그인 상태에 따른 메뉴 필터링 (로그인 안 되면 대시보드만)
   const visibleMenuItems = isLoggedIn 
-    ? menuItems 
-    : menuItems.filter(item => item.text === "대시보드" || item.text === "기존 포켓몬 목록" || item.text === "새 포켓몬 목록" || item.text === "새 포켓몬 등록");
+    ? menuItems.filter(item => item.text === "LMS 대시보드")
+    : menuItems.filter(item => item.text === "포켓몬대시보드" || item.text === "기존 포켓몬 목록" || item.text === "새 포켓몬 목록" || item.text === "새 포켓몬 등록");
 
   const currentWidth = open ? fullWidth : collapsedWidth;
 
@@ -92,12 +94,39 @@ const NavigationBar = () => {
       }}
     >
       {/* 상단 로고 영역 */}
-      <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: open ? "space-between" : "center", borderBottom: "1px solid #334155" }}>
+      <Box 
+        sx={{ 
+          p: 2.5, 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: open ? "space-between" : "center", 
+          borderBottom: "1px solid #334155" 
+        }}
+      >
         {open && (
-          <Typography variant="h6" fontWeight="bold" color="#38bdf8" sx={{ ml: 1 }}>
-            POKEMON
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* 1. 로그인 시에만 나타나는 썸네일 이미지 */}
+            {isLoggedIn && (
+              <Box
+                component="img"
+                src={dditLogo} // public 폴더 내의 이미지 경로 혹은 URL
+                alt="Logo"
+                sx={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%", // 원형 이미지를 원할 경우
+                  objectFit: "cover"
+                }}
+              />
+            )}
+            {/* 2. 로그인 여부에 따른 텍스트 변경 */}
+            <Typography variant="h6" fontWeight="bold" color="#38bdf8" sx={{ ml: 1 }}>
+              {isLoggedIn ? "대덕인재개발원" : "POKEMON"}
+            </Typography>
+
+          </Box>
         )}
+        
         <IconButton onClick={toggleDrawer} sx={{ color: "#94a3b8" }}>
           {open ? <ChevronLeftIcon /> : <MenuIcon />}
         </IconButton>

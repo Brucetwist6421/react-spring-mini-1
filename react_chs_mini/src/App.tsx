@@ -13,6 +13,7 @@ import NewPokemonList from "./pages/lists/NewPokemonList";
 import PokemonCreatePage from "./pages/inserts/PokemonCreatePage";
 import NewPokemonDetailPage from "./pages/details/NewPokemonDetailPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import LmsDashboard from "./pages/lmsDashboard/LmsDashboard";
 
 function App() {
   return (
@@ -54,6 +55,8 @@ function App() {
                   {/* 2. 동적 파라미터는 가장 아래에 배치 */}
                   <Route path="/" element={<MainDashboard />} />
                   <Route path="/:pokemonName" element={<MainDashboard />} />
+                  {/* 추가된 LMS 대시보드 경로 */}
+                  <Route path="/lmsDashboard" element={<LmsDashboard />} />
                 </Route>
               </Routes>
             </Box>

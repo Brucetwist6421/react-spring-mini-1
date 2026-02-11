@@ -6,7 +6,9 @@ import { useState, useEffect, type MouseEvent } from "react";
 import LoginModal from "./components/LoginModal";
 import MenuProfile from "../pages/MenuProfile";
 import { LoggedInMenu, LoggedOutMenu } from "./components/HeaderComponents";
-// 분리한 컴포넌트 임포트
+
+// 1. 이미지 임포트 (경로는 실제 파일 위치에 맞게 수정하세요)
+import dditLogo from "../api/datas/dditLogo.png"; 
 
 interface HeaderProps {
   title?: string;
@@ -24,15 +26,13 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
   // 사용자 정보 state
   const [userInfo, setUserInfo] = useState<{ email: string; memName: string; memType: string } | null>(null);
 
-  // 1. 초기 로드 시 로그인 상태 체크
+  // 초기 로드 시 로그인 상태 체크
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     const savedInfo = localStorage.getItem("userInfo");
     if (savedInfo) {
       setUserInfo(JSON.parse(savedInfo));
     }
-    console.log("savedInfo:", savedInfo);
-    console.log("userInfo:", userInfo);
     setIsLoggedIn(!!token);
   }, []);
 
@@ -44,13 +44,12 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
     setAnchorEl(null);
   };
 
-  // 2. 로그아웃 로직
+  // 로그아웃 로직
   const handleLogout = () => {
-    // 모든 로컬 스토리지 데이터 삭제 (accessToken, userInfo 등 한 번에)
     localStorage.clear();
     setIsLoggedIn(false);
     alert("로그아웃 되었습니다.");
-    window.location.reload(); // 세션 초기화를 위해 새로고침
+    window.location.reload(); 
   };
 
   return (
@@ -74,21 +73,39 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
           <MenuIcon />
         </IconButton>
 
-        <Typography 
-          variant="h6" 
-          component="div" 
-          sx={{ 
-            flexGrow: 1, 
-            fontWeight: 700, 
-            fontSize: "1.1rem",
-            color: "#f8fafc" 
-          }}
-        >
-          {title}
-        </Typography>
+        {/* 2. 로고 텍스트 및 이미지 영역 수정 */}
+        <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
+          {/* 로그인 시에만 로고 이미지 표시 */}
+          {isLoggedIn && (
+            <Box
+              component="img"
+              src={dditLogo}
+              alt="DDIT Logo"
+              sx={{
+                width: 32,
+                height: 32,
+                objectFit: "contain",
+                borderRadius: "4px" // 필요 시 조절
+              }}
+            />
+          )}
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              fontWeight: 700, 
+              fontSize: "1.1rem",
+              color: "#f8fafc" 
+            }}
+          >
+            {/* 로그인 여부에 따라 타이틀 변경 */}
+            {isLoggedIn && userInfo 
+              ? `대덕인재개발원 (${userInfo.memName}) ` 
+            : title}
+          </Typography>
+        </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          {/* 3. 모듈화된 버튼 컴포넌트 조건부 렌더링 */}
           {isLoggedIn ? (
             <LoggedInMenu onLogoutClick={handleLogout} />
           ) : (
@@ -102,8 +119,7 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
               <AccountCircle 
                 sx={{ 
                   fontSize: 28, 
-                  // 로그인 상태일 때 아이콘 색상을 스카이블루로 변경하여 표시
-                  color: isLoggedIn ? "#38bdf8" : (isProfileOpen ? "#38bdf8" : "#94a3b8"), 
+                  color: "#38bdf8", 
                   transition: "color 0.2s"
                 }} 
               />
@@ -118,7 +134,8 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
         anchorEl={anchorEl} 
         open={isProfileOpen} 
         onClose={handleProfileClose} 
-        onLogout={handleLogout} // 추가된 부분
+        onLogout={handleLogout} 
+        userInfo={userInfo}
       />
     </AppBar>
   );

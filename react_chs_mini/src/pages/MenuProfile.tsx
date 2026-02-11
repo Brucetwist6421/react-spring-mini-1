@@ -1,16 +1,19 @@
-import { Avatar, Box, Divider, Menu, MenuItem, Typography, ListItemIcon } from "@mui/material";
 import Logout from "@mui/icons-material/Logout";
-import Settings from "@mui/icons-material/Settings";
-import Person from "@mui/icons-material/Person";
+import { Avatar, Box, Divider, ListItemIcon, Menu, MenuItem, Typography } from "@mui/material";
 
 interface ProfileMenuProps {
   anchorEl: HTMLElement | null;
   open: boolean;
   onClose: () => void;
-  onLogout: () => void; // 로그아웃 처리를 위한 프롭 추가
+  onLogout: () => void;
+  // 유저 정보 전달을 위한 프롭 추가
+  userInfo: { email: string; memName: string; memType: string } | null;
 }
 
-export default function MenuProfile({ anchorEl, open, onClose, onLogout }: ProfileMenuProps) {
+export default function MenuProfile({ anchorEl, open, onClose, onLogout, userInfo }: ProfileMenuProps) {
+  // 이름의 첫 글자를 아바타에 표시 (정보가 없으면 'A')
+  const initial = userInfo?.memName ? userInfo.memName.charAt(0) : 'A';
+
   return (
     <Menu
       anchorEl={anchorEl}
@@ -19,7 +22,6 @@ export default function MenuProfile({ anchorEl, open, onClose, onLogout }: Profi
       onClick={onClose}
       transformOrigin={{ horizontal: 'right', vertical: 'top' }}
       anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      // Deprecated 된 PaperProps 대신 slotProps 사용
       slotProps={{
         paper: {
           elevation: 3,
@@ -28,7 +30,7 @@ export default function MenuProfile({ anchorEl, open, onClose, onLogout }: Profi
             mt: 1.5, 
             borderRadius: 2, 
             overflow: 'visible',
-            '&:before': { // 메뉴 화살표 효과 (선택 사항)
+            '&:before': {
               content: '""',
               display: 'block',
               position: 'absolute',
@@ -45,21 +47,27 @@ export default function MenuProfile({ anchorEl, open, onClose, onLogout }: Profi
       }}
     >
       <Box sx={{ px: 2, py: 1.5, textAlign: 'center' }}>
-        <Avatar sx={{ mx: 'auto', mb: 1, bgcolor: '#38bdf8' }}>A</Avatar>
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>포켓몬 마스터</Typography>
-        <Typography variant="body2" color="text.secondary">admin@test.com</Typography>
+        {/* 아바타에 이름 첫 글자 표시 */}
+        <Avatar sx={{ mx: 'auto', mb: 1, bgcolor: '#38bdf8', fontWeight: 'bold' }}>
+          {initial}
+        </Avatar>
+        
+        {/* 실제 로그인 정보로 세팅 */}
+        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          {userInfo?.memName || "방문자"}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {userInfo?.email || "이메일 정보 없음"}
+        </Typography>
+        
+        {/* 회원 유형 표시 (선택 사항) */}
+        {userInfo?.memType && (
+          <Typography variant="caption" sx={{ mt: 0.5, display: 'block', color: '#38bdf8' }}>
+            {userInfo.memType === 'ADMIN' ? '관리자 계정' : '일반 사용자'}
+          </Typography>
+        )}
       </Box>
       <Divider />
-      <MenuItem onClick={onClose}>
-        <ListItemIcon><Person fontSize="small" /></ListItemIcon>
-        내 프로필
-      </MenuItem>
-      <MenuItem onClick={onClose}>
-        <ListItemIcon><Settings fontSize="small" /></ListItemIcon>
-        설정
-      </MenuItem>
-      <Divider />
-      {/* 실제 로그아웃 함수 호출 */}
       <MenuItem 
         onClick={() => {
           onClose();
