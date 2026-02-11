@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
@@ -32,6 +31,7 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
       setUserInfo(JSON.parse(savedInfo));
     }
     console.log("savedInfo:", savedInfo);
+    console.log("userInfo:", userInfo);
     setIsLoggedIn(!!token);
   }, []);
 
