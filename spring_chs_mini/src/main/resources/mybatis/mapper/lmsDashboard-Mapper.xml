@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.LmsDashboardMapper">
+
+    <resultMap id="dashboardMap" type="kr.or.ddit.vo.LmsDashboardVO">
+        <result property="className" column="class_name"/>
+        <result property="term" column="term"/>
+        <result property="period" column="period"/>
+        <result property="totalEnrolled" column="total_enrolled"/>
+        <result property="activeAccounts" column="active_accounts"/>
+        <result property="dropoutCount" column="dropout_count"/>
+        <result property="totalAvgRatio" column="total_avg_ratio"/>
+        <result property="subjects" column="subjects" 
+                typeHandler="kr.or.ddit.config.JsonTypeHandler"/>
+    </resultMap>
+
+    <select id="selectLmsDashboardStats" resultMap="dashboardMap">
+        WITH AccountStats AS (
+            SELECT 
+                CUR_SEQ,
+                COUNT(*) AS total_enrolled,
+                COUNT(*) FILTER (WHERE STATUS = 'ENROLLED') AS active_accounts,
+                COUNT(*) FILTER (WHERE STATUS = 'DROPOUT') AS dropout_count
+            FROM lms.TB_ACCOUNT
+            GROUP BY CUR_SEQ
+        ),
+        TestStats AS (
+            SELECT 
+                t.SUB_SEQ,
+                COUNT(r.RESULT_SEQ) AS submitted_count
+            FROM lms.TB_TEST t
+            LEFT JOIN lms.TB_TEST_RESULT r ON t.TEST_SEQ = r.TEST_SEQ
+            LEFT JOIN lms.TB_ACCOUNT acc ON r.ACC_SEQ = acc.ACC_SEQ
+            WHERE acc.STATUS = 'ENROLLED' OR r.RESULT_SEQ IS NULL
+            GROUP BY t.SUB_SEQ
+        )
+        SELECT 
+            c.ROOM AS class_name,
+            c.TERM AS term,
+            c.START_DATE || ' ~ ' || c.END_DATE AS period,
+            COALESCE(ast.total_enrolled, 0) AS total_enrolled,
+            COALESCE(ast.active_accounts, 0) AS active_accounts,
+            COALESCE(ast.dropout_count, 0) AS dropout_count,
+            
+            /* 🔥 이 부분을 OVER() 없이 일반 AVG()로 수정했습니다 */
+            ROUND(AVG(
+                CASE 
+                    WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
+                    ELSE (COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100)
+                END
+            ), 1) AS total_avg_ratio,
+            
+            JSONB_AGG(
+                JSONB_BUILD_OBJECT(
+                    'subjectName', s.SUB_NAME,
+                    'submittedCount', COALESCE(tst.submitted_count, 0),
+                    'ratio', CASE 
+                                WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
+                                ELSE ROUND(COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100, 1)
+                            END
+                ) ORDER BY s.SUB_SEQ
+            ) AS subjects
+        FROM lms.TB_CURRICULUM c
+        LEFT JOIN AccountStats ast ON c.CUR_SEQ = ast.CUR_SEQ
+        JOIN lms.TB_SUBJECT s ON c.CUR_SEQ = s.CUR_SEQ
+        LEFT JOIN TestStats tst ON s.SUB_SEQ = tst.SUB_SEQ
+        <where>
+            <if test="year != null and year != ''">
+                AND TO_CHAR(c.START_DATE, 'YYYY') = #{year}
+            </if>
+        </where>
+        GROUP BY 
+            c.CUR_SEQ, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, 
+            ast.total_enrolled, ast.active_accounts, ast.dropout_count
+        ORDER BY c.TERM DESC
+    </select>
+</mapper>

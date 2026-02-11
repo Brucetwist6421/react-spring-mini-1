@@ -21,7 +21,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestVO loginVO) {
         try {
-            // 1. 리액트에서 보낸 데이터가 VO에 잘 담겼는지 확인 (매우 중요!)
+            // 1. 리액트에서 보낸 데이터가 VO에 잘 담겼는지 확인 
             log.info("로그인 요청 데이터 - Email: {}, Password: {}", loginVO.getEmail(),
                     (loginVO.getPassword() != null ? "입력됨" : "NULL!!!"));
 
