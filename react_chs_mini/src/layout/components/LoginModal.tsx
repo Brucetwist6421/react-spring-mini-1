@@ -13,13 +13,13 @@ interface LoginProps {
 }
 
 export default function LoginModal({ open, onClose }: LoginProps) {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ accId: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   
   // 1. 에러 상태 관리를 위한 state 추가
-  const [errors, setErrors] = useState({ email: false, password: false });
+  const [errors, setErrors] = useState({ accId: false, password: false });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,25 +35,25 @@ export default function LoginModal({ open, onClose }: LoginProps) {
     e.preventDefault();
     
     // 2. 입력값 검증 (유효성 검사)
-    const emailEmpty = formData.email.trim() === "";
+    const emailEmpty = formData.accId.trim() === "";
     const passwordEmpty = formData.password.trim() === "";
 
     if (emailEmpty || passwordEmpty) {
-      setErrors({ email: emailEmpty, password: passwordEmpty });
+      setErrors({ accId: emailEmpty, password: passwordEmpty });
       return; // 서버 요청 중단
     }
 
     setLoading(true);
     try {
       const response = await api.post("/api/auth/login", formData);
-      const { accessToken, email, memName, memType } = response.data; // 응답 데이터 구조에 맞게 구조분해할당
+      const { accessToken, accId, accName, accType } = response.data; // 응답 데이터 구조에 맞게 구조분해할당
 
       if (accessToken) {
           localStorage.setItem("accessToken", accessToken);
           // 사용자 정보를 JSON 문자열로 변환하여 저장
-          localStorage.setItem("userInfo", JSON.stringify({ email, memName, memType }));
+          localStorage.setItem("userInfo", JSON.stringify({ accId, accName, accType }));
           
-          alert(`${memName}님, 환영합니다!`);
+          alert(`${accName}님, 환영합니다!`);
           onClose();
           navigate("/lmsDashboard");
           //window.location.reload(); 
@@ -77,17 +77,17 @@ export default function LoginModal({ open, onClose }: LoginProps) {
         <DialogContent>
           <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2 }}>
             <TextField 
-              name="email"
-              label="이메일 주소" 
+              name="accId"
+              label="아이디" 
               variant="outlined" 
               fullWidth 
               autoFocus 
-              autoComplete="email"
-              value={formData.email}
+              autoComplete="accId"
+              value={formData.accId}
               onChange={handleChange}
               // 3. MUI Error 속성 적용
-              error={errors.email}
-              helperText={errors.email ? "이메일을 입력해주세요." : ""}
+              error={errors.accId}
+              helperText={errors.accId ? "아이디를 입력해주세요." : ""}
             />
             <TextField 
               name="password"

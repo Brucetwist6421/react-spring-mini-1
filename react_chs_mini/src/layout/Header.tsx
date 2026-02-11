@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
@@ -24,7 +23,7 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
   const isProfileOpen = Boolean(anchorEl);
 
   // 사용자 정보 state
-  const [userInfo, setUserInfo] = useState<{ email: string; memName: string; memType: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<{ accId: string; accName: string; accType: string; accEmail: string } | null>(null);
 
   // 초기 로드 시 로그인 상태 체크
   useEffect(() => {
@@ -100,7 +99,7 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
           >
             {/* 로그인 여부에 따라 타이틀 변경 */}
             {isLoggedIn && userInfo 
-              ? `대덕인재개발원 (${userInfo.memName}) ` 
+              ? `대덕인재개발원 (${userInfo.accName}) ` 
             : title}
           </Typography>
         </Box>

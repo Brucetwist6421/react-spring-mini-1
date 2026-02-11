@@ -11,5 +11,5 @@ public interface MemberMapper {
      * @param email 사용자 이메일
      * @return MemberVO (비밀번호 포함)
      */
-    MemberVO findByEmail(String email);
+    MemberVO findByMemId(String email);
 }

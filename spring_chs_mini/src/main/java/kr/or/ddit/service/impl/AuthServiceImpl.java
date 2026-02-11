@@ -1,30 +1,31 @@
 package kr.or.ddit.service.impl;
 
-import kr.or.ddit.service.AuthService;
-import kr.or.ddit.mapper.MemberMapper; // UserMapper에서 MemberMapper로 명칭 통일 권장
-import kr.or.ddit.vo.LoginRequestVO;
-import kr.or.ddit.vo.LoginResponseVO;
-import kr.or.ddit.vo.MemberVO;
-import kr.or.ddit.config.JwtProvider;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import kr.or.ddit.config.JwtProvider;
+import kr.or.ddit.mapper.AccountMapper;
+import kr.or.ddit.mapper.MemberMapper; // UserMapper에서 MemberMapper로 명칭 통일 권장
+import kr.or.ddit.service.AuthService;
+import kr.or.ddit.vo.AccountVO;
+import kr.or.ddit.vo.LoginRequestVO;
+import kr.or.ddit.vo.LoginResponseVO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    private final MemberMapper memberMapper;
+    private final AccountMapper accountMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
     @Override
     public LoginResponseVO authenticate(LoginRequestVO loginVO) {
         // 1. 유저 조회
-        MemberVO user = memberMapper.findByEmail(loginVO.getEmail());
+        AccountVO user = accountMapper.findByAccId(loginVO.getAccountId());
 
         if (user != null) {
             // log.info("리액트가 보낸 비번: [{}]", loginVO.getPassword());
@@ -39,12 +40,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 2. 비밀번호 확인 (DB 필드명 password에 맞춤)
-        if (!passwordEncoder.matches(loginVO.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginVO.getPassword(), user.getAccountPasswd())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
         // 3. 토큰 생성 및 반환
-        String token = jwtProvider.createToken(user.getEmail());
-        return new LoginResponseVO(token, user.getEmail(), user.getMemName(), user.getMemType());
+        String token = jwtProvider.createToken(user.getAccountId());
+        return new LoginResponseVO(token, user.getAccountId(), user.getAccountEmail(), user.getAccountName(), user.getAccountType());
     }
 }

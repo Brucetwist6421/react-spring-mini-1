@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor // 전체 필드 생성자
 public class LoginResponseVO {
     String accessToken;
-    String email;
-    String memName;
-    String memType;
+    String accId;
+    String accEmail;
+    String accName;
+    String accType;
 }
