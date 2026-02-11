@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/pokemonList", "/newPokemonList").permitAll()
                         .requestMatchers("/pokemon/**").permitAll()
+                        .requestMatchers("/upload/**").permitAll()
                         .anyRequest().authenticated())
                 // 인증 예외 발생 시 401 에러를 반환하도록 설정
                 .exceptionHandling(exception -> exception
