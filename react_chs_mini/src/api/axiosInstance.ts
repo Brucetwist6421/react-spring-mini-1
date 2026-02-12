@@ -22,7 +22,7 @@ api.interceptors.request.use(
 // 응답 인터셉터
 api.interceptors.response.use(
   (response) => response,
-  /*
+  /* 시큐리티 적용 시 주석 풀어줘야 함
   (error) => {
     if (error.response && error.response.status === 401) {
       const { code } = error.response.data;

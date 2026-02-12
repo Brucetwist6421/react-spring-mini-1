@@ -7,7 +7,7 @@ interface StatCardProps {
   color: string;
 }
 
-const StatCard = ({ title, value, icon, color }: StatCardProps) => (
+const LmsStatCard = ({ title, value, icon, color }: StatCardProps) => (
   <Card sx={{ height: '100%', boxShadow: 2 }}>
     <CardContent>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -23,4 +23,4 @@ const StatCard = ({ title, value, icon, color }: StatCardProps) => (
   </Card>
 );
 
-export default StatCard;
+export default LmsStatCard;

@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/pokemonList", "/newPokemonList").permitAll()
                         .requestMatchers("/pokemon/**").permitAll()
                         .requestMatchers("/upload/**").permitAll()
-                        ///api/lmsDashboard
+                        ///api/lmsDashboard -- 시큐리티 적용 시 주석 풀어주기
                         .requestMatchers("/api/lmsDashboard/**").permitAll()
                         .anyRequest().authenticated())
                 // 인증 예외 발생 시 401 에러를 반환하도록 설정

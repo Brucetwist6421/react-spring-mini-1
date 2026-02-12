@@ -87,11 +87,17 @@ const LmsDashboard: React.FC = () => {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell width="60px" sx={{ bgcolor: "#f5f5f5" }} />
-              <TableCell sx={{ bgcolor: "#f5f5f5", fontWeight: "bold" }}>과정명(기수) / 교육기간</TableCell>
-              <TableCell align="center" sx={{ bgcolor: "#f5f5f5", fontWeight: "bold" }}>기수</TableCell>
-              <TableCell align="center" sx={{ bgcolor: "#f5f5f5", fontWeight: "bold" }}>현재인원/시작인원</TableCell>
-              <TableCell align="right" sx={{ bgcolor: "#f5f5f5", fontWeight: "bold" }}>과정 이행률</TableCell>
+              <TableCell width="50px" sx={{ bgcolor: "#f8fafc" }} />
+              <TableCell width="30%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold", color: "#475569" }}>
+                과정 명 (기수) / 교육기간
+              </TableCell>
+              <TableCell width="20%" align="left" sx={{ bgcolor: "#f8fafc", fontWeight: "bold", color: "#475569" }}>
+                현재 인원 / 시작 인원
+              </TableCell>
+              {/* align="right"를 "left"로 변경하여 막대 그래프와 시작점을 맞춥니다. */}
+              <TableCell width="45%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold", color: "#475569", pr: 4 }}>
+                과정 이행률
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
