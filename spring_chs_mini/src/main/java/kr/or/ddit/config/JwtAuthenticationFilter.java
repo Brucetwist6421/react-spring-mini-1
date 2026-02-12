@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.or.ddit.mapper.AccountMapper; // 추가
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -14,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
@@ -32,7 +35,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // [중복 로그인 체크 로직 추가 시작]
             String accountId = jwtProvider.getAccountId(token); // 토큰에서 ID 추출
             String savedToken = accountMapper.getCurrentToken(accountId); // DB 최신 토큰 조회
-
+            log.info("요청 토큰: {}", token);
+            log.info("DB 저장 토큰: {}", savedToken);
+            log.info("계정 ID: {}", accountId);
             // DB에 저장된 토큰이 없거나, 현재 토큰과 다르다면 (다른 곳에서 로그인함)
             if (savedToken == null || !savedToken.equals(token)) {
                 sendErrorResponse(response, "DUPLICATE_LOGIN", "다른 기기에서 로그인하여 접속이 종료되었습니다.");

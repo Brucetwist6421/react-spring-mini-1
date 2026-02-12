@@ -17,5 +17,5 @@ public interface AccountMapper {
 
     void updateCurrentToken(@Param("accountId") String accountId, @Param("token") String token);
     
-    String getCurrentToken(String accountId); // 나중에 Filter에서 대조할 때 사용
+    String getCurrentToken(@Param("accountId") String accountId); // 나중에 Filter에서 대조할 때 사용
 }
