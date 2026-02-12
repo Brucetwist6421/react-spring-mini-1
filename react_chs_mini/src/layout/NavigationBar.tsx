@@ -143,18 +143,39 @@ const NavigationBar = () => {
                   onClick={() => navigate(item.path)}
                   selected={isSelected}
                   sx={{
-                    minHeight: 48,
+                    minHeight: 52, // 글자가 커진 만큼 최소 높이를 살짝 키움 (48 -> 52)
                     justifyContent: open ? "initial" : "center",
                     px: 2.5,
                     borderRadius: "8px",
-                    "&.Mui-selected": { backgroundColor: "#38bdf8", color: "#fff" },
+                    "&.Mui-selected": { 
+                      backgroundColor: "#38bdf8", 
+                      color: "#fff",
+                      "&:hover": { backgroundColor: "#0ea5e9" } // 선택된 상태 호버 색상 추가
+                    },
                     "&:hover": { backgroundColor: "#334155" },
                   }}
                 >
-                  <ListItemIcon sx={{ color: isSelected ? "#fff" : "#94a3b8", minWidth: 0, mr: open ? 2 : "auto" }}>
+                  <ListItemIcon 
+                    sx={{ 
+                      color: isSelected ? "#fff" : "#94a3b8", 
+                      minWidth: 0, 
+                      mr: open ? 2 : "auto",
+                      "& svg": { fontSize: "24px" } // 아이콘도 글자 크기에 맞춰 시원하게 조정
+                    }}
+                  >
                     {item.icon}
                   </ListItemIcon>
-                  {open && <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: "14px" }} />}
+                  
+                  {open && (
+                    <ListItemText 
+                      primary={item.text} 
+                      primaryTypographyProps={{ 
+                        fontSize: "16px", // 👈 기존 14px에서 16px로 2px 상향
+                        fontWeight: isSelected ? 700 : 500, // 선택 시 글자를 더 굵게 하여 강조
+                        letterSpacing: "-0.3px" // 글자가 커진 만큼 자간을 살짝 조절
+                      }} 
+                    />
+                  )}
                 </ListItemButton>
               </ListItem>
             );
