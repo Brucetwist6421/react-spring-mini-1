@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Box, Grid, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import PercentIcon from "@mui/icons-material/Percent";
 import SchoolIcon from "@mui/icons-material/School";
+import { Box, CircularProgress, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
-import axios from "axios";
-import type { LmsDashboardData } from "./types/lmsDashboardType";
+import api from "../../api/axiosInstance";
 import LmsDashboardRow from "./components/LmsDashboardRow";
 import LmsStatCard from "./components/LmsStatCard";
+import type { LmsDashboardData } from "./types/lmsDashboardType";
 
 const LmsDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -16,7 +16,7 @@ const LmsDashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("/api/lmsDashboard/stats");
+        const res = await api.get("/api/lmsDashboard/stats");
         setData(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("데이터 로딩 실패:", err);

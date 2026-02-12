@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import { 
-  Dialog, DialogTitle, DialogContent, TextField, 
-  DialogActions, Button, Box, CircularProgress 
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField
 } from "@mui/material";
+import { useState } from "react";
 import api from "../../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
   open: boolean;
@@ -16,7 +21,6 @@ export default function LoginModal({ open, onClose }: LoginProps) {
   const [formData, setFormData] = useState({ accId: "", password: "" });
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
   
   // 1. 에러 상태 관리를 위한 state 추가
   const [errors, setErrors] = useState({ accId: false, password: false });
@@ -55,7 +59,8 @@ export default function LoginModal({ open, onClose }: LoginProps) {
           
           alert(`${accName}님, 환영합니다!`);
           onClose();
-          navigate("/lmsDashboard");
+          // 이렇게 하면 axios 인스턴스가 새로 초기화되면서 localStorage에서 새 토큰을 읽어옵니다.
+          window.location.href = "/lmsDashboard";
           //window.location.reload(); 
       }
     } catch (error: any) {
