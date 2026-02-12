@@ -3,6 +3,7 @@
 <mapper namespace="kr.or.ddit.mapper.LmsDashboardMapper">
 
     <resultMap id="dashboardMap" type="kr.or.ddit.vo.LmsDashboardVO">
+        <id property="curSeq" column="cur_seq" />
         <result property="className" column="class_name"/>
         <result property="term" column="term"/>
         <result property="period" column="period"/>
