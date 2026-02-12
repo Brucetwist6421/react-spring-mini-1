@@ -87,7 +87,7 @@ const LmsDashboard: React.FC = () => {
         <Grid size={{ xs: 12, sm: 4 }}>
           <LmsStatCard 
             title="누적 수강생" 
-            value={totalStudents.toLocaleString()} 
+            value={`${totalStudents.toLocaleString()} 명`} 
             icon={<PeopleIcon sx={{ fontSize: 32 }} />} 
             color="#3b82f6" 
           />
@@ -95,7 +95,7 @@ const LmsDashboard: React.FC = () => {
         <Grid size={{ xs: 12, sm: 4 }}>
           <LmsStatCard 
             title="현재 재학생" 
-            value={activeStudents.toLocaleString()} 
+            value={`${activeStudents.toLocaleString()} 명`} 
             icon={<SchoolIcon sx={{ fontSize: 32 }} />} 
             color="#10b981" 
           />
@@ -103,7 +103,7 @@ const LmsDashboard: React.FC = () => {
         <Grid size={{ xs: 12, sm: 4 }}>
           <LmsStatCard 
             title="전체 평균 이행률" 
-            value={avgRatio} 
+            value={`${avgRatio} %`}
             icon={<PercentIcon sx={{ fontSize: 32 }} />} 
             color="#f59e0b" 
           />
