@@ -77,29 +77,29 @@
     </select>
 
     <resultMap id="studentScoreMap" type="kr.or.ddit.vo.LmsStudentScoreVO">
-        <result property="accSeq" column="acc_seq"/>
+        <id property="accSeq" column="acc_seq"/>
         <result property="accountName" column="account_name"/>
         <result property="totalScore" column="total_sum"/>
         <result property="avgScore" column="total_avg"/>
-        <result property="scores" column="scores" 
-                typeHandler="kr.or.ddit.config.JsonTypeHandler"/>
+        
+        <collection property="scores" ofType="kr.or.ddit.vo.SubjectScoreVO">
+            <result property="subjectName" column="sub_name"/>
+            <result property="score" column="score"/>
+        </collection>
     </resultMap>
 
     <select id="selectStudentScoresByCurriculum" resultMap="studentScoreMap">
         WITH StudentBase AS (
-            /* 1. 해당 교육과정의 재학생 목록 */
             SELECT acc_seq, account_name 
             FROM lms.tb_account 
             WHERE cur_seq = #{curSeq} AND status = 'ENROLLED'
         ),
         SubjectBase AS (
-            /* 2. 해당 교육과정의 과목 목록 */
             SELECT sub_seq, sub_name 
             FROM lms.tb_subject 
             WHERE cur_seq = #{curSeq}
         ),
         ScoreMatrix AS (
-            /* 3. 학생 x 과목 조합에 실제 점수 매칭 */
             SELECT 
                 sb.acc_seq,
                 sb.account_name,
@@ -110,20 +110,14 @@
             LEFT JOIN lms.tb_test t ON sj.sub_seq = t.sub_seq
             LEFT JOIN lms.tb_test_result tr ON t.test_seq = tr.test_seq AND sb.acc_seq = tr.acc_seq
         )
-        /* 4. 최종 학생별 집계 및 과목별 점수 JSON 화 */
         SELECT 
             acc_seq,
             account_name,
-            SUM(score) AS total_sum,
-            ROUND(AVG(score), 1) AS total_avg,
-            JSONB_AGG(
-                JSONB_BUILD_OBJECT(
-                    'subjectName', sub_name,
-                    'score', score
-                ) ORDER BY sub_name
-            ) AS scores
+            sub_name,
+            score,
+            SUM(score) OVER(PARTITION BY acc_seq) AS total_sum,
+            ROUND(AVG(score) OVER(PARTITION BY acc_seq), 1) AS total_avg
         FROM ScoreMatrix
-        GROUP BY acc_seq, account_name
-        ORDER BY account_name ASC
+        ORDER BY account_name ASC, sub_name ASC
     </select>
 </mapper>

@@ -40,6 +40,7 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
         setLoading(true);
         try {
             const res = await api.get(`/api/lmsDashboard/student-stats/${targetSeq}`);
+            console.log("서버에서 받은 학생 점수 상세:", res.data); // 이 로그를 확인하세요!
             setStudentScores(res.data);
         } catch (err) {
             console.error("전송 에러:", err);

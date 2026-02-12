@@ -69,7 +69,6 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
             startIcon={<AssessmentIcon />}
             onClick={(e) => {
               e.stopPropagation(); // 행 클릭(확장) 이벤트 방지
-              console.log("모달 열기 버튼 클릭됨", row);
               setIsModalOpen(true);
             }}
             sx={{ 
