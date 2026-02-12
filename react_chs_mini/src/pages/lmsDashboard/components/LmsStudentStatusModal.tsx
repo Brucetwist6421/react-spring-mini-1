@@ -24,13 +24,10 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [studentScores, setStudentScores] = useState<any[]>([]);
 
-  console.log("모달 전달 데이터:", row);
-  
 
   // 1. API 데이터 호출
   useEffect(() => {
     // row 자체를 찍어서 정확한 필드명을 확인
-    console.log("useEffect 실행됨, row 데이터:", row);
 
     // curSeq가 아니라 cur_seq 일 수도 있습니다.
     const targetSeq = row?.curSeq || row?.cur_seq || row?.CUR_SEQ;
@@ -40,7 +37,6 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
         setLoading(true);
         try {
             const res = await api.get(`/api/lmsDashboard/student-stats/${targetSeq}`);
-            console.log("서버에서 받은 학생 점수 상세:", res.data); // 이 로그를 확인하세요!
             setStudentScores(res.data);
         } catch (err) {
             console.error("전송 에러:", err);
@@ -50,7 +46,7 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
         };
         fetchStudentStats();
     } else {
-        console.warn("API 호출 조건 미충족: open =", open, "targetSeq =", targetSeq);
+        // console.warn("API 호출 조건 미충족: open =", open, "targetSeq =", targetSeq);
     }
   }, [open, row]);
 
