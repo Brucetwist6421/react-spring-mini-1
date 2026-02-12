@@ -23,23 +23,23 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const { status, data } = error.response || {};
+    if (error.response && error.response.status === 401) {
+      const { code } = error.response.data;
+      console.log("API 401 Error Code:", code);
 
-    // 401 에러 처리
-    if (status === 401) {
-      // 백엔드 JwtAuthenticationFilter에서 보낸 code 확인
-      if (data && data.code === "DUPLICATE_LOGIN") {
-        alert("⚠️ " + (data.message || "다른 기기에서 로그인하여 접속이 종료되었습니다."));
-      } else {
-        alert("세션이 만료되었습니다. 다시 로그인해주세요.");
-      }
+      // 중복 로그인 코드가 왔을 때
+      if (code === "DUPLICATE_LOGIN") {
+        alert("다른 기기에서 로그인하여 접속이 종료됩니다.");
+        localStorage.clear(); // 토큰 삭제
+        window.location.href = "/"; // 메인 또는 로그인 페이지로 강제 이동
+        return Promise.reject(error);
+      } 
       
-      // 로컬 데이터 정리 및 페이지 이동
+      // 일반적인 인증 실패 시 (토큰 만료 등)
+      alert("인증이 유효하지 않습니다. 다시 로그인해주세요.");
       localStorage.clear();
-      window.location.href = "/"; 
+      window.location.href = "/";
     }
-
-    console.error("API Error Status:", status);
     return Promise.reject(error);
   }
 );

@@ -40,6 +40,8 @@ public class AuthServiceImpl implements AuthService {
 
         // 3. 토큰 생성
         String token = jwtProvider.createToken(user.getAccountId());
+        log.info("새로 발급된 토큰: {}", token);
+        log.info("유저 ID: {}", user.getAccountId());
 
         // 4. [중복 로그인 방지 핵심] DB에 발급된 최신 토큰 업데이트
         // mapper에 updateCurrentToken(String accountId, String token) 메서드가 있어야 합니다.
