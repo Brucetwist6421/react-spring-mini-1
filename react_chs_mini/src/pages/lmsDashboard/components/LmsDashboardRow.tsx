@@ -3,19 +3,22 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Box, Collapse, Grid, IconButton, LinearProgress, Paper, TableCell, TableRow, Typography } from "@mui/material";
 import { useState } from "react";
 import type { LmsDashboardData } from "../types/lmsDashboardType";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import { Button } from "@mui/material";
+import LmsStudentStatusModal from "./LmsStudentStatusModal";
 
 const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
   const [open, setOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
       <TableRow 
-        // 1. 클릭 이벤트 추가
         onClick={() => setOpen(!open)}
         sx={{ 
           "& > *": { borderBottom: "unset" }, 
-          "&:hover": { bgcolor: "#f1f5f9" }, // 호버 색상을 조금 더 명확하게 변경
-          cursor: "pointer",                 // 마우스 커서 포인터 변경
+          "&:hover": { bgcolor: "#f1f5f9" },
+          cursor: "pointer",
           transition: "background-color 0.2s"
         }}
       >
@@ -27,7 +30,7 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
         </TableCell>
 
         {/* 2. 과정 정보 */}
-        <TableCell component="th" scope="row" width="30%">
+        <TableCell component="th" scope="row" width="25%">
           <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "1rem" }}>
             {row.className} ({row.term}기)
           </Typography>
@@ -37,40 +40,62 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
         </TableCell>
 
         {/* 3. 인원 현황 */}
-        <TableCell align="left" width="20%">
+        <TableCell align="left" width="15%">
           <Typography sx={{ fontSize: "1rem", fontWeight: 500 }}>
             {row.activeAccounts} / {row.totalEnrolled} 명
           </Typography>
         </TableCell>
 
-        {/* 4. 이행률 - 헤더와 맞춰서 정렬 정리 */}
-        <TableCell align="left" sx={{ pr: 4 }}> 
+        {/* 4. 이행률 */}
+        <TableCell align="left" width="40%"> 
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            {/* 수치를 막대 왼쪽으로 배치하여 헤더 제목 바로 아래 오도록 함 */}
             <Typography variant="body1" sx={{ mr: 2, minWidth: 50, fontWeight: "bold", fontSize: "1rem" }}>
               {row.totalAvgRatio}%
             </Typography>
             <LinearProgress 
               variant="determinate" 
               value={row.totalAvgRatio} 
-              sx={{ 
-                flexGrow: 1, 
-                height: 12, 
-                borderRadius: 6,
-                bgcolor: "#e2e8f0"
-              }} 
+              sx={{ flexGrow: 1, height: 10, borderRadius: 6, bgcolor: "#e2e8f0" }} 
               color={row.totalAvgRatio > 70 ? "success" : "warning"}
             />
           </Box>
         </TableCell>
+
+        {/* 5. 현황보기 버튼 (이 셀을 행 안으로 이동시켰습니다) */}
+        <TableCell align="center" width="15%">
+          <Button
+            variant="outlined" // 배경색이 너무 튀지 않게 outlined로 변경 (취향에 따라 contained 유지 가능)
+            size="small"
+            startIcon={<AssessmentIcon />}
+            onClick={(e) => {
+              e.stopPropagation(); // 행 클릭(확장) 이벤트 방지
+              setIsModalOpen(true);
+            }}
+            sx={{ 
+              borderRadius: "6px", 
+              textTransform: "none", 
+              fontWeight: "bold",
+              whiteSpace: "nowrap" // 버튼 글자 줄바꿈 방지
+            }}
+          >
+            현황보기
+          </Button>
+        </TableCell>
       </TableRow>
 
+      {/* 학생 성적 상세 모달 */}
+      <LmsStudentStatusModal 
+        open={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        row={row} 
+      />
+
+      {/* 확장 영역 (Collapse) */}
       <TableRow>
-        {/* 상세 영역 (클릭해도 닫히지 않도록 이벤트 전파 방지 처리) */}
         <TableCell 
           style={{ paddingBottom: 0, paddingTop: 0 }} 
-          colSpan={4}
-          onClick={(e) => e.stopPropagation()} // 상세 영역 클릭 시 닫히는 것 방지
+          colSpan={5} // 버튼 셀이 추가되었으므로 colSpan을 5로 늘려야 합니다.
+          onClick={(e) => e.stopPropagation()}
         >
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 3 }}>
@@ -90,11 +115,7 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
                           {sub.submittedCount}명 완료
                         </Typography>
                       </Box>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={sub.ratio} 
-                        sx={{ mt: 1.5, height: 6, borderRadius: 3 }} 
-                      />
+                      <LinearProgress variant="determinate" value={sub.ratio} sx={{ mt: 1.5, height: 6, borderRadius: 3 }} />
                     </Paper>
                   </Grid>
                 ))}

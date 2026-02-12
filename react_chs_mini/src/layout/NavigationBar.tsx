@@ -170,7 +170,7 @@ const NavigationBar = () => {
                     <ListItemText 
                       primary={item.text} 
                       primaryTypographyProps={{ 
-                        fontSize: "16px", // 👈 기존 14px에서 16px로 2px 상향
+                        fontSize: "16px", // 기존 14px에서 16px로 2px 상향
                         fontWeight: isSelected ? 700 : 500, // 선택 시 글자를 더 굵게 하여 강조
                         letterSpacing: "-0.3px" // 글자가 커진 만큼 자간을 살짝 조절
                       }} 
