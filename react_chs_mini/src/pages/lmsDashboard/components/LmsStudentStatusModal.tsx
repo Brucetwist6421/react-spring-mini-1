@@ -1,92 +1,249 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { 
-  Dialog, DialogTitle, DialogContent, Table, TableHead, TableBody, 
-  TableCell, TableRow, Chip, Paper, Typography, Box, TableContainer, IconButton
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Table,
+  TableHead,
+  TableBody,
+  TableCell,
+  TableRow,
+  Chip,
+  Paper,
+  Typography,
+  Box,
+  TableContainer,
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close"; // 닫기 버튼용
+import CloseIcon from "@mui/icons-material/Close";
+import { useEffect, useState, useMemo } from "react";
+import api from "../../../api/axiosInstance";
 
 const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
-  // 실제 데이터가 없을 경우를 대비한 방어 코드
+  const [loading, setLoading] = useState<boolean>(false);
+  const [studentScores, setStudentScores] = useState<any[]>([]);
+
+  console.log("모달 전달 데이터:", row);
+  
+
+  // 1. API 데이터 호출
+  useEffect(() => {
+    // row 자체를 찍어서 정확한 필드명을 확인
+    console.log("useEffect 실행됨, row 데이터:", row);
+
+    // curSeq가 아니라 cur_seq 일 수도 있습니다.
+    const targetSeq = row?.curSeq || row?.cur_seq || row?.CUR_SEQ;
+
+    if (open && targetSeq) {
+        const fetchStudentStats = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get(`/api/lmsDashboard/student-stats/${targetSeq}`);
+            setStudentScores(res.data);
+        } catch (err) {
+            console.error("전송 에러:", err);
+        } finally {
+            setLoading(false);
+        }
+        };
+        fetchStudentStats();
+    } else {
+        console.warn("API 호출 조건 미충족: open =", open, "targetSeq =", targetSeq);
+    }
+  }, [open, row]);
+
+  // 2. 과정 전체 평균 계산 (클라이언트측 계산 또는 API 결과 활용)
+  const courseAvg = useMemo(() => {
+    if (studentScores.length === 0) return "0.0";
+    const total = studentScores.reduce(
+      (acc, curr) => acc + (curr.avgScore || 0),
+      0,
+    );
+    return (total / studentScores.length).toFixed(1);
+  }, [studentScores]);
+
   if (!row) return null;
-
-  // 가상 데이터 (실제로는 API에서 받아온 데이터를 state로 관리하세요)
-  const studentScores = [
-    { name: "김철수", scores: { "자바": 90, "리액트": 85, "DB": 95 }, total: 270, avg: 90 },
-    { name: "이영희", scores: { "자바": 80, "리액트": 70, "DB": 75 }, total: 225, avg: 75 },
-    { name: "박지민", scores: { "자바": 95, "리액트": 90, "DB": 85 }, total: 270, avg: 90 },
-  ];
-
-  // 과정 평균 계산 (예시)
-  const courseAvg = 85.0;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      {/* 제목 영역: 닫기 버튼 추가 및 태그 오류 수정 */}
-      <DialogTitle sx={{ 
-        fontWeight: "bold", 
-        bgcolor: "#f8fafc", 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center' 
-      }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+      <DialogTitle
+        sx={{
+          fontWeight: "bold",
+          bgcolor: "#f8fafc",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        {/* component="span"을 추가하여 h2 내부의 h6 문제를 해결합니다. */}
+        <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
           {row.className} - 학생별 성적 현황
         </Typography>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      
+
       <DialogContent dividers>
-        {/* 상단 과정 요약 통계 카드 */}
-        <Box sx={{ display: 'flex', gap: 2, mb: 3, mt: 1 }}>
-          <Paper variant="outlined" sx={{ p: 2, flex: 1, textAlign: 'center', bgcolor: '#f0f9ff', border: '1px solid #bae6fd' }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>과정 전체 평균</Typography>
-            <Typography variant="h5" color="primary" fontWeight="bold">{courseAvg}점</Typography>
+        {/* 상단 요약 통계 */}
+        <Box sx={{ display: "flex", gap: 2, mb: 3, mt: 1 }}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              flex: 1,
+              textAlign: "center",
+              bgcolor: "#f0f9ff",
+              border: "1px solid #bae6fd",
+            }}
+          >
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: "bold" }}
+            >
+              과정 전체 평균
+            </Typography>
+            <Typography variant="h5" color="primary" fontWeight="bold">
+              {courseAvg}점
+            </Typography>
           </Paper>
-          <Paper variant="outlined" sx={{ p: 2, flex: 1, textAlign: 'center', bgcolor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
-            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>수강 인원</Typography>
-            <Typography variant="h5" sx={{ color: '#16a34a' }} fontWeight="bold">{studentScores.length}명</Typography>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              flex: 1,
+              textAlign: "center",
+              bgcolor: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+            }}
+          >
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: "bold" }}
+            >
+              조회 인원
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{ color: "#16a34a" }}
+              fontWeight="bold"
+            >
+              {studentScores.length}명
+            </Typography>
           </Paper>
         </Box>
 
-        <TableContainer sx={{ maxHeight: 500, borderRadius: 1, border: '1px solid #e2e8f0' }}>
+        <TableContainer
+          sx={{ maxHeight: 550, borderRadius: 1, border: "1px solid #e2e8f0" }}
+        >
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#f8fafc' }}>학생명</TableCell>
-                {row.subjects.map((sub: any) => (
-                  <TableCell key={sub.subjectName} align="center" sx={{ fontWeight: 'bold', bgcolor: '#f8fafc' }}>
+                <TableCell
+                  sx={{ fontWeight: "bold", bgcolor: "#f8fafc", minWidth: 100 }}
+                >
+                  학생명
+                </TableCell>
+                {/* 3. 과목 헤더: row.subjects를 기반으로 렌더링 */}
+                {row.subjects?.map((sub: any) => (
+                  <TableCell
+                    key={sub.subjectName}
+                    align="center"
+                    sx={{ fontWeight: "bold", bgcolor: "#f8fafc" }}
+                  >
                     {sub.subjectName}
                   </TableCell>
                 ))}
-                {/* 배경색 포인트를 주어 시각적 구분 강화 */}
-                <TableCell align="center" sx={{ fontWeight: 'bold', bgcolor: '#fff7ed', color: '#c2410c' }}>총점</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold', bgcolor: '#f0fdf4', color: '#15803d' }}>평균</TableCell>
+                <TableCell
+                  align="center"
+                  sx={{
+                    fontWeight: "bold",
+                    bgcolor: "#fff7ed",
+                    color: "#c2410c",
+                  }}
+                >
+                  총점
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{
+                    fontWeight: "bold",
+                    bgcolor: "#f0fdf4",
+                    color: "#15803d",
+                  }}
+                >
+                  평균
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {studentScores.map((student, idx) => (
-                <TableRow key={idx} hover>
-                  <TableCell sx={{ fontWeight: 500 }}>{student.name}</TableCell>
-                  {row.subjects.map((sub: any) => (
-                    <TableCell key={sub.subjectName} align="center">
-                      {/* 학생 데이터의 과목명과 테이블 헤더의 과목명을 매칭 */}
-                      {student.scores[sub.subjectName as keyof typeof student.scores] || 0}
-                    </TableCell>
-                  ))}
-                  <TableCell align="center" sx={{ fontWeight: 'bold', bgcolor: '#fffaf5' }}>{student.total}</TableCell>
-                  <TableCell align="center" sx={{ bgcolor: '#f7fee7' }}>
-                    <Chip 
-                      label={`${student.avg.toFixed(1)}점`} 
-                      size="small" 
-                      variant="outlined"
-                      sx={{ fontWeight: 'bold', bgcolor: 'white' }}
-                      color={student.avg >= 90 ? "success" : student.avg >= 80 ? "primary" : "default"} 
-                    />
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={row.subjects?.length + 3}
+                    align="center"
+                    sx={{ py: 10 }}
+                  >
+                    <CircularProgress size={40} />
+                    <Typography sx={{ mt: 2, color: "text.secondary" }}>
+                      데이터를 불러오는 중입니다...
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : studentScores.length > 0 ? (
+                studentScores.map((student, idx) => (
+                  <TableRow key={idx} hover>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {student.accountName}
+                    </TableCell>
+                    {/* 4. 점수 매칭: API의 scores 배열에서 subjectName이 일치하는 점수 출력 */}
+                    {row.subjects?.map((sub: any) => {
+                      const subjectScore = student.scores?.find(
+                        (s: any) => s.subjectName === sub.subjectName,
+                      );
+                      return (
+                        <TableCell key={sub.subjectName} align="center">
+                          {subjectScore ? subjectScore.score : 0}
+                        </TableCell>
+                      );
+                    })}
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: "bold", bgcolor: "#fffaf5" }}
+                    >
+                      {student.totalScore}
+                    </TableCell>
+                    <TableCell align="center" sx={{ bgcolor: "#f7fee7" }}>
+                      <Chip
+                        label={`${(student.avgScore || 0).toFixed(1)}점`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontWeight: "bold", bgcolor: "white" }}
+                        color={
+                          student.avgScore >= 90
+                            ? "success"
+                            : student.avgScore >= 80
+                              ? "primary"
+                              : "default"
+                        }
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={row.subjects?.length + 3}
+                    align="center"
+                    sx={{ py: 10 }}
+                  >
+                    데이터가 존재하지 않습니다.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

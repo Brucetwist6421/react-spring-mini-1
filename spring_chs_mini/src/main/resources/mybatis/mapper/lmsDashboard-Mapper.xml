@@ -35,6 +35,7 @@
             GROUP BY t.SUB_SEQ
         )
         SELECT 
+            c.CUR_SEQ AS cur_seq,
             c.ROOM AS class_name,
             c.TERM AS term,
             c.START_DATE || ' ~ ' || c.END_DATE AS period,
@@ -42,7 +43,6 @@
             COALESCE(ast.active_accounts, 0) AS active_accounts,
             COALESCE(ast.dropout_count, 0) AS dropout_count,
             
-            /* 🔥 이 부분을 OVER() 없이 일반 AVG()로 수정했습니다 */
             ROUND(AVG(
                 CASE 
                     WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
