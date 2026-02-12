@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletResponse;
+import kr.or.ddit.mapper.AccountMapper;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -22,6 +23,8 @@ public class SecurityConfig {
 
     // 나중에 토큰을 검증할 필터를 주입받아야 합니다.
     private final JwtProvider jwtProvider;
+
+    private final AccountMapper accountMapper;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -44,11 +47,11 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
                             response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write("{\"message\":\"로그인 세션이 만료되었거나 유효하지 않습니다.\"}");
+                            response.getWriter().write("{\"code\":\"UNAUTHORIZED\", \"message\":\"로그인이 필요합니다.\"}");
                         }));
 
         // JWT 필터 등록
-        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtProvider);
+        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtProvider, accountMapper);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

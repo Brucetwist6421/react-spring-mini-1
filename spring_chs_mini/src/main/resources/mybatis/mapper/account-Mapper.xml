@@ -19,4 +19,16 @@
         WHERE a.account_id = #{accountId}
     </select>
 
+    <update id="updateCurrentToken">
+        UPDATE lms.tb_account 
+        SET current_token = #{token} 
+        WHERE account_id = #{accountId}
+    </update>
+
+    <select id="getCurrentToken" resultType="string">
+        SELECT current_token 
+        FROM lms.tb_account 
+        WHERE account_id = #{accountId}
+    </select>
+
 </mapper>

@@ -75,11 +75,19 @@ public class JwtProvider {
 
     // 토큰에서 사용자 정보를 꺼내 시큐리티 인증 객체 생성
     public Authentication getAuthentication(String token) {
-        String email = Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        String accountId = getAccountId(token);
 
-        // 권한은 우선 빈 리스트로 설정 (필요시 DB의 memType 추가)
-        User principal = new User(email, "", Collections.emptyList());
+        User principal = new User(accountId, "", Collections.emptyList());
         return new UsernamePasswordAuthenticationToken(principal, token, Collections.emptyList());
     }
+
+    // 토큰에서 Subject(accountId) 추출
+    public String getAccountId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+}
 }

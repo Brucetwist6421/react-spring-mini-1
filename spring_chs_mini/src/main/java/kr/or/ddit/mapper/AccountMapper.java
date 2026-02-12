@@ -1,6 +1,7 @@
 package kr.or.ddit.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import kr.or.ddit.vo.AccountVO;
 
@@ -13,4 +14,8 @@ public interface AccountMapper {
      * @return AccountVO (비밀번호 포함)
      */
     AccountVO findByAccId(String email);
+
+    void updateCurrentToken(@Param("accountId") String accountId, @Param("token") String token);
+    
+    String getCurrentToken(String accountId); // 나중에 Filter에서 대조할 때 사용
 }
