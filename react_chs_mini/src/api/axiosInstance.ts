@@ -22,11 +22,13 @@ api.interceptors.request.use(
 // 응답 인터셉터
 api.interceptors.response.use(
   (response) => response,
+  /*
   (error) => {
     if (error.response && error.response.status === 401) {
       const { code } = error.response.data;
       console.log("API 401 Error Code:", code);
 
+      
       // 중복 로그인 코드가 왔을 때
       if (code === "DUPLICATE_LOGIN") {
         alert("다른 기기에서 로그인하여 접속이 종료됩니다.");
@@ -42,6 +44,7 @@ api.interceptors.response.use(
     }
     return Promise.reject(error);
   }
+    */
 );
 
 export default api;
