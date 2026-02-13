@@ -60,7 +60,7 @@ export default function LoginModal({ open, onClose }: LoginProps) {
           alert(`${accName}님, 환영합니다!`);
           onClose();
           // 이렇게 하면 axios 인스턴스가 새로 초기화되면서 localStorage에서 새 토큰을 읽어옵니다.
-          window.location.href = "/lmsDashboard";
+          window.location.href = "/lms/dashboard";
           //window.location.reload(); 
       }
     } catch (error: any) {

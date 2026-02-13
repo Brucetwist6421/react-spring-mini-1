@@ -1,19 +1,20 @@
+import { Box } from "@mui/material"; // 레이아웃 구성을 위한 Box
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Box } from "@mui/material"; // 레이아웃 구성을 위한 Box
+import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./layout/Footer";
 import Header from "./layout/Header";
-import PokemonDetailPage from "./pages/details/PokemonDetailPage";
-import theme from "./theme";
 import NavigationBar from "./layout/NavigationBar";
 import MainDashboard from "./pages/dashboard/MainDashboard";
-import PokemonList from "./pages/lists/PokemonList";
-import NewPokemonList from "./pages/lists/NewPokemonList";
-import PokemonCreatePage from "./pages/inserts/PokemonCreatePage";
 import NewPokemonDetailPage from "./pages/details/NewPokemonDetailPage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import PokemonDetailPage from "./pages/details/PokemonDetailPage";
+import PokemonCreatePage from "./pages/inserts/PokemonCreatePage";
+import NewPokemonList from "./pages/lists/NewPokemonList";
+import PokemonList from "./pages/lists/PokemonList";
 import LmsDashboard from "./pages/lmsDashboard/LmsDashboard";
+import LmsStudentManagement from "./pages/lmsDashboard/components/LmsStudentManagement";
+import theme from "./theme";
 
 function App() {
   return (
@@ -52,11 +53,14 @@ function App() {
 
                 <Route element={<ProtectedRoute />}>
                   {/* <Route path="/pokemon/create" element={<PokemonCreatePage />} /> */}
-                  {/* 2. 동적 파라미터는 가장 아래에 배치 */}
                   <Route path="/" element={<MainDashboard />} />
                   <Route path="/:pokemonName" element={<MainDashboard />} />
-                  {/* 추가된 LMS 대시보드 경로 */}
-                  <Route path="/lmsDashboard" element={<LmsDashboard />} />
+                  {/* 1. 학생 목록 페이지 (관리 버튼 클릭 시 도착지) */}
+                  <Route path="/lms/management/:curSeq" element={<LmsStudentManagement />} />
+                  {/* 2. 특정 학생 선택 시 상세 페이지 (목록은 그대로 있고 오른쪽 내용만 바뀜) */}
+                  <Route path="/lms/management/:curSeq/student/:accSeq" element={<LmsStudentManagement />} />
+                  {/* LMS 대시보드 */}
+                  <Route path="/lms/dashboard" element={<LmsDashboard />} />
                 </Route>
               </Routes>
             </Box>

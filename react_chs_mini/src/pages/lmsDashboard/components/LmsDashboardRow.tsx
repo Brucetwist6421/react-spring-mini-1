@@ -7,9 +7,14 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import { Button } from "@mui/material";
 import LmsStudentStatusModal from "./LmsStudentStatusModal";
 
+import { useNavigate } from "react-router-dom"; 
+import SettingsIcon from "@mui/icons-material/Settings"; 
+
 const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <>
@@ -61,25 +66,39 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
           </Box>
         </TableCell>
 
-        {/* 5. 현황보기 버튼 (이 셀을 행 안으로 이동시켰습니다) */}
-        <TableCell align="center" width="15%">
-          <Button
-            variant="outlined" // 배경색이 너무 튀지 않게 outlined로 변경 (취향에 따라 contained 유지 가능)
-            size="small"
-            startIcon={<AssessmentIcon />}
-            onClick={(e) => {
-              e.stopPropagation(); // 행 클릭(확장) 이벤트 방지
-              setIsModalOpen(true);
-            }}
-            sx={{ 
-              borderRadius: "6px", 
-              textTransform: "none", 
-              fontWeight: "bold",
-              whiteSpace: "nowrap" // 버튼 글자 줄바꿈 방지
-            }}
-          >
-            현황보기
-          </Button>
+        {/* 5. 버튼 그룹 셀 (현황보기 유지 + 과정관리 추가) */}
+        <TableCell align="center" width="200px">
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+            {/* 기존 현황보기 버튼 */}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<AssessmentIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
+              sx={{ borderRadius: "6px", textTransform: "none", fontWeight: "bold" }}
+            >
+              성적현황
+            </Button>
+
+            {/* 과정관리 버튼 (상세 페이지 이동) */}
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              startIcon={<SettingsIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                // 1단계: 해당 과정의 학생 리스트 페이지로 이동
+                navigate(`/lms/management/${row.curSeq}`);
+              }}
+              sx={{ borderRadius: "6px", fontWeight: "bold", boxShadow: 'none' }}
+            >
+              학생관리
+            </Button>
+          </Box>
         </TableCell>
       </TableRow>
 
@@ -94,7 +113,7 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
       <TableRow>
         <TableCell 
           style={{ paddingBottom: 0, paddingTop: 0 }} 
-          colSpan={5} // 버튼 셀이 추가되었으므로 colSpan을 5로 늘려야 합니다.
+          colSpan={6} //
           onClick={(e) => e.stopPropagation()}
         >
           <Collapse in={open} timeout="auto" unmountOnExit>
