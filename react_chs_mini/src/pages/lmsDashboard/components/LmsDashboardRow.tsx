@@ -32,7 +32,7 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
         {/* 2. 과정 정보 */}
         <TableCell component="th" scope="row" width="25%">
           <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-            {row.className} ({row.term}기)
+            {row.curName} - {row.className}호 ({row.term}기)
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
             {row.period}

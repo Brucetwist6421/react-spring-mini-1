@@ -6,6 +6,7 @@ export interface SubjectStat {
 
 export interface LmsDashboardData {
   className: string;
+  curName: string;
   term: number;
   period: string;
   totalEnrolled: number;
