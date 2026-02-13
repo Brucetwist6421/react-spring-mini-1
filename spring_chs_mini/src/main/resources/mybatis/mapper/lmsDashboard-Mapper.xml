@@ -4,6 +4,7 @@
 
     <resultMap id="dashboardMap" type="kr.or.ddit.vo.LmsDashboardVO">
         <id property="curSeq" column="cur_seq" />
+        <result property="curName" column="cur_name"/>
         <result property="className" column="class_name"/>
         <result property="term" column="term"/>
         <result property="period" column="period"/>
@@ -37,6 +38,7 @@
         )
         SELECT 
             c.CUR_SEQ AS cur_seq,
+            c.CUR_NAME AS cur_name,
             c.ROOM AS class_name,
             c.TERM AS term,
             c.START_DATE || ' ~ ' || c.END_DATE AS period,
@@ -71,7 +73,7 @@
             </if>
         </where>
         GROUP BY 
-            c.CUR_SEQ, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, 
+            c.CUR_SEQ, c.CUR_NAME, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, 
             ast.total_enrolled, ast.active_accounts, ast.dropout_count
         ORDER BY c.TERM DESC
     </select>

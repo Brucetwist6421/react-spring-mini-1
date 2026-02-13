@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class LmsDashboardVO {
     private Integer curSeq;
+    private String curName;
     private String className;
     private int term;
     private String period;
