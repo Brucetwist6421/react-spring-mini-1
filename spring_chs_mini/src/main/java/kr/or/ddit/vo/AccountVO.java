@@ -34,4 +34,6 @@ public class AccountVO {
     private LocalDateTime regDate;    // 등록일시
     private String updateId;          // 수정자ID
     private LocalDateTime updateDate; // 수정일시
+
+    private String curName;      // 교육과정 이름
 }

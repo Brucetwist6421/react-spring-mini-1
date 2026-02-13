@@ -31,4 +31,26 @@
         WHERE account_id = #{accountId}
     </select>
 
+    <select id="selectStudentsByCurriculum" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
+        SELECT 
+            a.acc_seq,
+            a.cur_seq,
+            a.account_id,
+            a.account_name,
+            a.birth,
+            a.gender,
+            a.tel,
+            a.edu,
+            a.major,
+            a.status,
+            a.account_email,
+            a.account_type,
+            a.reg_date,
+            c.cur_name
+        FROM lms.tb_account a
+        LEFT JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
+        WHERE a.cur_seq = #{curSeq}
+          AND a.account_type = 'STU'  ORDER BY a.account_name ASC
+    </select>
+
 </mapper>

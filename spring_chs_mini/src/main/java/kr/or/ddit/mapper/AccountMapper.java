@@ -1,5 +1,7 @@
 package kr.or.ddit.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,4 +20,6 @@ public interface AccountMapper {
     void updateCurrentToken(@Param("accountId") String accountId, @Param("token") String token);
     
     String getCurrentToken(@Param("accountId") String accountId); // 나중에 Filter에서 대조할 때 사용
+
+    List<AccountVO> selectStudentsByCurriculum(Integer curSeq);
 }
