@@ -9,6 +9,7 @@ import LmsStudentStatusModal from "./LmsStudentStatusModal";
 
 import { useNavigate } from "react-router-dom"; 
 import SettingsIcon from "@mui/icons-material/Settings"; 
+import { Tooltip } from "@mui/material";
 
 const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
   const [open, setOpen] = useState(false);
@@ -16,26 +17,35 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
 
   const navigate = useNavigate();
 
+  // 인원 확인 변수 (가독성을 위해 추출)
+  const isEmpty = row.activeAccounts === 0;
+
   return (
     <>
-      <TableRow 
-        onClick={() => setOpen(!open)}
-        sx={{ 
-          "& > *": { borderBottom: "unset" }, 
-          "&:hover": { bgcolor: "#f1f5f9" },
-          cursor: "pointer",
-          transition: "background-color 0.2s"
+      <TableRow
+        // 인원이 0명이면 클릭 이벤트(상세 펼치기)를 실행하지 않음
+        onClick={() => !isEmpty && setOpen(!open)}
+        sx={{
+          "& > *": { borderBottom: "unset" },
+          "&:hover": { bgcolor: isEmpty ? "inherit" : "#f1f5f9" }, // 인원 없으면 호버 효과 제거
+          cursor: isEmpty ? "default" : "pointer", // 인원 없으면 커서 모양 변경
+          transition: "background-color 0.2s",
+          opacity: isEmpty ? 0.7 : 1, // 시각적으로 비활성 상태임을 표시
         }}
       >
         {/* 1. 확장 아이콘 */}
         <TableCell width="50px">
-          <IconButton size="small">
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          <IconButton 
+            size="small" 
+            disabled={isEmpty} // 🔥 인원 없으면 아이콘 클릭 불가
+          >
+            {/* 인원이 0이면 펼쳐질 일이 없으므로 아이콘 상태 고정 혹은 숨김 처리 가능 */}
+            {open && !isEmpty ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
 
         {/* 2. 과정 정보 */}
-        <TableCell component="th" scope="row" width="25%">
+        <TableCell component="th" scope="row" width="20%">
           <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "1rem" }}>
             {row.curName} - {row.className}호 ({row.term}기)
           </Typography>
@@ -67,12 +77,13 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
         </TableCell>
 
         {/* 5. 버튼 그룹 셀 (현황보기 유지 + 과정관리 추가) */}
-        <TableCell align="center" width="200px">
+        <TableCell align="center" width="20%">
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-            {/* 기존 현황보기 버튼 */}
+            {/* 성적현황 버튼 - 인원이 없으면 볼 데이터가 없으므로 함께 비활성화 권장 */}
             <Button
               variant="outlined"
               size="small"
+              disabled={row.activeAccounts === 0}
               startIcon={<AssessmentIcon />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -83,21 +94,37 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
               성적현황
             </Button>
 
-            {/* 과정관리 버튼 (상세 페이지 이동) */}
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              startIcon={<SettingsIcon />}
-              onClick={(e) => {
-                e.stopPropagation();
-                // 1단계: 해당 과정의 학생 리스트 페이지로 이동
-                navigate(`/lms/management/${row.curSeq}`);
-              }}
-              sx={{ borderRadius: "6px", fontWeight: "bold", boxShadow: 'none' }}
+            <Tooltip 
+              title={row.activeAccounts === 0 ? "등록된 학생이 없습니다" : ""} 
+              arrow 
+              placement="top"
             >
-              학생관리
-            </Button>
+              <span> {/* disabled 버튼은 Tooltip이 작동하지 않을 수 있어 span으로 감쌉니다 */}
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  disabled={row.activeAccounts === 0} // 인원이 0이면 비활성화
+                  startIcon={<SettingsIcon />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/lms/management/${row.curSeq}`);
+                  }}
+                  sx={{ 
+                    borderRadius: "6px", 
+                    fontWeight: "bold", 
+                    boxShadow: 'none',
+                    // 비활성화 시 스타일 정의 (선택 사항)
+                    "&.Mui-disabled": {
+                      bgcolor: "#e2e8f0",
+                      color: "#94a3b8"
+                    }
+                  }}
+                >
+                  학생관리
+                </Button>
+              </span>
+            </Tooltip>
           </Box>
         </TableCell>
       </TableRow>
@@ -113,11 +140,13 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
       <TableRow>
         <TableCell 
           style={{ paddingBottom: 0, paddingTop: 0 }} 
-          colSpan={6} //
+          colSpan={6} 
           onClick={(e) => e.stopPropagation()}
         >
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 3 }}>
+          {/*isEmpty가 true이면 Collapse 자체가 렌더링되지 않도록 원천 차단 */}
+          {!isEmpty && (
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <Box sx={{ margin: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", fontSize: "1.1rem", color: "#334155" }}>
                 과목별 이행률 상세
               </Typography>
@@ -141,6 +170,7 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
               </Grid>
             </Box>
           </Collapse>
+          )}
         </TableCell>
       </TableRow>
     </>

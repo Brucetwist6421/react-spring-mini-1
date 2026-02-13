@@ -116,11 +116,11 @@ const LmsDashboard: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell width="50px" sx={{ bgcolor: "#f8fafc" }} />
-              <TableCell width="25%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 명 (기수)</TableCell>
-              <TableCell width="15%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>인원 현황</TableCell>
+              <TableCell width="20%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 명 (기수)</TableCell>
+              <TableCell width="15%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>현재 인원 / 시작 인원</TableCell>
               <TableCell width="40%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 이행률</TableCell>
               {/* 버튼을 위한 빈 헤더 칸 추가 */}
-              <TableCell width="15%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>상세 현황</TableCell>
+              <TableCell width="20%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>상세 현황</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
