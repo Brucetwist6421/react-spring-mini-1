@@ -75,7 +75,7 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
       >
         {/* component="span"을 추가하여 h2 내부의 h6 문제를 해결합니다. */}
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          {row.className} - 학생별 성적 현황
+          {row.curName} - {row.className} 호 학생 별 성적 현황
         </Typography>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
