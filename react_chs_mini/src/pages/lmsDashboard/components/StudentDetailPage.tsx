@@ -23,7 +23,7 @@ const StudentDetailPage = () => {
     // 임시 데이터 세팅 로직 (실제로는 API 연동)
     const timer = setTimeout(() => {
       setStudent({
-        accountName: "홍길동",
+        accountName: "김아무개",
         accountId: "hong123",
         status: "수강중",
         tel: "010-1234-5678",
