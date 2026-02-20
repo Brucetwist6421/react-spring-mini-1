@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.checkerframework.checker.units.qual.A;
 
 import kr.or.ddit.vo.AccountVO;
 
@@ -22,4 +23,6 @@ public interface AccountMapper {
     String getCurrentToken(@Param("accountId") String accountId); // 나중에 Filter에서 대조할 때 사용
 
     List<AccountVO> selectStudentsByCurriculum(Integer curSeq);
+
+    AccountVO selectAccountDetail(Integer accSeq);
 }

@@ -17,4 +17,9 @@ public class AccountServiceImpl implements AccountService {
     public List<AccountVO> getStudentsByCurriculum(Integer curSeq) {
         return accountMapper.selectStudentsByCurriculum(curSeq);
     }
+
+    @Override
+    public AccountVO getAccountDetail(Integer accSeq) {
+        return accountMapper.selectAccountDetail(accSeq);
+    }
 }

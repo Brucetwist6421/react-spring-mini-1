@@ -6,4 +6,6 @@ import kr.or.ddit.vo.AccountVO;
 
 public interface AccountService {
     List<AccountVO> getStudentsByCurriculum(Integer curSeq);
+
+    AccountVO getAccountDetail(Integer accSeq);
 }

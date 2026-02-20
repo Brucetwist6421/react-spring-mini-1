@@ -24,7 +24,7 @@ const LmsStudentManagement = () => {
           // 2. 학생 목록 중 첫 번째 데이터나 서버 응답에서 과정 정보 추출
           if (res.data.length > 0) {
             const classData = res.data[0];
-            console.log("과정 정보:", classData);
+            // console.log("과정 정보:", classData);
             setCourseInfo({
               curName: classData.curName,
               className: classData.className || '1', // XML 결과에 따라 조정
@@ -44,34 +44,50 @@ const LmsStudentManagement = () => {
       
       {/* 상단 경로 안내 및 과정 정보 헤더 */}
       <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 3, bgcolor: '#ffffff' }}>
-        <Stack direction="row" alignItems="center" spacing={1}>
-            <Button 
-              variant="text" 
-              size="small" 
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate('/lms/dashboard')} // 대시보드 경로로 이동
-              sx={{ mr: 1, fontWeight: 700, color: 'text.secondary' }}
-            >
-              목록으로
-            </Button>
-            <Divider orientation="vertical" flexItem sx={{ mx: 1, height: 20, alignSelf: 'center' }} />
-          <SchoolIcon color="primary" fontSize="small" />
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5}>
+        {/* 목록 이동 버튼 */}
+        <Button 
+            variant="text" 
+            size="medium" 
+            startIcon={<ArrowBackIcon sx={{ color: '#000000' }} />}
+            onClick={() => navigate('/lms/dashboard')}
+            sx={{ 
+            mr: 0.5, 
+            p: 0,
+            minWidth: 'auto',
+            '&:hover': { bgcolor: 'transparent', opacity: 0.7 } 
+            }}
+        >
+            <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000' }}>
+            목록
+            </Typography>
+        </Button>
+
+        <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 20, alignSelf: 'center', bgcolor: '#000000', opacity: 0.2 }} />
+
+        {/* 아이콘 및 카테고리 명칭 */}
+        <SchoolIcon sx={{ fontSize: 22, color: '#000000' }} />
+        <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000' }}>
             학생 관리
-          </Typography>
-          <ChevronRightIcon sx={{ color: 'text.disabled', fontSize: 18 }} />
-          {courseInfo ? (
-            <Stack direction="row" spacing={1} alignItems="baseline">
-              <Typography variant="h6" fontWeight={800} color="text.primary">
+        </Typography>
+        
+        <ChevronRightIcon sx={{ color: '#000000', fontSize: 20, opacity: 0.5 }} />
+
+        {/* 🔥 글자 크기 +2px 및 검정색 통일 섹션 */}
+        {courseInfo ? (
+            <Stack direction="row" spacing={1.5} alignItems="center">
+            <Typography sx={{ fontSize: '1.1rem', fontWeight: 800, color: '#000000' }}>
                 {courseInfo.curName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" fontWeight={600}>
+            </Typography>
+            <Typography sx={{ fontSize: '1.1rem', fontWeight: 500, color: '#000000' }}>
                 {courseInfo.room}호 ({courseInfo.term}기)
-              </Typography>
+            </Typography>
             </Stack>
-          ) : (
-            <Typography variant="body2" color="text.disabled">과정 정보를 불러오는 중...</Typography>
-          )}
+        ) : (
+            <Typography sx={{ fontSize: '1.1rem', fontWeight: 500, color: '#000000', opacity: 0.5 }}>
+            과정 정보를 불러오는 중...
+            </Typography>
+        )}
         </Stack>
       </Paper>
 
@@ -81,8 +97,8 @@ const LmsStudentManagement = () => {
         {/* 왼쪽: 학생 리스트 */}
         <Paper sx={{ width: 280, display: 'flex', flexDirection: 'column', borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }} elevation={0}>
           <Box sx={{ p: 2, bgcolor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="subtitle2" fontWeight="bold">학생 명단</Typography>
-            <Chip label={`${students.length}명`} size="small" variant="outlined" sx={{ fontWeight: 700, height: 20, fontSize: '0.7rem' }} />
+            <Typography fontSize={17} variant="subtitle2" fontWeight="bold">학생 명단</Typography>
+            <Chip label={`${students.length}명`} size="medium" variant="outlined" sx={{ fontWeight: 700, height: 20, fontSize: '1.1rem' }} />
           </Box>
           <Divider />
           <List sx={{ flexGrow: 1, overflow: 'auto', py: 0 }}>
@@ -99,7 +115,7 @@ const LmsStudentManagement = () => {
               >
                 <ListItemText
                   primary={stu.accountName}
-                  secondary={stu.accountId}
+                  secondary={`LMS ID : ${stu.accountId}`}
                   slotProps={{
                     primary: {
                       sx: {

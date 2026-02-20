@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/curriculum")
+@RequestMapping("/api/account")
 @RequiredArgsConstructor
 public class AccountController {
 
@@ -18,5 +18,11 @@ public class AccountController {
     @GetMapping("/{curSeq}/students")
     public ResponseEntity<List<AccountVO>> getStudentsByCurriculum(@PathVariable Integer curSeq) {
         return ResponseEntity.ok(accountService.getStudentsByCurriculum(curSeq));
+    }
+
+    //계정 상세조회
+    @GetMapping("/{accSeq}")
+    public AccountVO getAccountDetail(@PathVariable Integer accSeq) {
+        return accountService.getAccountDetail(accSeq);
     }
 }

@@ -57,4 +57,32 @@
           AND a.account_type = 'STU'  ORDER BY a.account_name ASC
     </select>
 
+    <select id="selectAccountDetail" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
+        SELECT 
+            a.acc_seq,
+            a.account_id,
+            a.account_name,
+            a.birth,
+            a.gender,
+            a.tel,
+            a.account_email,
+            a.address,
+            a.edu,
+            a.major,
+            a.grad_type,
+            a.military_status,
+            c.cur_seq,
+            c.cur_name,
+            c.business_name,
+            c.start_date,
+            c.end_date,
+            c.account_seq AS teacher_seq -- 담당자
+        FROM 
+            lms.tb_account a
+        LEFT JOIN 
+            lms.tb_curriculum c ON a.cur_seq = c.cur_seq
+        WHERE 
+            a.acc_seq = #{accSeq}
+    </select>
+
 </mapper>
