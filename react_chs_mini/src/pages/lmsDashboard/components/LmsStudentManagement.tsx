@@ -18,7 +18,7 @@ const LmsStudentManagement = () => {
   useEffect(() => {
     if (curSeq) {
       // 1. 학생 목록 가져오기
-      axios.get(`/api/curriculum/${curSeq}/students`)
+      axios.get(`/api/account/${curSeq}/students`)
         .then(res => {
           setStudents(res.data);
           // 2. 학생 목록 중 첫 번째 데이터나 서버 응답에서 과정 정보 추출
