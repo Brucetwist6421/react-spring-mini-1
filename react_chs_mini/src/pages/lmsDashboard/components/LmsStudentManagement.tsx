@@ -23,11 +23,15 @@ const LmsStudentManagement = () => {
           setStudents(res.data);
           // 2. 학생 목록 중 첫 번째 데이터나 서버 응답에서 과정 정보 추출
           if (res.data.length > 0) {
-            const first = res.data[0];
+            const classData = res.data[0];
+            console.log("과정 정보:", classData);
             setCourseInfo({
-              curName: first.curName,
-              className: first.className || '1', // XML 결과에 따라 조정
-              term: first.term || '1'
+              curName: classData.curName,
+              className: classData.className || '1', // XML 결과에 따라 조정
+              term: classData.term || '1',
+              room: classData.room || '미정',
+              startDate: classData.startDate || '미정',
+              endDate: classData.endDate || '미정',
             });
           }
         })
@@ -62,7 +66,7 @@ const LmsStudentManagement = () => {
                 {courseInfo.curName}
               </Typography>
               <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                {courseInfo.className}호 ({courseInfo.term}기)
+                {courseInfo.room}호 ({courseInfo.term}기)
               </Typography>
             </Stack>
           ) : (

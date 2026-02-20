@@ -36,4 +36,9 @@ public class AccountVO {
     private LocalDateTime updateDate; // 수정일시
 
     private String curName;      // 교육과정 이름
+    private String room;         // 교육실
+    private String term;         // 교육기간
+    private LocalDate startDate; // 시작일
+    private LocalDate endDate;   // 종료일
+
 }

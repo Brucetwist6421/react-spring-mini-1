@@ -109,6 +109,11 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/lms/management/${row.curSeq}`);
+                    // 이동 후 즉시 스크롤을 최상단으로 이동
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "instant" // "smooth" 보다 "instant"가 페이지 전환 시 더 깔끔합니다.
+                    });
                   }}
                   sx={{ 
                     borderRadius: "6px", 

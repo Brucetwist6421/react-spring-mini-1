@@ -46,7 +46,11 @@
             a.account_email,
             a.account_type,
             a.reg_date,
-            c.cur_name
+            c.cur_name,
+            c.room,
+            c.term,
+            c.start_date,
+            c.end_date
         FROM lms.tb_account a
         LEFT JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
         WHERE a.cur_seq = #{curSeq}
