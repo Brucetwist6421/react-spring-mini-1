@@ -63,7 +63,7 @@ const StudentDetailPage = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 4 }}>
       
-      {/* 1. 상단 프로필 및 과정 요약 카드 */}
+      {/* 1. 상단 프로필 및 과정 요약 카드 영역*/}
       <Paper elevation={0} sx={{ p: 3, border: '1px solid #e2e8f0', borderRadius: 4, bgcolor: '#ffffff' }}>
         <Grid container spacing={4}>
           {/* 사진 및 이름 섹션 */}
