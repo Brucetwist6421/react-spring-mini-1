@@ -106,7 +106,21 @@ const LmsStudentManagement = () => {
                   }}
                 >
                   <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '100%' }}>
-                    <Avatar sx={{ width: 32, height: 32, fontSize: '0.9rem', bgcolor: isSelected ? '#3b82f6' : '#cbd5e1' }}>
+                    {/* 프로필 사진 처리 영역 */}
+                    <Avatar 
+                      src={stu.mainImagePath} // 이미지 경로가 있으면 썸네일 표시
+                      alt={stu.accountName}
+                      sx={{ 
+                        width: 40, // 가독성을 위해 크기를 살짝 키웠습니다 (32 -> 40)
+                        height: 40, 
+                        fontSize: '1rem', 
+                        fontWeight: 700,
+                        bgcolor: isSelected ? '#3b82f6' : '#e2e8f0',
+                        color: isSelected ? '#ffffff' : '#64748b',
+                        border: isSelected ? '2px solid #3b82f6' : 'none'
+                      }}
+                    >
+                      {/* src가 null이거나 로드 실패 시 이름 첫 글자 표시 */}
                       {stu.accountName.charAt(0)}
                     </Avatar>
                     

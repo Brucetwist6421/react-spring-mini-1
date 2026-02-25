@@ -71,6 +71,7 @@
             a.account_email,
             a.address,
             a.ident_number,         -- 주민등록번호 추가
+            a.main_image_path,      -- 프로필 이미지 경로 추가
             
             -- 2. 학력 및 군경력
             a.edu,

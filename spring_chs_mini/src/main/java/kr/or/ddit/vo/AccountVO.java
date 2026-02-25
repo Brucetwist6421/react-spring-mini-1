@@ -31,6 +31,7 @@ public class AccountVO {
     private String dropout_info;  // 중도탈락 정보 (text)
     private String address;         // 주소
     private String maritalStatus;   // 혼인여부 (추가)
+    private String mainImagePath;   // 프로필 이미지 경로 (추가)
     
     // 2. 학력 및 경력 정보
     private String edu;             // 최종학력

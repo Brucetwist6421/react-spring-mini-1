@@ -59,6 +59,7 @@ const StudentDetailPage = () => {
       setLoading(true);
       axios.get(`/api/account/${accountSeq}`)
         .then(res => {
+          console.log("학생 정보 로딩 성공:", res.data);
           setStudent(res.data);
           setLoading(false);
         })
