@@ -65,7 +65,7 @@ const NavigationBar = () => {
     { text: "기존 포켓몬 목록", icon: <CatchingPokemon />, path: "/pokemonList" },
     { text: "새 포켓몬 목록", icon: <CatchingPokemonTwoTone />, path: "/newPokemonList" },
     { text: "새 포켓몬 등록", icon: <AddCircle />, path: "/pokemon/create" },
-    { text: "LMS 대시보드", icon: <CatchingPokemonTwoTone />, path: "/lms/dashboard" },
+    { text: "LMS 대시보드", icon: <Dashboard />, path: "/lms/dashboard" },
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];
 
