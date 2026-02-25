@@ -22,7 +22,9 @@
                 CUR_SEQ,
                 COUNT(*) AS total_enrolled,
                 COUNT(*) FILTER (WHERE STATUS = 'ENROLLED') AS active_accounts,
-                COUNT(*) FILTER (WHERE STATUS = 'DROPOUT') AS dropout_count
+                COUNT(*) FILTER (WHERE STATUS = 'DROPOUT') AS dropout_count,
+                COUNT(*) FILTER (WHERE STATUS = 'EARLYOUT') AS earlyout_count,
+                COUNT(*) FILTER (WHERE STATUS = 'GRADUATED') AS graduated_count
             FROM lms.TB_ACCOUNT
             GROUP BY CUR_SEQ
         ),

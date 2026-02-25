@@ -5,6 +5,7 @@ interface StatCardProps {
   value: string | number;
   icon: React.ReactNode;
   color: string;
+  subtitle?: string; // ?를 붙여 선택적 프로퍼티로 설정
 }
 
 const LmsStatCard = ({ title, value, icon, color }: StatCardProps) => (

@@ -1,5 +1,8 @@
+import ExitToAppIcon from "@mui/icons-material/ExitToApp"; // 수강 철회용
+import PersonAddIcon from "@mui/icons-material/PersonAdd"; // 재학 중용
+import PersonOffIcon from "@mui/icons-material/PersonOff"; // 중도 탈락용
+import PercentIcon from "@mui/icons-material/Percent"; // 이행률용
 import PeopleIcon from "@mui/icons-material/People";
-import PercentIcon from "@mui/icons-material/Percent";
 import SchoolIcon from "@mui/icons-material/School";
 import { 
   Box, CircularProgress, Grid, Paper, Table, TableBody, TableCell, 
@@ -52,8 +55,16 @@ const LmsDashboard: React.FC = () => {
   }, []);
 
   // 4. 통계 데이터 계산 (API로 받아온 data 기준)
-  const totalStudents = data.reduce((acc, curr) => acc + (curr.totalEnrolled || 0), 0);
-  const activeStudents = data.reduce((acc, curr) => acc + (curr.activeAccounts || 0), 0);
+  const stats = useMemo(() => {
+    return data.reduce((acc, curr) => ({
+      active: acc.active + (curr.activeAccounts || 0),
+      dropout: acc.dropout + (curr.dropoutCount || 0),
+      earlyout: acc.earlyout + (curr.earlyoutCount || 0),
+      graduated: acc.graduated + (curr.graduatedCount || 0),
+      total: acc.total + (curr.totalEnrolled || 0)
+    }), { active: 0, dropout: 0, earlyout: 0, graduated: 0, total: 0 });
+  }, [data]);
+
   const avgRatio = data.length > 0 
     ? (data.reduce((acc, curr) => acc + (Number(curr.totalAvgRatio) || 0), 0) / data.length).toFixed(1) 
     : "0.0";
@@ -82,33 +93,71 @@ const LmsDashboard: React.FC = () => {
         </FormControl>
       </Box>
 
-      {/* 요약 통계 카드 */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
+      {/* 요약 통계 카드 섹션 */}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {/* 1. 전체 누적 학생 수 */}
+        <Grid size={{ xs: 12, sm: 4, md: 2.4 }}> {/* 5개를 한 줄에 배치하기 위해 12 / 5 = 2.4 적용 */}
           <LmsStatCard 
-            title="누적 수강생" 
-            value={`${totalStudents.toLocaleString()} 명`} 
-            icon={<PeopleIcon sx={{ fontSize: 32 }} />} 
-            color="#3b82f6" 
+            title="누적 학생 수" 
+            value={`${stats.total.toLocaleString()} 명`} 
+            icon={<PeopleIcon sx={{ fontSize: 30 }} />} 
+            color="#64748b" // Slate Gray
+            subtitle="전체 등록 인원"
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+
+        {/* 2. 재학 중 */}
+        <Grid size={{ xs: 12, sm: 4, md: 2.4 }}>
           <LmsStatCard 
-            title="현재 재학생" 
-            value={`${activeStudents.toLocaleString()} 명`} 
-            icon={<SchoolIcon sx={{ fontSize: 32 }} />} 
+            title="재학 중" 
+            value={`${stats.active.toLocaleString()} 명`} 
+            icon={<PersonAddIcon sx={{ fontSize: 30 }} />} 
             color="#10b981" 
+            subtitle="현재 교육 참여"
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        
+        {/* 3. 중도 탈락 */}
+        <Grid size={{ xs: 12, sm: 4, md: 2.4 }}>
           <LmsStatCard 
-            title="전체 평균 이행률" 
-            value={`${avgRatio} %`}
-            icon={<PercentIcon sx={{ fontSize: 32 }} />} 
+            title="중도 탈락" 
+            value={`${stats.dropout.toLocaleString()} 명`} 
+            icon={<PersonOffIcon sx={{ fontSize: 30 }} />} 
+            color="#ef4444" 
+            subtitle="미수료 탈락자"
+          />
+        </Grid>
+        
+        {/* 4. 수강 철회 */}
+        <Grid size={{ xs: 12, sm: 4, md: 2.4 }}>
+          <LmsStatCard 
+            title="수강 철회" 
+            value={`${stats.earlyout.toLocaleString()} 명`} 
+            icon={<ExitToAppIcon sx={{ fontSize: 30 }} />} 
             color="#f59e0b" 
+            subtitle="개강 전후 포기"
+          />
+        </Grid>
+
+        {/* 5. 수료 완료 */}
+        <Grid size={{ xs: 12, sm: 4, md: 2.4 }}>
+          <LmsStatCard 
+            title="수료 완료" 
+            value={`${stats.graduated.toLocaleString()} 명`} 
+            icon={<SchoolIcon sx={{ fontSize: 30 }} />} 
+            color="#3b82f6" 
+            subtitle="누적 수료생 총계"
           />
         </Grid>
       </Grid>
+
+      {/* 이행률 표시 */}
+      <Paper sx={{ p: 2, mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f8fafc', borderRadius: 3, border: '1px dashed #cbd5e1' }}>
+         <PercentIcon sx={{ color: '#64748b', mr: 1 }} />
+         <Typography variant="body1" sx={{ color: '#475569', fontWeight: 600 }}>
+            선택된 연도 교육과정 전체 학생 LMS 시험 평균 이행률: <span style={{ color: '#f59e0b', fontSize: '1.2rem' }}>{avgRatio}%</span>
+         </Typography>
+      </Paper>
 
       {/* 상세 리스트 테이블 */}
       <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", overflow: 'hidden' }}>
@@ -119,14 +168,13 @@ const LmsDashboard: React.FC = () => {
               <TableCell width="20%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 명 (기수)</TableCell>
               <TableCell width="15%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>현재 인원 / 시작 인원</TableCell>
               <TableCell width="40%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 이행률</TableCell>
-              {/* 버튼을 위한 빈 헤더 칸 추가 */}
               <TableCell width="20%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>상세 현황</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ py: 10 }}>
+                <TableCell colSpan={5} align="center" sx={{ py: 10 }}>
                    <CircularProgress thickness={4} size={40} sx={{ color: '#1e293b' }} />
                    <Typography sx={{ mt: 2, color: '#64748b' }}>데이터를 불러오는 중...</Typography>
                 </TableCell>
@@ -137,7 +185,7 @@ const LmsDashboard: React.FC = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} align="center" sx={{ py: 10, color: '#94a3b8', fontSize: '1.1rem' }}>
+                <TableCell colSpan={5} align="center" sx={{ py: 10, color: '#94a3b8', fontSize: '1.1rem' }}>
                   데이터가 없습니다.
                 </TableCell>
               </TableRow>
