@@ -29,13 +29,14 @@
             GROUP BY CUR_SEQ
         ),
         TestStats AS (
+            /* 현재 재학중인 학생의 시험 제출 수만 집계 */
             SELECT 
                 t.SUB_SEQ,
                 COUNT(r.RESULT_SEQ) AS submitted_count
             FROM lms.TB_TEST t
             LEFT JOIN lms.TB_TEST_RESULT r ON t.TEST_SEQ = r.TEST_SEQ
             LEFT JOIN lms.TB_ACCOUNT acc ON r.account_seq = acc.account_seq
-            WHERE acc.STATUS = 'ENROLLED' OR r.RESULT_SEQ IS NULL
+            WHERE (acc.STATUS = 'ENROLLED' OR r.RESULT_SEQ IS NULL)
             GROUP BY t.SUB_SEQ
         )
         SELECT 
@@ -47,8 +48,7 @@
             COALESCE(ast.total_enrolled, 0) AS total_enrolled,
             COALESCE(ast.active_accounts, 0) AS active_accounts,
             COALESCE(ast.dropout_count, 0) AS dropout_count,
-            
-            ROUND(AVG(
+            COALESCE(ast.earlyout_count, 0) AS earlyout_count,     COALESCE(ast.graduated_count, 0) AS graduated_count, ROUND(AVG(
                 CASE 
                     WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
                     ELSE (COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100)
@@ -76,7 +76,7 @@
         </where>
         GROUP BY 
             c.CUR_SEQ, c.CUR_NAME, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, 
-            ast.total_enrolled, ast.active_accounts, ast.dropout_count
+            ast.total_enrolled, ast.active_accounts, ast.dropout_count, ast.earlyout_count, ast.graduated_count
         ORDER BY c.TERM DESC
     </select>
 
