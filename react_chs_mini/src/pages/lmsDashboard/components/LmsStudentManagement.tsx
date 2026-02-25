@@ -108,7 +108,10 @@ const LmsStudentManagement = () => {
                   <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '100%' }}>
                     {/* 프로필 사진 처리 영역 */}
                     <Avatar 
-                      src={stu.mainImagePath} // 이미지 경로가 있으면 썸네일 표시
+                      src={stu.mainImagePath 
+                        ? `http://168.107.51.143:8080/upload/${encodeURIComponent(stu.mainImagePath)}` 
+                        : `https://w7.pngwing.com/pngs/884/996/png-transparent-pingu-waiting-cartoons-pingu-thumbnail.png`
+                      }
                       alt={stu.accountName}
                       sx={{ 
                         width: 40, // 가독성을 위해 크기를 살짝 키웠습니다 (32 -> 40)

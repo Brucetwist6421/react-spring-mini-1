@@ -93,7 +93,12 @@ const StudentDetailPage = () => {
         <Grid container spacing={4} alignItems="center">
           <Grid size={{ xs: 12, md: 4 }}>
             <Stack direction="row" spacing={3} alignItems="center">
-              <Avatar sx={{ width: 100, height: 100, bgcolor: '#3b82f6', fontSize: '2.5rem', fontWeight: 800 }}>
+              <Avatar 
+                src={student.mainImagePath 
+                  ? `http://168.107.51.143:8080/upload/${encodeURIComponent(student.mainImagePath)}` 
+                  : `https://w7.pngwing.com/pngs/884/996/png-transparent-pingu-waiting-cartoons-pingu-thumbnail.png`
+                }
+                sx={{ width: 110, height: 110, bgcolor: '#3b82f6', fontSize: '2.5rem', fontWeight: 800 }}>
                 {student.accountName?.[0]}
               </Avatar>
               <Box>
@@ -152,7 +157,7 @@ const StudentDetailPage = () => {
               <InfoItem icon={<PhoneIphoneIcon fontSize="small" />} label="연락처" value={student.tel} />
               <InfoItem icon={<WarningAmberIcon fontSize="small" />} label="비상연락처" value={student.emergencyTel} />
               <InfoItem icon={<HomeIcon fontSize="small" />} label="주소" value={student.address} />
-              <InfoItem icon={<CakeIcon fontSize="small" />} label="생년월일" value={`${student.birth || '-'} (${student.gender === 'M' ? '남' : '여'})`} />
+              <InfoItem icon={<CakeIcon fontSize="small" />} label="생년월일(성별)" value={`${student.birth || '-'} (${student.gender === 'M' ? '남' : '여'})`} />
             </Paper>
 
             <Paper elevation={0} sx={{ p: 3, border: '1px solid #e2e8f0', borderRadius: 4 }}>
@@ -199,7 +204,7 @@ const StudentDetailPage = () => {
                   <TextField 
                     fullWidth multiline rows={3} 
                     value={student.dropoutInfo || ""} 
-                    InputProps={{ readOnly: true }}
+                    slotProps={{input: {readOnly: true,},}}
                     sx={{ mb: 4, bgcolor: student.status === 'DROPOUT' ? '#fff5f5' : '#f8fafc' }}
                   />
 
