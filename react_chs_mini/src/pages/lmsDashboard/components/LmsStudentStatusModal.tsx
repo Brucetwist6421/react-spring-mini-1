@@ -199,11 +199,15 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
                     {/* 4. 점수 매칭: API의 scores 배열에서 subjectName이 일치하는 점수 출력 */}
                     {row.subjects?.map((sub: any) => {
                       const subjectScore = student.scores?.find(
-                        (s: any) => s.subjectName === sub.subjectName,
+                        (s: any) => s.subjectName.trim() === sub.subjectName.trim(), // 공백 제거 후 비교
                       );
+
+                      // subjectScore가 없거나, 있더라도 score가 null 또는 undefined인 경우 체크
+                      const hasScore = subjectScore !== undefined && subjectScore.score !== null;
+
                       return (
                         <TableCell key={sub.subjectName} align="center">
-                          {subjectScore !== null ? subjectScore.score : '미응시'}
+                          {hasScore ? subjectScore.score : <span style={{ color: '#94a3b8' }}>미응시</span>}
                         </TableCell>
                       );
                     })}

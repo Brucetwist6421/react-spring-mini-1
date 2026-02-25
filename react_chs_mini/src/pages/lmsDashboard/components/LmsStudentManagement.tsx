@@ -1,37 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useParams, useNavigate } from "react-router-dom";
-import { Box, Paper, List, ListItemButton, ListItemText, Typography, Divider, Chip, Stack, Button } from "@mui/material";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import StudentDetailPage from "./StudentDetailPage";
-import SchoolIcon from '@mui/icons-material/School';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // 아이콘 추가
+import SchoolIcon from '@mui/icons-material/School';
+import { Avatar, Box, Button, Chip, Divider, List, ListItemButton, Paper, Stack, Typography } from "@mui/material";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import StudentDetailPage from "./StudentDetailPage";
 
 const LmsStudentManagement = () => {
   const { curSeq, accountSeq } = useParams<{ curSeq: string; accountSeq: string }>();
   const navigate = useNavigate();
   const [students, setStudents] = useState<any[]>([]);
-  // 과정 정보를 저장할 상태 추가
   const [courseInfo, setCourseInfo] = useState<any>(null);
+
+  // 1. 학생 상태 헬퍼 함수
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'ENROLLED': return { label: '재학 중', color: 'success' as const, bgcolor: '#f0fdf4' };
+      case 'DROPOUT': return { label: '중도 탈락', color: 'error' as const, bgcolor: '#fef2f2' };
+      case 'EARLYOUT': return { label: '수강 철회', color: 'warning' as const, bgcolor: '#fffbeb' };
+      case 'GRADUATED': return { label: '수료', color: 'primary' as const, bgcolor: '#eff6ff' };
+      default: return { label: '기타', color: 'default' as const, bgcolor: '#f8fafc' };
+    }
+  };
 
   useEffect(() => {
     if (curSeq) {
-      // 1. 학생 목록 가져오기
       axios.get(`/api/account/${curSeq}/students`)
         .then(res => {
           setStudents(res.data);
-          // 2. 학생 목록 중 첫 번째 데이터나 서버 응답에서 과정 정보 추출
           if (res.data.length > 0) {
             const classData = res.data[0];
-            // console.log("과정 정보:", classData);
             setCourseInfo({
               curName: classData.curName,
-              className: classData.className || '1', // XML 결과에 따라 조정
+              className: classData.className || '1',
               term: classData.term || '1',
               room: classData.room || '미정',
-              startDate: classData.startDate || '미정',
-              endDate: classData.endDate || '미정',
             });
           }
         })
@@ -42,104 +47,100 @@ const LmsStudentManagement = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: 'calc(100vh - 120px)' }}>
       
-      {/* 상단 경로 안내 및 과정 정보 헤더 */}
+      {/* 상단 경로 안내 헤더 (생략 - 기존 유지) */}
       <Paper elevation={0} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: 3, bgcolor: '#ffffff' }}>
         <Stack direction="row" alignItems="center" spacing={1.5}>
-        {/* 목록 이동 버튼 */}
-        <Button 
+          <Button 
             variant="text" 
-            size="medium" 
-            startIcon={<ArrowBackIcon sx={{ color: '#000000' }} />}
+            startIcon={<ArrowBackIcon />}
             onClick={() => navigate('/lms/dashboard')}
-            sx={{ 
-            mr: 0.5, 
-            p: 0,
-            minWidth: 'auto',
-            '&:hover': { bgcolor: 'transparent', opacity: 0.7 } 
-            }}
-        >
-            <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000' }}>
+            sx={{ fontWeight: 700, color: '#000000' }}
+          >
             목록
-            </Typography>
-        </Button>
-
-        <Divider orientation="vertical" flexItem sx={{ mx: 0.5, height: 20, alignSelf: 'center', bgcolor: '#000000', opacity: 0.2 }} />
-
-        {/* 아이콘 및 카테고리 명칭 */}
-        <SchoolIcon sx={{ fontSize: 22, color: '#000000' }} />
-        <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: '#000000' }}>
-            학생 관리
-        </Typography>
-        
-        <ChevronRightIcon sx={{ color: '#000000', fontSize: 20, opacity: 0.5 }} />
-
-        {/* 🔥 글자 크기 +2px 및 검정색 통일 섹션 */}
-        {courseInfo ? (
-            <Stack direction="row" spacing={1.5} alignItems="center">
-            <Typography sx={{ fontSize: '1.1rem', fontWeight: 800, color: '#000000' }}>
-                {courseInfo.curName}
-            </Typography>
-            <Typography sx={{ fontSize: '1.1rem', fontWeight: 500, color: '#000000' }}>
-                {courseInfo.room}호 ({courseInfo.term}기)
-            </Typography>
+          </Button>
+          <Divider orientation="vertical" flexItem sx={{ height: 20, alignSelf: 'center' }} />
+          <SchoolIcon sx={{ color: '#000000' }} />
+          <Typography sx={{ fontSize: '1.1rem', fontWeight: 700 }}>학생 관리</Typography>
+          <ChevronRightIcon sx={{ opacity: 0.5 }} />
+          {courseInfo && (
+            <Stack direction="row" spacing={1}>
+              <Typography sx={{ fontSize: '1.1rem', fontWeight: 800 }}>{courseInfo.curName}</Typography>
+              <Typography sx={{ fontSize: '1.1rem', fontWeight: 500 }}>{courseInfo.room}호 ({courseInfo.term}기)</Typography>
             </Stack>
-        ) : (
-            <Typography sx={{ fontSize: '1.1rem', fontWeight: 500, color: '#000000', opacity: 0.5 }}>
-            과정 정보를 불러오는 중...
-            </Typography>
-        )}
+          )}
         </Stack>
       </Paper>
 
-      {/* 메인 컨텐츠 영역 (2단 구성) */}
+      {/* 메인 컨텐츠 영역 */}
       <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, minHeight: 0 }}>
         
-        {/* 왼쪽: 학생 리스트 */}
-        <Paper sx={{ width: 280, display: 'flex', flexDirection: 'column', borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }} elevation={0}>
+        {/* 왼쪽: 학생 리스트 (UX 개선 버전) */}
+        <Paper sx={{ width: 320, display: 'flex', flexDirection: 'column', borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }} elevation={0}>
           <Box sx={{ p: 2, bgcolor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography fontSize={17} variant="subtitle2" fontWeight="bold">학생 명단</Typography>
-            <Chip label={`${students.length}명`} size="medium" variant="outlined" sx={{ fontWeight: 700, height: 20, fontSize: '1.1rem' }} />
+            <Typography fontSize={16} fontWeight="800" color="#334155">수강생 명단</Typography>
+            <Chip label={`${students.length}명`} size="small" sx={{ fontWeight: 700, bgcolor: '#e2e8f0' }} />
           </Box>
           <Divider />
-          <List sx={{ flexGrow: 1, overflow: 'auto', py: 0 }}>
-            {students.map((stu) => (
-              <ListItemButton 
-                key={stu.accountSeq}
-                selected={Number(accountSeq) === stu.accountSeq}
-                onClick={() => navigate(`/lms/management/${curSeq}/student/${stu.accountSeq}`)}
-                sx={{ 
-                  borderBottom: '1px solid #f1f5f9', 
-                  py: 1.5,
-                  '&.Mui-selected': { borderLeft: '4px solid #3b82f6' } 
-                }}
-              >
-                <ListItemText
-                  primary={stu.accountName}
-                  secondary={`LMS ID : ${stu.accountId}`}
-                  slotProps={{
-                    primary: {
-                      sx: {
-                        fontWeight: Number(accountSeq) === stu.accountSeq ? 800 : 500,
-                        color: Number(accountSeq) === stu.accountSeq ? 'primary.main' : 'text.primary',
-                      },
+          
+          <List sx={{ flexGrow: 1, overflow: 'auto', p: 1 }}>
+            {students.map((stu) => {
+              const status = getStatusConfig(stu.status);
+              const isSelected = Number(accountSeq) === stu.accountSeq;
+
+              return (
+                <ListItemButton 
+                  key={stu.accountSeq}
+                  selected={isSelected}
+                  onClick={() => navigate(`/lms/management/${curSeq}/student/${stu.accountSeq}`)}
+                  sx={{ 
+                    borderRadius: 2,
+                    mb: 0.5,
+                    py: 1.2,
+                    transition: 'all 0.2s',
+                    '&.Mui-selected': { 
+                      bgcolor: '#eff6ff', 
+                      borderLeft: '4px solid #3b82f6',
+                      '&:hover': { bgcolor: '#dbeafe' }
                     },
-                    secondary: { sx: { fontSize: '0.8rem' } }
+                    '&:hover': { bgcolor: '#f1f5f9' }
                   }}
-                />
-              </ListItemButton>
-            ))}
+                >
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '100%' }}>
+                    <Avatar sx={{ width: 32, height: 32, fontSize: '0.9rem', bgcolor: isSelected ? '#3b82f6' : '#cbd5e1' }}>
+                      {stu.accountName.charAt(0)}
+                    </Avatar>
+                    
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography sx={{ fontWeight: isSelected ? 800 : 600, fontSize: '1rem', color: isSelected ? '#1e40af' : '#1e293b' }}>
+                          {stu.accountName}
+                        </Typography>
+                        <Chip 
+                          label={status.label} 
+                          size="small" 
+                          color={status.color} 
+                          variant="filled"
+                          sx={{ height: 20, fontSize: '0.65rem', fontWeight: 800 }}
+                        />
+                      </Stack>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.2 }}>
+                        ID: {stu.accountId}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </ListItemButton>
+              );
+            })}
           </List>
         </Paper>
 
-        {/* 오른쪽: 상세 정보 */}
+        {/* 오른쪽: 상세 정보 (생략 - 기존 유지) */}
         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-          {accountSeq ? (
-            <StudentDetailPage /> 
-          ) : (
-            <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 3, border: '1px dashed #cbd5e1', bgcolor: '#fbfcfd' }} elevation={0}>
-              <SchoolIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
-              <Typography color="text.secondary" fontWeight={500}>학생을 선택하면 상세 관리 화면이 나타납니다.</Typography>
-            </Paper>
+          {accountSeq ? <StudentDetailPage /> : (
+             <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 3, border: '1px dashed #cbd5e1', bgcolor: '#fbfcfd' }} elevation={0}>
+               <SchoolIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
+               <Typography color="text.secondary" fontWeight={500}>학생을 선택하면 상세 관리 화면이 나타납니다.</Typography>
+             </Paper>
           )}
         </Box>
       </Box>

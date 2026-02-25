@@ -35,7 +35,7 @@ const LmsDashboard: React.FC = () => {
       const res = await api.get("/api/lmsDashboard/stats", { params });
       
       setData(Array.isArray(res.data) ? res.data : []);
-      console.log("API 응답 데이터:", res.data);
+      // console.log("API 응답 데이터:", res.data);
     } catch (err) {
       console.error("데이터 로딩 실패:", err);
       setData([]);
