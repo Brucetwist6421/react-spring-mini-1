@@ -21,7 +21,7 @@ public class AccountServiceImpl implements AccountService {
         List<AccountVO> accountList = accountMapper.selectStudentsByCurriculum(curSeq);
 		if (accountList == null || accountList.isEmpty()) {
 			for (AccountVO vo : accountList) {
-				List<AccountAttachmentVO> attachments = accountMapper.selectAttachmentsByAccountSeq(vo.getaccountSeq());
+				List<AccountAttachmentVO> attachments = accountMapper.selectAttachmentsByAccountSeq(vo.getAccountSeq());
 				if (attachments != null && !attachments.isEmpty()) {
 					vo.setAttachments(attachments);
 				}
