@@ -94,7 +94,8 @@
             c.end_date,
             c.room,                 -- 강의실(호수) 추가
             c.term,                 -- 기수 추가
-            c.account_seq AS teacher_seq -- 담당자 ID
+            c.account_seq AS teacher_seq, -- 담당자 ID
+            (select aa.account_name from lms.tb_account aa where aa.acc_seq = c.account_seq) AS teacher_name --담임 이름
         FROM 
             lms.tb_account a
         LEFT JOIN 

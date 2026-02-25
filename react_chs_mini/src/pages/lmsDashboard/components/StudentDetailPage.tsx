@@ -96,8 +96,8 @@ const StudentDetailPage = () => {
                 <Typography variant="body2" fontWeight={600}>{student.startDate} ~ {student.endDate}</Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">담당 관리자</Typography>
-                <Typography variant="body2" fontWeight={600}>{student.teacherSeq}</Typography>
+                <Typography variant="caption" color="text.secondary">담임</Typography>
+                <Typography variant="body2" fontWeight={600}>{student.teacherName}</Typography>
               </Box>
             </Stack>
           </Grid>

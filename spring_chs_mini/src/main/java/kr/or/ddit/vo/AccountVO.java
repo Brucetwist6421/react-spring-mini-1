@@ -57,5 +57,6 @@ public class AccountVO {
     private String room;            // 교육실 (추가)
     private String term;            // 기수 (추가)
     private String teacherSeq;      // 담당자 일련번호 (account_seq)
+    private String teacherName;     // 담임 이름 
 
 }
