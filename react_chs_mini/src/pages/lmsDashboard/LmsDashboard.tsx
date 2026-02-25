@@ -1,14 +1,20 @@
 import ExitToAppIcon from "@mui/icons-material/ExitToApp"; // 수강 철회용
+import PeopleIcon from "@mui/icons-material/People";
 import PersonAddIcon from "@mui/icons-material/PersonAdd"; // 재학 중용
 import PersonOffIcon from "@mui/icons-material/PersonOff"; // 중도 탈락용
-import PercentIcon from "@mui/icons-material/Percent"; // 이행률용
-import PeopleIcon from "@mui/icons-material/People";
 import SchoolIcon from "@mui/icons-material/School";
-import { 
-  Box, CircularProgress, Grid, Paper, Table, TableBody, TableCell, 
-  TableContainer, TableHead, TableRow, Typography, MenuItem, Select, FormControl, InputLabel 
+import {
+  Box, CircularProgress,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Typography
 } from "@mui/material";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import api from "../../api/axiosInstance";
 import LmsDashboardRow from "./components/LmsDashboardRow";
@@ -154,9 +160,9 @@ const LmsDashboard: React.FC = () => {
 
       {/* 이행률 표시 */}
       <Paper sx={{ p: 2, mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f8fafc', borderRadius: 3, border: '1px dashed #cbd5e1' }}>
-         <PercentIcon sx={{ color: '#64748b', mr: 1 }} />
+         {/* <PercentIcon sx={{ color: '#64748b', mr: 1 }} /> */}
          <Typography variant="body1" sx={{ color: '#475569', fontWeight: 600 }}>
-            선택된 연도 교육과정 전체 학생 LMS 시험 평균 이행률: <span style={{ color: '#f59e0b', fontSize: '1.2rem' }}>{avgRatio}%</span>
+            선택된 연도 전체 학생 LMS 시험 이행률 평균: <span style={{ color: '#f59e0b', fontSize: '1.2rem' }}>{avgRatio}%</span>
          </Typography>
       </Paper>
 

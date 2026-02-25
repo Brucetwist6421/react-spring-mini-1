@@ -165,7 +165,7 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                         <Typography sx={{ fontSize: "0.9rem", fontWeight: 600 }}>{sub.ratio}%</Typography>
                         <Typography sx={{ fontSize: "0.85rem", color: "text.secondary" }}>
-                          {sub.submittedCount}명 완료
+                          {row.activeAccounts}명 중 {sub.submittedCount}명 완료
                         </Typography>
                       </Box>
                       <LinearProgress variant="determinate" value={sub.ratio} sx={{ mt: 1.5, height: 6, borderRadius: 3 }} />

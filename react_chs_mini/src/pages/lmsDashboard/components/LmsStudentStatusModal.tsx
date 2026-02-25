@@ -203,7 +203,7 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
                       );
                       return (
                         <TableCell key={sub.subjectName} align="center">
-                          {subjectScore ? subjectScore.score : 0}
+                          {subjectScore !== null ? subjectScore.score : '미응시'}
                         </TableCell>
                       );
                     })}

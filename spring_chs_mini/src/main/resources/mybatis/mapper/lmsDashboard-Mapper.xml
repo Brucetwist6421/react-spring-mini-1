@@ -110,7 +110,7 @@
                 sb.account_seq,
                 sb.account_name,
                 sj.sub_name,
-                COALESCE(tr.total_score, 0) AS score
+                COALESCE(tr.total_score, null) AS score
             FROM StudentBase sb
             CROSS JOIN SubjectBase sj
             LEFT JOIN lms.tb_test t ON sj.sub_seq = t.sub_seq
