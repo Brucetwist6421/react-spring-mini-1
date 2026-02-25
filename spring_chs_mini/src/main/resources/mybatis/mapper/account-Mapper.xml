@@ -5,7 +5,7 @@
 
     <select id="findByAccId" parameterType="string" resultType="kr.or.ddit.vo.AccountVO">
         SELECT 
-            a.acc_seq,
+            a.account_seq,
             a.account_id,
             a.account_passwd,
             a.account_name,
@@ -33,7 +33,7 @@
 
     <select id="selectStudentsByCurriculum" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
         SELECT 
-            a.acc_seq,
+            a.account_seq,
             a.cur_seq,
             a.account_id,
             a.account_name,
@@ -61,7 +61,7 @@
     <select id="selectAccountDetail" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
         SELECT 
             -- 1. 학생 기본 및 연락처 정보
-            a.acc_seq,
+            a.account_seq,
             a.account_id,
             a.account_name,
             a.birth,
@@ -96,13 +96,13 @@
             c.room,                 -- 강의실(호수) 추가
             c.term,                 -- 기수 추가
             c.account_seq AS teacher_seq, -- 담당자 ID
-            (select aa.account_name from lms.tb_account aa where aa.acc_seq = c.account_seq) AS teacher_name --담임 이름
+            (select aa.account_name from lms.tb_account aa where aa.account_seq = c.account_seq) AS teacher_name --담임 이름
         FROM 
             lms.tb_account a
         LEFT JOIN 
             lms.tb_curriculum c ON a.cur_seq = c.cur_seq
         WHERE 
-            a.acc_seq = #{accSeq}
+            a.account_seq = #{accountSeq}
     </select>
 
     <select id="selectAttachmentsByAccountSeq" parameterType="long" resultType="kr.or.ddit.vo.AccountAttachmentVO">
