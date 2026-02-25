@@ -9,7 +9,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'; // 아이콘 추가
 
 const LmsStudentManagement = () => {
-  const { curSeq, accSeq } = useParams<{ curSeq: string; accSeq: string }>();
+  const { curSeq, accountSeq } = useParams<{ curSeq: string; accountSeq: string }>();
   const navigate = useNavigate();
   const [students, setStudents] = useState<any[]>([]);
   // 과정 정보를 저장할 상태 추가
@@ -104,9 +104,9 @@ const LmsStudentManagement = () => {
           <List sx={{ flexGrow: 1, overflow: 'auto', py: 0 }}>
             {students.map((stu) => (
               <ListItemButton 
-                key={stu.accSeq}
-                selected={Number(accSeq) === stu.accSeq}
-                onClick={() => navigate(`/lms/management/${curSeq}/student/${stu.accSeq}`)}
+                key={stu.accountSeq}
+                selected={Number(accountSeq) === stu.accountSeq}
+                onClick={() => navigate(`/lms/management/${curSeq}/student/${stu.accountSeq}`)}
                 sx={{ 
                   borderBottom: '1px solid #f1f5f9', 
                   py: 1.5,
@@ -119,8 +119,8 @@ const LmsStudentManagement = () => {
                   slotProps={{
                     primary: {
                       sx: {
-                        fontWeight: Number(accSeq) === stu.accSeq ? 800 : 500,
-                        color: Number(accSeq) === stu.accSeq ? 'primary.main' : 'text.primary',
+                        fontWeight: Number(accountSeq) === stu.accountSeq ? 800 : 500,
+                        color: Number(accountSeq) === stu.accountSeq ? 'primary.main' : 'text.primary',
                       },
                     },
                     secondary: { sx: { fontSize: '0.8rem' } }
@@ -133,7 +133,7 @@ const LmsStudentManagement = () => {
 
         {/* 오른쪽: 상세 정보 */}
         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-          {accSeq ? (
+          {accountSeq ? (
             <StudentDetailPage /> 
           ) : (
             <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 3, border: '1px dashed #cbd5e1', bgcolor: '#fbfcfd' }} elevation={0}>

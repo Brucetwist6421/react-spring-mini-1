@@ -32,7 +32,7 @@
                 COUNT(r.RESULT_SEQ) AS submitted_count
             FROM lms.TB_TEST t
             LEFT JOIN lms.TB_TEST_RESULT r ON t.TEST_SEQ = r.TEST_SEQ
-            LEFT JOIN lms.TB_ACCOUNT acc ON r.ACC_SEQ = acc.ACC_SEQ
+            LEFT JOIN lms.TB_ACCOUNT acc ON r.account_seq = acc.account_seq
             WHERE acc.STATUS = 'ENROLLED' OR r.RESULT_SEQ IS NULL
             GROUP BY t.SUB_SEQ
         )
@@ -79,7 +79,7 @@
     </select>
 
     <resultMap id="studentScoreMap" type="kr.or.ddit.vo.LmsStudentScoreVO">
-        <id property="accSeq" column="acc_seq"/>
+        <id property="accountSeq" column="account_seq"/>
         <result property="accountName" column="account_name"/>
         <result property="totalScore" column="total_sum"/>
         <result property="avgScore" column="total_avg"/>
@@ -92,7 +92,7 @@
 
     <select id="selectStudentScoresByCurriculum" resultMap="studentScoreMap">
         WITH StudentBase AS (
-            SELECT acc_seq, account_name 
+            SELECT account_seq, account_name 
             FROM lms.tb_account 
             WHERE cur_seq = #{curSeq} AND status = 'ENROLLED'
         ),
@@ -103,22 +103,22 @@
         ),
         ScoreMatrix AS (
             SELECT 
-                sb.acc_seq,
+                sb.account_seq,
                 sb.account_name,
                 sj.sub_name,
                 COALESCE(tr.total_score, 0) AS score
             FROM StudentBase sb
             CROSS JOIN SubjectBase sj
             LEFT JOIN lms.tb_test t ON sj.sub_seq = t.sub_seq
-            LEFT JOIN lms.tb_test_result tr ON t.test_seq = tr.test_seq AND sb.acc_seq = tr.acc_seq
+            LEFT JOIN lms.tb_test_result tr ON t.test_seq = tr.test_seq AND sb.account_seq = tr.account_seq
         )
         SELECT 
-            acc_seq,
+            account_seq,
             account_name,
             sub_name,
             score,
-            SUM(score) OVER(PARTITION BY acc_seq) AS total_sum,
-            ROUND(AVG(score) OVER(PARTITION BY acc_seq), 1) AS total_avg
+            SUM(score) OVER(PARTITION BY account_seq) AS total_sum,
+            ROUND(AVG(score) OVER(PARTITION BY account_seq), 1) AS total_avg
         FROM ScoreMatrix
         ORDER BY account_name ASC, sub_name ASC
     </select>

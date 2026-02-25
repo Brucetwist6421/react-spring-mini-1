@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import kr.or.ddit.vo.AccountAttachmentVO;
 import kr.or.ddit.vo.AccountVO;
 
 @Mapper // 마이바티스 매퍼임을 명시
@@ -23,5 +24,7 @@ public interface AccountMapper {
 
     List<AccountVO> selectStudentsByCurriculum(Integer curSeq);
 
-    AccountVO selectAccountDetail(Integer accSeq);
+    AccountVO selectAccountDetail(Integer accountSeq);
+
+    List<AccountAttachmentVO> selectAttachmentsByAccountSeq(Integer accountSeq);
 }

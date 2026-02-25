@@ -7,6 +7,7 @@ import lombok.Builder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 public class AccountVO {
 
     // 1. tb_account (계정 기본 정보)
-    private Integer accSeq;         // 계정 일련번호 (serial)
+    private Integer accountSeq;         // 계정 일련번호 (serial)
     private Integer curSeq;         // 교육과정 일련번호 (fk)
     private String accountId;       // 아이디 (unique)
     private String accountName;     // 이름
@@ -58,5 +59,7 @@ public class AccountVO {
     private String term;            // 기수 (추가)
     private String teacherSeq;      // 담당자 일련번호 (account_seq)
     private String teacherName;     // 담임 이름 
+
+    private List<AccountAttachmentVO> attachments; // 첨부파일 리스트
 
 }

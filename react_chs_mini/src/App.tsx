@@ -58,7 +58,7 @@ function App() {
                   {/* 1. 학생 목록 페이지 (관리 버튼 클릭 시 도착지) */}
                   <Route path="/lms/management/:curSeq" element={<LmsStudentManagement />} />
                   {/* 2. 특정 학생 선택 시 상세 페이지 (목록은 그대로 있고 오른쪽 내용만 바뀜) */}
-                  <Route path="/lms/management/:curSeq/student/:accSeq" element={<LmsStudentManagement />} />
+                  <Route path="/lms/management/:curSeq/student/:accountSeq" element={<LmsStudentManagement />} />
                   {/* LMS 대시보드 */}
                   <Route path="/lms/dashboard" element={<LmsDashboard />} />
                 </Route>

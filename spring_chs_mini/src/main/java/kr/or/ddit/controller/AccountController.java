@@ -21,8 +21,8 @@ public class AccountController {
     }
 
     //계정 상세조회
-    @GetMapping("/{accSeq}")
-    public AccountVO getAccountDetail(@PathVariable Integer accSeq) {
-        return accountService.getAccountDetail(accSeq);
+    @GetMapping("/{accountSeq}")
+    public AccountVO getAccountDetail(@PathVariable Integer accountSeq) {
+        return accountService.getAccountDetail(accountSeq);
     }
 }

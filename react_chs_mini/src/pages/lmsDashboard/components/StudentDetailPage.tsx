@@ -26,7 +26,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import RandomSpinner from '../../../components/RandomSpinner';
 
 const StudentDetailPage = () => {
-  const { accSeq } = useParams<{ accSeq: string }>();
+  const { accountSeq } = useParams<{ accountSeq: string }>();
   const [student, setStudent] = useState<any>(null);
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -55,9 +55,9 @@ const StudentDetailPage = () => {
   };
 
   useEffect(() => {
-    if (accSeq) {
+    if (accountSeq) {
       setLoading(true);
-      axios.get(`/api/account/${accSeq}`)
+      axios.get(`/api/account/${accountSeq}`)
         .then(res => {
           setStudent(res.data);
           setLoading(false);
@@ -67,7 +67,7 @@ const StudentDetailPage = () => {
           setLoading(false);
         });
     }
-  }, [accSeq]);
+  }, [accountSeq]);
 
   if (loading) return <RandomSpinner/>;
   if (!student) return <Typography sx={{ p: 4 }}>학생 정보를 찾을 수 없습니다.</Typography>;

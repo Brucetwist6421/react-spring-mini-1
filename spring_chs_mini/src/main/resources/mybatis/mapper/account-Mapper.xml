@@ -50,7 +50,8 @@
             c.room,
             c.term,
             c.start_date,
-            c.end_date
+            c.end_date,
+            a.main_image_path
         FROM lms.tb_account a
         LEFT JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
         WHERE a.cur_seq = #{curSeq}
@@ -103,5 +104,15 @@
         WHERE 
             a.acc_seq = #{accSeq}
     </select>
+
+    <select id="selectAttachmentsByAccountSeq" parameterType="long" resultType="kr.or.ddit.vo.AccountAttachmentVO">
+	    SELECT
+	        seq,
+	        account_seq,
+	        file_name
+	    FROM lms.tb_account_attachment
+	    WHERE account_seq = #{accountSeq}
+	    order by seq asc
+	</select>
 
 </mapper>
