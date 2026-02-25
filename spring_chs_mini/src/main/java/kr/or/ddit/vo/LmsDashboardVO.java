@@ -14,6 +14,8 @@ public class LmsDashboardVO {
     private int totalEnrolled;
     private int activeAccounts;
     private int dropoutCount;
+    private int earlyoutCount;
+    private int graduatedCount;
     private double totalAvgRatio;
     private List<SubjectStatVO> subjects; // JSON 내역 매핑
 

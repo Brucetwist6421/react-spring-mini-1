@@ -11,6 +11,8 @@
         <result property="totalEnrolled" column="total_enrolled"/>
         <result property="activeAccounts" column="active_accounts"/>
         <result property="dropoutCount" column="dropout_count"/>
+        <result property="earlyoutCount" column="earlyout_count"/>
+        <result property="graduatedCount" column="graduated_count"/>
         <result property="totalAvgRatio" column="total_avg_ratio"/>
         <result property="subjects" column="subjects" 
                 typeHandler="kr.or.ddit.config.JsonTypeHandler"/>

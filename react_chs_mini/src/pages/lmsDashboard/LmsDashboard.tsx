@@ -29,6 +29,7 @@ const LmsDashboard: React.FC = () => {
       const res = await api.get("/api/lmsDashboard/stats", { params });
       
       setData(Array.isArray(res.data) ? res.data : []);
+      console.log("API 응답 데이터:", res.data);
     } catch (err) {
       console.error("데이터 로딩 실패:", err);
       setData([]);
@@ -139,10 +140,10 @@ const LmsDashboard: React.FC = () => {
           />
         </Grid>
 
-        {/* 5. 수료 완료 */}
+        {/* 5. 수료 */}
         <Grid size={{ xs: 12, sm: 4, md: 2.4 }}>
           <LmsStatCard 
-            title="수료 완료" 
+            title="수료" 
             value={`${stats.graduated.toLocaleString()} 명`} 
             icon={<SchoolIcon sx={{ fontSize: 30 }} />} 
             color="#3b82f6" 
