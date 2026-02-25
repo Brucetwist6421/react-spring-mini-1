@@ -59,24 +59,42 @@
 
     <select id="selectAccountDetail" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
         SELECT 
+            -- 1. 학생 기본 및 연락처 정보
             a.acc_seq,
             a.account_id,
             a.account_name,
             a.birth,
             a.gender,
             a.tel,
+            a.emergency_tel,        -- 비상 연락처 추가
             a.account_email,
             a.address,
+            a.ident_number,         -- 주민등록번호 추가
+            
+            -- 2. 학력 및 군경력
             a.edu,
             a.major,
             a.grad_type,
             a.military_status,
+            a.marital_status,       -- 혼인 여부 추가
+            a.licenses,             -- 자격증 추가
+            
+            -- 3. 이전 경력 및 상태 정보
+            a.prev_company,         -- 전 직장명 추가
+            a.quit_date,            -- 퇴사 일자 추가
+            a.career,               -- 경력 상세 추가
+            a.status,               -- 수강 상태 추가
+            a.dropout_info,         -- 중도 탈락 정보 추가
+            
+            -- 4. 소속 교육 과정 정보 (Join)
             c.cur_seq,
             c.cur_name,
-            c.business_name,
+            c.business_name,        -- 사업명 추가
             c.start_date,
             c.end_date,
-            c.account_seq AS teacher_seq -- 담당자
+            c.room,                 -- 강의실(호수) 추가
+            c.term,                 -- 기수 추가
+            c.account_seq AS teacher_seq -- 담당자 ID
         FROM 
             lms.tb_account a
         LEFT JOIN 
