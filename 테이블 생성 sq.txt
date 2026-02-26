@@ -94,3 +94,92 @@ CREATE TABLE TB_TEST_RESULT (
     CONSTRAINT FK_RESULT_STUDENT FOREIGN KEY (STU_SEQ) REFERENCES TB_STUDENT (STU_SEQ),
     CONSTRAINT FK_RESULT_TEST FOREIGN KEY (TEST_SEQ) REFERENCES TB_TEST (TEST_SEQ)
 );
+
+-- 출석 테이블
+CREATE TABLE lms.tb_attendance (
+  attendance_seq SERIAL NOT NULL,
+  account_seq INTEGER NOT NULL,     -- 학생 (tb_account 참조)
+  cur_seq INTEGER NOT NULL,         -- 과정 (tb_curriculum 참조)
+  attendance_date DATE NOT NULL DEFAULT CURRENT_DATE, -- 예외 발생 일자
+  
+  -- 상태: LATE(지각), EARLY(조퇴), ABSENT(결석), OUTING(외출), OFFICIAL(공결)
+  status CHARACTER VARYING(20) NOT NULL, 
+  
+  -- 시작/종료 시간 (외출: 외출/복귀시간, 지각: 입실시간, 조퇴: 퇴실시간)
+  start_time TIMESTAMP WITHOUT TIME ZONE NULL, 
+  end_time TIMESTAMP WITHOUT TIME ZONE NULL, 
+  
+  remark TEXT NULL,                 -- 사유 (병원, 은행, 개인용무 등)
+  
+  reg_id CHARACTER VARYING(50) NOT NULL, 
+  reg_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_id CHARACTER VARYING(50) NULL,
+  update_date TIMESTAMP WITHOUT TIME ZONE NULL,
+
+  CONSTRAINT tb_attendance_pkey PRIMARY KEY (attendance_seq),
+  -- 한 학생이 하루에 여러 번 외출할 수 있다면 이 제약조건을 제거하거나, 
+  -- status를 포함하여 복합키를 구성해야 합니다. (아래는 하루 1건 예외 기록 기준)
+  CONSTRAINT unique_attendance_exception UNIQUE (account_seq, cur_seq, attendance_date, status),
+  CONSTRAINT fk_attendance_account FOREIGN KEY (account_seq) REFERENCES lms.tb_account (account_seq) ON DELETE CASCADE,
+  CONSTRAINT fk_attendance_curriculum FOREIGN KEY (cur_seq) REFERENCES lms.tb_curriculum (cur_seq) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+
+과목시퀀스, 과목명, 시작일자, 종료일자 컬럼이 과목 테이블에 있고 과정 시퀀스, 호실, 기수, 시작일자, 종료일자, 인원수 컬럼이 과정 테이블에 있고 학생시퀀스, 과정 시퀀스(FK), 아이디, 이름, 생년월일, 성별, 연락처, 학력, 전공, 졸업구분, 경력사항, 제적정보 컬럼이 학생 테이블에 있습니다. 또한 학생이 모든 과목에 대한 테스트를 진행해야 합니다. DB를 어떻게 설계하면 좋을까요?
+
+해당 xml 을 구현할 수 있게 vo(lombok), controller, service(인터페이스), serviceImpl, mapper(인터페이스), mapper.xml 구조를 구현해주세요.
+
+학생 클릭 시 이름, id, 전화번호, 과정명, 사업명, 과정 기간, 담당자(.tb_curriculum 의 account_seq), 생일, 성별, 주소, 이메일, edu,major, grad_type, military_status 조회를  구현할 수 있게 vo(lombok), controller, service(인터페이스), serviceImpl, mapper(인터페이스), mapper.xml 구조를 구현해주세요.
+
+학생 클릭 시 학생 사진, 이름, id, 전화번호, 과정명, 사업명, 과정 기간, 담당자(.tb_curriculum 의 account_seq), 생일, 성별, 주소, 이메일, edu,major, grad_type, military_status 가 조회되고 출석현황정보, 평가정보, 의견 및 특이사항 정보, 상담 정보가 ui, ux 최적화된 상태로 구현하고 싶습니다.
+
+
+create table lms.tb_account (
+  account_seq serial not null,
+  cur_seq integer null,
+  account_id character varying(50) not null,
+  account_name character varying(50) not null,
+  birth date null,
+  gender character(1) null,
+  tel character varying(20) null,
+  edu character varying(50) null,
+  major character varying(50) null,
+  grad_type character varying(20) null,
+  career text null,
+  dropout_info text null,
+  status character varying(20) null default 'ENROLLED'::character varying,
+  account_email character varying(100) null,
+  account_passwd character varying(255) null,
+  account_type character varying(20) null default 'STU'::character varying,
+  reg_date timestamp without time zone null default CURRENT_TIMESTAMP,
+  update_id character varying(50) null,
+  update_date timestamp without time zone null default CURRENT_TIMESTAMP,
+  current_token text null,
+  teacher_yn character varying null default 'N'::character varying,
+  ident_number character varying(255) null,
+  emergency_tel character varying(20) null,
+  address text null,
+  marital_status character(1) null,
+  licenses text null,
+  military_status character varying(20) null,
+  prev_company character varying(100) null,
+  quit_date date null,
+  main_image_path character varying null,
+  constraint tb_student_pkey primary key (account_seq),
+  constraint tb_account_account_email_key unique (account_email),
+  constraint tb_student_user_id_key unique (account_id),
+  constraint fk_account_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq)
+) TABLESPACE pg_default;
+
+create table lms.tb_curriculum (
+  cur_seq serial not null,
+  room character varying(50) null,
+  term integer null,
+  man_count integer null,
+  start_date date not null,
+  end_date date not null,
+  cur_name character varying null,
+  account_seq integer null,
+  business_name character varying(255) null,
+  constraint tb_curriculum_pkey primary key (cur_seq)
+) TABLESPACE pg_default;
