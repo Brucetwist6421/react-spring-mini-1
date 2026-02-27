@@ -194,6 +194,9 @@ const StudentDetailPage = () => {
                   <Typography variant="caption" fontWeight={900}>{attUX.label}</Typography>
                 </Stack>
                 <Typography variant="h4" fontWeight={900} color={attUX.color}>
+                  <Box component="span" sx={{ fontSize: '1rem', fontWeight: 700, mr: 0.5, verticalAlign: 'middle' }}>
+                    출석률 : 
+                  </Box>
                   {attendance ? `${attendance.attendanceRate.toFixed(1)}%` : '--%'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mt: 0.5 }}>
