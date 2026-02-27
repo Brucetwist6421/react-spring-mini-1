@@ -2,7 +2,7 @@
 import {
   Avatar, Box, Button,
   Chip, Divider,
-  Paper, Stack, Tab, Tabs, TextField, Typography
+  Paper, Stack, Tab, Tabs, TextField, Tooltip, Typography
 } from '@mui/material';
 import Grid from '@mui/material/Grid'; // Grid2 권장 사용
 import axios from 'axios';
@@ -23,12 +23,18 @@ import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import SaveIcon from '@mui/icons-material/Save';
 import SchoolIcon from '@mui/icons-material/School';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+
 import RandomSpinner from '../../../components/RandomSpinner';
 import AttendanceStatusView from './AttendanceStatusView';
 
 const StudentDetailPage = () => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
   const [student, setStudent] = useState<any>(null);
+  const [attendance, setAttendance] = useState<any>(null);
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -43,14 +49,13 @@ const StudentDetailPage = () => {
     }
   };
 
-  // 2. 학력 상태(gradType) 한글 매핑 함수 추가
+  // 2. 학력 상태(gradType) 한글 매핑 함수
   const getGradTypeLabel = (type: string) => {
     switch (type) {
       case 'GRADUATED': return '졸업';
       case 'ATTENDING': return '재학 중';
       case 'DROPOUT': return '중퇴';
       case 'REST': return '휴학';
-      //case 'COMPLETED': return '수료';
       default: return type || '-';
     }
   };
@@ -58,23 +63,42 @@ const StudentDetailPage = () => {
   useEffect(() => {
     if (accountSeq) {
       setLoading(true);
-      axios.get(`/api/account/${accountSeq}`)
-        .then(res => {
-          console.log("학생 정보 로딩 성공:", res.data);
-          setStudent(res.data);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("학생 정보 로딩 실패:", err);
-          setLoading(false);
-        });
+      // 학생 정보와 출석 정보를 동시에 로드
+      Promise.all([
+        axios.get(`/api/account/${accountSeq}`),
+        axios.get(`/api/attendance/status/${accountSeq}`)
+      ]).then(([accRes, attRes]) => {
+        setStudent(accRes.data);
+        setAttendance(attRes.data);
+        setLoading(false);
+      }).catch(err => {
+        console.error("로딩 실패:", err);
+        setLoading(false);
+      });
     }
   }, [accountSeq]);
 
-  if (loading) return <RandomSpinner/>;
+  // 출석률 및 학적 상태에 따른 UX 설정 함수
+  const getAttendanceUX = (rate: number, status: string) => {
+    if (status === 'DROPOUT' || status === 'EARLYOUT') {
+      return { 
+        label: '산정 종료', 
+        color: '#64748b', 
+        bgColor: '#f8fafc', 
+        icon: <RunningWithErrorsIcon fontSize="small" />,
+        desc: '학적 변동으로 인해 해당 일자 기준으로 데이터가 동결되었습니다.' 
+      };
+    }
+    if (rate >= 90) return { label: '우수', color: '#15803d', bgColor: '#f0fdf4', icon: <CheckCircleIcon fontSize="small" />, desc: '안정적인 출석률을 유지 중입니다.' };
+    if (rate >= 80) return { label: '보통', color: '#1d4ed8', bgColor: '#eff6ff', icon: <AnalyticsIcon fontSize="small" />, desc: '지속적인 관리가 필요합니다.' };
+    return { label: '위험', color: '#dc2626', bgColor: '#fef2f2', icon: <ErrorOutlineIcon fontSize="small" />, desc: '출석률이 낮아 수당 지급 제한 가능성이 높습니다.' };
+  };
+
+  if (loading) return <RandomSpinner />;
   if (!student) return <Typography sx={{ p: 4 }}>학생 정보를 찾을 수 없습니다.</Typography>;
 
-  const statusCfg = getStatusConfig(student.status);
+  const attUX = getAttendanceUX(attendance?.attendanceRate || 0, student.status);
+  const isInactive = student.status === 'DROPOUT' || student.status === 'EARLYOUT';
 
   const InfoItem = ({ icon, label, value, color = "text.primary" }: any) => (
     <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1.8 }}>
@@ -90,16 +114,29 @@ const StudentDetailPage = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 4 }}>
       
       {/* 1. 상단 프로필 요약 (Header) */}
-      <Paper elevation={0} sx={{ p: 3, border: '1px solid #e2e8f0', borderRadius: 4, bgcolor: '#ffffff' }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 3, 
+          border: '1px solid #e2e8f0', 
+          borderRadius: 4, 
+          bgcolor: '#ffffff', 
+          position: 'relative', 
+          overflow: 'hidden',
+          '&::before': isInactive ? {
+            content: '""',
+            position: 'absolute',
+            top: 0, left: 0, width: '4px', height: '100%',
+            bgcolor: student.status === 'DROPOUT' ? 'error.main' : 'warning.main'
+          } : {}
+        }}
+      >
         <Grid container spacing={4} alignItems="center">
           <Grid size={{ xs: 12, md: 4 }}>
             <Stack direction="row" spacing={3} alignItems="center">
               <Avatar 
-                src={student.mainImagePath 
-                  ? `http://168.107.51.143:8080/upload/${encodeURIComponent(student.mainImagePath)}` 
-                  : `https://w7.pngwing.com/pngs/884/996/png-transparent-pingu-waiting-cartoons-pingu-thumbnail.png`
-                }
-                sx={{ width: 110, height: 110, bgcolor: '#3b82f6', fontSize: '2.5rem', fontWeight: 800 }}>
+                src={student.mainImagePath ? `http://168.107.51.143:8080/upload/${encodeURIComponent(student.mainImagePath)}` : `https://w7.pngwing.com/pngs/884/996/png-transparent-pingu-waiting-cartoons-pingu-thumbnail.png`}
+                sx={{ width: 110, height: 110, bgcolor: isInactive ? '#94a3b8' : '#3b82f6', fontSize: '2.5rem', fontWeight: 800 }}>
                 {student.accountName?.[0]}
               </Avatar>
               <Box>
@@ -109,7 +146,7 @@ const StudentDetailPage = () => {
                 </Stack>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{student.accountEmail}</Typography>
                 <Stack direction="row" spacing={1}>
-                  <Chip label={statusCfg.label} color={statusCfg.color} size="small" sx={{ fontWeight: 700 }} />
+                  <Chip label={getStatusConfig(student.status).label} color={getStatusConfig(student.status).color} size="small" sx={{ fontWeight: 700 }} />
                   <Chip label={student.militaryStatus || '군미필'} variant="outlined" size="small" />
                 </Stack>
               </Box>
@@ -135,13 +172,35 @@ const StudentDetailPage = () => {
             </Stack>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 3 }} sx={{ textAlign: 'center' }}>
-            <Box sx={{ p: 2, bgcolor: student.status === 'DROPOUT' ? '#fef2f2' : '#f0fdf4', borderRadius: 4, border: '1px solid', borderColor: student.status === 'DROPOUT' ? '#fee2e2' : '#dcfce7' }}>
-               <Typography variant="caption" color={student.status === 'DROPOUT' ? '#991b1b' : '#166534'} fontWeight={800}>출석 상태</Typography>
-               <Typography variant="h4" fontWeight={900} color={student.status === 'DROPOUT' ? '#dc2626' : '#15803d'}>
-                 {student.status === 'DROPOUT' ? '중단' : '정상'}
-               </Typography>
-            </Box>
+          {/* 출석 상태 요약 섹션 */}
+          <Grid size={{ xs: 12, md: 3 }}>
+            <Tooltip title={attUX.desc} arrow>
+              <Paper 
+                elevation={0} 
+                sx={{ 
+                  p: 2, 
+                  bgcolor: attUX.bgColor, 
+                  borderRadius: 4, 
+                  border: '1px solid', 
+                  borderColor: attUX.color + '33',
+                  textAlign: 'center',
+                  cursor: 'help',
+                  transition: 'all 0.2s',
+                  '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }
+                }}
+              >
+                <Stack direction="row" spacing={0.5} justifyContent="center" alignItems="center" sx={{ color: attUX.color, mb: 0.5 }}>
+                  {attUX.icon}
+                  <Typography variant="caption" fontWeight={900}>{attUX.label}</Typography>
+                </Stack>
+                <Typography variant="h4" fontWeight={900} color={attUX.color}>
+                  {attendance ? `${attendance.attendanceRate.toFixed(1)}%` : '--%'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mt: 0.5 }}>
+                  {isInactive ? `변동일: ${student.dropoutDate || '-'}` : `집계일: ${attendance?.referenceDate || '-'}`}
+                </Typography>
+              </Paper>
+            </Tooltip>
           </Grid>
         </Grid>
       </Paper>
@@ -163,9 +222,24 @@ const StudentDetailPage = () => {
 
             <Paper elevation={0} sx={{ p: 3, border: '1px solid #e2e8f0', borderRadius: 4 }}>
               <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 2.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <BusinessIcon /> 학력 및 경력
+                <BusinessIcon /> 학적 및 이력
               </Typography>
-              {/* 최종학력 매핑 적용 부분 */}
+              
+              {/* 중도탈락/철회 시 날짜 섹션 강조 */}
+              {isInactive && (
+                <Box sx={{ mb: 3, p: 2, bgcolor: student.status === 'DROPOUT' ? '#fff1f2' : '#fffbeb', borderRadius: 2, border: '1px solid', borderColor: student.status === 'DROPOUT' ? '#fee2e2' : '#fef3c7' }}>
+                   <InfoItem 
+                    icon={<CalendarTodayIcon fontSize="small" color={student.status === 'DROPOUT' ? 'error' : 'warning'} />} 
+                    label={student.status === 'DROPOUT' ? "중도 탈락 일자" : "수강 철회 일자"} 
+                    value={student.dropoutDate} 
+                    color={student.status === 'DROPOUT' ? '#e11d48' : '#d97706'}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: -1, display: 'block', fontSize: '0.7rem' }}>
+                    * 해당 일자 이후의 출석은 집계에서 제외되었습니다.
+                  </Typography>
+                </Box>
+              )}
+
               <InfoItem 
                 label="최종학력" 
                 value={student.edu ? `${student.edu} (${getGradTypeLabel(student.gradType)})` : '-'} 
@@ -202,18 +276,19 @@ const StudentDetailPage = () => {
                     </Typography>
                   </Paper>
                   
-                  <Typography variant="h6" fontWeight={800} mb={2} color={student.status === 'DROPOUT' ? 'error.main' : 'inherit'}>
-                    중도탈락/변동 정보
+                  <Typography variant="h6" fontWeight={800} mb={2} color={isInactive ? 'error.main' : 'inherit'}>
+                    학적 변동 상세 정보
                   </Typography>
                   <TextField 
                     fullWidth multiline rows={3} 
+                    placeholder="탈락 사유 등이 여기에 표시됩니다."
                     value={student.dropoutInfo || ""} 
                     slotProps={{input: {readOnly: true,},}}
-                    sx={{ mb: 4, bgcolor: student.status === 'DROPOUT' ? '#fff5f5' : '#f8fafc' }}
+                    sx={{ mb: 4, bgcolor: isInactive ? '#fffafb' : '#f8fafc' }}
                   />
 
                   <Typography variant="h6" fontWeight={800} mb={2}>담당자 관찰 기록</Typography>
-                  <TextField fullWidth multiline rows={4} placeholder="특이사항을 입력하세요." />
+                  <TextField fullWidth multiline rows={4} placeholder="학생 관찰 내용이나 특이사항을 입력하세요." />
                   <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
                     <Button variant="contained" startIcon={<SaveIcon />} sx={{ borderRadius: 2 }}>저장하기</Button>
                   </Box>

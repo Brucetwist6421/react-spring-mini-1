@@ -73,7 +73,7 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
         </Alert>
       ) : (
         <Alert severity="success" icon={<CheckCircleOutlineIcon />} sx={{ mb: 3, borderRadius: 3 }}>
-          현재({data.referenceDate}) 기준 정상 집계 중인 출석 현황입니다.
+          현재({data.referenceDate}) 기준 집계 중인 출석 현황입니다.
         </Alert>
       )}
 
