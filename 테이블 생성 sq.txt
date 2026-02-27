@@ -183,3 +183,5 @@ create table lms.tb_curriculum (
   business_name character varying(255) null,
   constraint tb_curriculum_pkey primary key (cur_seq)
 ) TABLESPACE pg_default;
+
+//출석 테이블 생성 및 조회 서비스 back layer 구현

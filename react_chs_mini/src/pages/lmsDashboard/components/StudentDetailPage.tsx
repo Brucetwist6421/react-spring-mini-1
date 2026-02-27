@@ -24,6 +24,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import SchoolIcon from '@mui/icons-material/School';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import RandomSpinner from '../../../components/RandomSpinner';
+import AttendanceStatusView from './AttendanceStatusView';
 
 const StudentDetailPage = () => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
@@ -189,6 +190,9 @@ const StudentDetailPage = () => {
             </Tabs>
 
             <Box sx={{ p: 4 }}>
+              {tabValue === 0 && (
+                <AttendanceStatusView accountSeq={student.accountSeq} />
+              )}
               {tabValue === 2 && (
                 <Box>
                   <Typography variant="h6" fontWeight={800} mb={2}>경력 기술 상세</Typography>
