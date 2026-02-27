@@ -4,38 +4,46 @@
 
     <select id="selectAttendanceSummary" resultType="kr.or.ddit.vo.AttendanceVO">
         WITH date_info AS (
-            -- 학생의 과정 시작일과 '현재 시점의 기준일' 설정
+            -- 학생의 상태에 따라 계산 기준일(reference_date)을 동적으로 설정
             SELECT 
                 a.account_seq,
+                a.status,
+                a.dropout_date,
                 c.cur_seq,
                 c.cur_name,
                 c.start_date,
                 c.end_date,
-                LEAST(CURRENT_DATE, c.end_date) as reference_date
+                CASE 
+                    -- 1. 중도탈락(DROPOUT) 또는 수강철회(EARLYOUT)이고 dropout_date가 있는 경우: 해당 날짜를 기준일로 사용
+                    WHEN a.status IN ('DROPOUT', 'EARLYOUT') AND a.dropout_date IS NOT NULL 
+                        THEN LEAST(a.dropout_date, c.end_date)
+                    -- 2. 정상 재학 중인 경우: 오늘 날짜와 과정 종료일 중 빠른 날짜를 사용
+                    ELSE LEAST(CURRENT_DATE, c.end_date)
+                END as reference_date
             FROM lms.tb_account a
             JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
             WHERE a.account_seq = #{accountSeq}
         ),
         calendar AS (
-            -- 시작일부터 기준일까지의 날짜 리스트 생성 및 토/일 제외
+            -- 시작일부터 동적으로 정해진 reference_date까지의 실제 수업 날짜 생성 (토/일 제외)
             SELECT 
                 di.account_seq,
                 COUNT(d.day)::int as total_working_days
             FROM date_info di
             CROSS JOIN generate_series(di.start_date, di.reference_date, '1 day'::interval) as d(day)
             WHERE EXTRACT(DOW FROM d.day) NOT IN (0, 6) -- 0:일요일, 6:토요일 제외
-            /* 여기에 공휴일 테이블이 있다면 추가 제외 로직 삽입 가능 */
-            -- AND d.day::date NOT IN (SELECT holiday_date FROM lms.tb_holiday)
             GROUP BY di.account_seq
         )
         SELECT 
             di.account_seq,
             a.account_name,
+            a.status as accountStatus,
             di.cur_name,
             TO_CHAR(di.start_date, 'YYYY-MM-DD') as startDate,
             TO_CHAR(di.end_date, 'YYYY-MM-DD') as endDate,
+            TO_CHAR(di.reference_date, 'YYYY-MM-DD') as referenceDate,
             cal.total_working_days,
-            -- 각 상태별 카운트 (OFFICIAL 공결은 계산에서 제외하므로 카운트하지 않거나 무시)
+            -- 기준일(reference_date) 이전의 데이터만 집계
             COUNT(CASE WHEN att.status = 'ABSENT' THEN 1 END)::int as absentCount,
             COUNT(CASE WHEN att.status = 'LATE' THEN 1 END)::int as lateCount,
             COUNT(CASE WHEN att.status = 'OUTING' THEN 1 END)::int as outingCount,
@@ -44,7 +52,7 @@
         JOIN lms.tb_account a ON di.account_seq = a.account_seq
         JOIN calendar cal ON di.account_seq = cal.account_seq
         LEFT JOIN lms.tb_attendance att ON di.account_seq = att.account_seq 
-             AND att.attendance_date BETWEEN di.start_date AND di.reference_date
-        GROUP BY di.account_seq, a.account_name, di.cur_name, di.start_date, di.end_date, cal.total_working_days
+            AND att.attendance_date BETWEEN di.start_date AND di.reference_date
+        GROUP BY di.account_seq, a.account_name, a.status, di.cur_name, di.start_date, di.end_date, di.reference_date, cal.total_working_days
     </select>
 </mapper>
