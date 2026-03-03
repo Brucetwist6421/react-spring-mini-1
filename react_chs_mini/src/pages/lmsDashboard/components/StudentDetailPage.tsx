@@ -27,6 +27,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 
 import RandomSpinner from '../../../components/RandomSpinner';
 import AttendanceStatusView from './AttendanceStatusView';
@@ -144,10 +145,10 @@ const StudentDetailPage = () => {
                   <Typography variant="h5" fontWeight={800}>{student.accountName}</Typography>
                   <Chip label={student.accountId} size="small" variant="outlined" />
                 </Stack>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>{student.accountEmail}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>이메일 : {student.accountEmail}</Typography>
                 <Stack direction="row" spacing={1}>
                   <Chip label={getStatusConfig(student.status).label} color={getStatusConfig(student.status).color} size="small" sx={{ fontWeight: 700 }} />
-                  <Chip label={student.militaryStatus || '군미필'} variant="outlined" size="small" />
+                  {/* <Chip label={student.militaryStatus || '군미필'} variant="outlined" size="small" /> */}
                 </Stack>
               </Box>
             </Stack>
@@ -221,6 +222,7 @@ const StudentDetailPage = () => {
               <InfoItem icon={<WarningAmberIcon fontSize="small" />} label="비상연락처" value={student.emergencyTel} />
               <InfoItem icon={<HomeIcon fontSize="small" />} label="주소" value={student.address} />
               <InfoItem icon={<CakeIcon fontSize="small" />} label="생년월일(성별)" value={`${student.birth || '-'} (${student.gender === 'M' ? '남' : '여'})`} />
+              <InfoItem icon={<MilitaryTechIcon fontSize="small" />} label="군필 여부" value={student.militaryStatus || '미필'} />
             </Paper>
 
             <Paper elevation={0} sx={{ p: 3, border: '1px solid #e2e8f0', borderRadius: 4 }}>
