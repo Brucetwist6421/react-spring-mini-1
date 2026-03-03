@@ -55,4 +55,17 @@
             AND att.attendance_date BETWEEN di.start_date AND di.reference_date
         GROUP BY di.account_seq, a.account_name, a.status, di.cur_name, di.start_date, di.end_date, di.reference_date, cal.total_working_days
     </select>
+
+    <select id="selectAttendanceDetailList" resultType="map">
+        SELECT 
+            TO_CHAR(attendance_date, 'YYYY-MM-DD') as "attendanceDate",
+            status as "status",
+            remark as "remark",
+            TO_CHAR(start_time, 'HH24:MI') as "startTime",
+            TO_CHAR(end_time, 'HH24:MI') as "endTime"
+        FROM lms.tb_attendance
+        WHERE account_seq = #{accountSeq}
+          AND (remark IS NOT NULL AND remark != '' OR status != 'PRESENT')
+        ORDER BY attendance_date DESC
+    </select>
 </mapper>

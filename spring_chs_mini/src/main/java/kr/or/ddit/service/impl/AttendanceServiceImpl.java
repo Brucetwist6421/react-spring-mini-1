@@ -1,5 +1,8 @@
 package kr.or.ddit.service.impl;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
 import kr.or.ddit.mapper.AttendanceMapper;
@@ -39,10 +42,16 @@ public class AttendanceServiceImpl implements AttendanceService {
             
             // 5. 소수점 둘째자리까지 반올림 (예: 98.3333 -> 98.33)
             status.setAttendanceRate(Math.round(rate * 100.0) / 100.0);
+
+            
         } else {
             // 수업 일수가 0인 경우 (과정 시작 당일 주말 등) 출석률 100% 혹은 0% 설정
             status.setAttendanceRate(100.0);
         }
+
+        // 상세 특이사항 목록 조회 후 VO에 주입
+        List<Map<String, Object>> details = attendanceMapper.selectAttendanceDetailList(accountSeq);
+        status.setDetails(details);
         
         return status;
     }

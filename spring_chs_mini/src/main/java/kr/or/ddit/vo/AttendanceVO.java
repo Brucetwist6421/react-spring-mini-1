@@ -1,5 +1,8 @@
 package kr.or.ddit.vo;
 
+import java.util.List;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +30,7 @@ public class AttendanceVO {
     
     private double convertedAbsenceDays; // 환산된 총 결석 일수 (3회당 1일 포함)
     private double attendanceRate;       // 최종 출석률 (%)
+
+    // --- 추가: 상세 특이사항 목록을 담을 필드 ---
+    private List<Map<String, Object>> details; // 특이사항 목록 (날짜, 유형, 사유 등)
 }
