@@ -32,5 +32,6 @@ public class AttendanceVO {
     private double attendanceRate;       // 최종 출석률 (%)
 
     // --- 추가: 상세 특이사항 목록을 담을 필드 ---
+    private String monthlyData; // JSON 문자열 (쿼리의 json_agg 결과)
     private List<Map<String, Object>> attList; // 특이사항 목록 (날짜, 유형, 사유 등)
 }
