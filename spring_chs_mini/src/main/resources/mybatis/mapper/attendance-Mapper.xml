@@ -21,16 +21,19 @@
             JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
             WHERE a.account_seq = #{accountSeq}
         ),
-        -- 1. 일자별 캘린더 생성 및 회차(unit_month) 부여
+        -- 1. 일자별 캘린더 생성 및 정확한 회차(unit_month) 부여
         calendar_daily AS (
             SELECT 
                 di.account_seq,
                 d.day::date as work_date,
-                -- 시작일로부터 30일 단위로 회차 계산 (1회차, 2회차...)
-                ((d.day::date - di.start_date) / 30) + 1 as unit_month
+                -- 핵심 수정 로직: 
+                -- AGE(현재날짜, 시작일)은 '1 mon 2 days' 식의 간격을 반환합니다.
+                -- 여기서 EXTRACT(month ...)를 하면 정확히 몇 달이 지났는지 알 수 있습니다.
+                (EXTRACT(YEAR FROM AGE(d.day::date, di.start_date)) * 12 
+                + EXTRACT(MONTH FROM AGE(d.day::date, di.start_date)))::int + 1 as unit_month
             FROM date_info di
             CROSS JOIN generate_series(di.start_date, di.reference_date, '1 day'::interval) as d(day)
-            WHERE EXTRACT(DOW FROM d.day) NOT IN (0, 6)
+            WHERE EXTRACT(DOW FROM d.day) NOT IN (0, 6) -- 주말 제외
         ),
         -- 2. 회차별(월별) 통계 계산
         monthly_stats AS (
@@ -46,7 +49,7 @@
                 AND cd.work_date = att.attendance_date
             GROUP BY cd.unit_month
         )
-        -- 3. 최종 결과 집계
+        -- 3. 최종 결과 집계 (이하 기존과 동일하되 alias 대소문자 주의)
         SELECT 
             di.account_seq,
             a.account_name,
@@ -55,15 +58,13 @@
             TO_CHAR(di.start_date, 'YYYY-MM-DD') as startDate,
             TO_CHAR(di.end_date, 'YYYY-MM-DD') as endDate,
             TO_CHAR(di.reference_date, 'YYYY-MM-DD') as referenceDate,
-            (SELECT SUM(month_working_days) FROM monthly_stats)::int as total_working_days,
+            (SELECT SUM(month_working_days) FROM monthly_stats)::int as totalWorkingDays,
             
-            -- 전체 통계
             COUNT(CASE WHEN att.status = 'ABSENT' THEN 1 END)::int as absentCount,
             COUNT(CASE WHEN att.status = 'LATE' THEN 1 END)::int as lateCount,
             COUNT(CASE WHEN att.status = 'OUTING' THEN 1 END)::int as outingCount,
             COUNT(CASE WHEN att.status = 'EARLY' THEN 1 END)::int as earlyCount,
 
-            -- 월별(회차별) 데이터를 JSON 배열로 반환 (프론트에서 활용 용이)
             (
                 SELECT json_agg(t) 
                 FROM (
@@ -72,11 +73,10 @@
                         TO_CHAR(month_start, 'YYYY-MM-DD') as mStart,
                         TO_CHAR(month_end, 'YYYY-MM-DD') as mEnd,
                         month_working_days as mWorkingDays,
-                        -- 회차별 출석률 계산: (출석일 / 총수업일) * 100 
-                        -- (지각/조퇴 3회 = 결석 1일 로직 적용 시 추가 계산 필요)
-                        ROUND((1 - (month_absent + (month_etc / 3)::numeric) / month_working_days) * 100, 2) as mRate
+                        -- 출석률 계산 (분모가 0인 경우 대비 NULLIF 사용 추천)
+                        ROUND((1 - (month_absent + (month_etc / 3)::numeric) / NULLIF(month_working_days, 0)) * 100, 2) as mRate
                     FROM monthly_stats
-                    ORDER BY unit_month
+                    ORDER BY unitMonth
                 ) t
             ) as monthlyData
             

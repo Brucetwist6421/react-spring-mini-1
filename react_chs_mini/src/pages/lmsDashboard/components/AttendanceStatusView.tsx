@@ -11,6 +11,7 @@ import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import MonthlyAttendanceChart from './MonthlyAttendanceChart';
 
 interface AttendanceData {
   totalWorkingDays: number;
@@ -22,6 +23,7 @@ interface AttendanceData {
   attendanceRate: number;
   accountStatus: string; 
   referenceDate: string; 
+  monthlyData: string;
   attList: Array<{
     attendanceDate: string;
     status: string;
@@ -138,6 +140,9 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
           </Stack>
         </Grid>
       </Grid>
+
+      {/* 3. 월별 출석 추이 컴포넌트 추가 */}
+      <MonthlyAttendanceChart monthlyData={data.monthlyData} />
 
       <Divider sx={{ my: 4 }} />
 
