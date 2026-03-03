@@ -62,7 +62,7 @@ const MonthlyAttendanceChart = ({ monthlyData }: Props) => {
               {/* 왼쪽: 회차 정보 */}
               <Box sx={{ minWidth: 65, textAlign: 'center' }}>
                 <Typography variant="h6" sx={{ fontWeight: 900, fontSize: '1.35rem', lineHeight: 1.1 }}>
-                  {item.unitmonth}개월 차
+                  {item.unitmonth}개월
                 </Typography>
               </Box>
 

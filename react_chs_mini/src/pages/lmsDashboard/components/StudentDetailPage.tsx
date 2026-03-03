@@ -31,6 +31,7 @@ import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 
 import RandomSpinner from '../../../components/RandomSpinner';
 import AttendanceStatusView from './AttendanceStatusView';
+import React from 'react';
 
 const StudentDetailPage = () => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
@@ -102,73 +103,89 @@ const StudentDetailPage = () => {
   const isInactive = student.status === 'DROPOUT' || student.status === 'EARLYOUT';
 
   const InfoItem = ({ icon, label, value, color = "text.primary" }: any) => (
-    <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ mb: 1.8 }}>
-      <Box sx={{ color: 'primary.main', mt: 0.2 }}>{icon}</Box>
+    <Stack direction="row" spacing={1.5} alignItems="flex-start" sx={{ mb: 2.2 }}>
+      {icon && React.isValidElement(icon) && (
+        <Box sx={{ color: 'primary.main', mt: 0.3, display: 'flex', alignItems: 'center' }}>
+          {/* React.cloneElement를 사용해 기존 아이콘에 새로운 속성(sx)을 안전하게 주입 */}
+          {React.cloneElement(icon as React.ReactElement<any>, { 
+            sx: { 
+              fontSize: '1.4rem',
+              ...(icon.props as any)?.sx // 기존에 아이콘이 가지고 있던 sx 속성이 있다면 유지
+            } 
+          })}
+        </Box>
+      )}
+      {/* 아이콘이 없는 경우에도 레이아웃 유지를 위해 왼쪽 여백 확보 (선택 사항) */}
+      {!icon && <Box sx={{ minWidth: label ? 0 : 32 }} />} 
+      
       <Box>
-        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1 }}>{label}</Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600, color: color }}>{value || '-'}</Typography>
+        <Typography 
+          variant="caption" 
+          sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.2, fontSize: '0.9rem', fontWeight: 700 }}
+        >
+          {label}
+        </Typography>
+        <Typography 
+          variant="body1" 
+          sx={{ fontWeight: 700, color: color, fontSize: '1.05rem', mt: 0.3 }}
+        >
+          {value || '-'}
+        </Typography>
       </Box>
     </Stack>
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pb: 4 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pb: 4, mt: 1 }}>
       
       {/* 1. 상단 프로필 요약 (Header) */}
       <Paper 
         elevation={0} 
         sx={{ 
-          p: 3, 
+          p: 4, // 패딩 증가
           border: '1px solid #e2e8f0', 
-          borderRadius: 4, 
+          borderRadius: 5, 
           bgcolor: '#ffffff', 
           position: 'relative', 
-          overflow: 'hidden',
-          '&::before': isInactive ? {
-            content: '""',
-            position: 'absolute',
-            top: 0, left: 0, width: '4px', height: '100%',
-            bgcolor: student.status === 'DROPOUT' ? 'error.main' : 'warning.main'
-          } : {}
+          overflow: 'hidden'
         }}
       >
         <Grid container spacing={4} alignItems="center">
           <Grid size={{ xs: 12, md: 4 }}>
-            <Stack direction="row" spacing={3} alignItems="center">
+            <Stack direction="row" spacing={4} alignItems="center">
               <Avatar 
                 src={student.mainImagePath ? `http://168.107.51.143:8080/upload/${encodeURIComponent(student.mainImagePath)}` : `https://w7.pngwing.com/pngs/884/996/png-transparent-pingu-waiting-cartoons-pingu-thumbnail.png`}
-                sx={{ width: 110, height: 110, bgcolor: isInactive ? '#94a3b8' : '#3b82f6', fontSize: '2.5rem', fontWeight: 800 }}>
+                sx={{ width: 130, height: 130, bgcolor: isInactive ? '#94a3b8' : '#3b82f6', fontSize: '3rem', fontWeight: 800 }}>
                 {student.accountName?.[0]}
               </Avatar>
               <Box>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-                  <Typography variant="h5" fontWeight={800}>{student.accountName}</Typography>
-                  <Chip label={student.accountId} size="small" variant="outlined" />
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+                  <Typography sx={{ fontSize: '1.8rem', fontWeight: 900 }}>{student.accountName}</Typography>
+                  <Chip label={student.accountId} size="medium" variant="outlined" sx={{ fontWeight: 700, fontSize: '0.9rem' }} />
                 </Stack>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>이메일 : {student.accountEmail}</Typography>
-                <Stack direction="row" spacing={1}>
-                  <Chip label={getStatusConfig(student.status).label} color={getStatusConfig(student.status).color} size="small" sx={{ fontWeight: 700 }} />
-                  {/* <Chip label={student.militaryStatus || '군미필'} variant="outlined" size="small" /> */}
+                <Typography sx={{ fontSize: '1.1rem', color: 'text.secondary', mb: 2 }}>이메일 : {student.accountEmail}</Typography>
+                <Stack direction="row" spacing={1.5}>
+                  <Chip label={getStatusConfig(student.status).label} color={getStatusConfig(student.status).color} sx={{ fontWeight: 800, fontSize: '0.95rem', px: 1 }} />
                 </Stack>
               </Box>
             </Stack>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 5 }} sx={{ borderLeft: { md: '1px solid #f1f5f9' }, pl: { md: 4 } }}>
-            <Typography variant="caption" color="primary" fontWeight={800} sx={{ display: 'flex', alignItems: 'center', mb: 1, gap: 0.5 }}>
-              <SchoolIcon fontSize="small" /> 소속 과정: {student.curName}
+          <Grid size={{ xs: 12, md: 5 }} sx={{ borderLeft: { md: '1px solid #f1f5f9' }, pl: { md: 5 } }}>
+            <Typography sx={{ fontSize: '1rem', color: 'primary.main', fontWeight: 900, display: 'flex', alignItems: 'center', mb: 1.5, gap: 1 }}>
+              <SchoolIcon /> 소속 과정: {student.curName}
             </Typography>
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            <Typography sx={{ fontSize: '1.1rem', mb: 2 }}>
               사업명: <strong>{student.businessName}</strong> | {student.room}호 ({student.term}기)
             </Typography>
-            <Stack direction="row" spacing={3}>
+            <Stack direction="row" spacing={4}>
               <Box>
-                <Typography variant="caption" color="text.secondary">과정 기간</Typography>
-                <Typography variant="body2" fontWeight={600}>{student.startDate} ~ {student.endDate}</Typography>
+                <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 700 }}>과정 기간</Typography>
+                <Typography sx={{ fontSize: '1.05rem', fontWeight: 800 }}>{student.startDate} ~ {student.endDate}</Typography>
               </Box>
               <Box>
-                <Typography variant="caption" color="text.secondary">담임</Typography>
-                <Typography variant="body2" fontWeight={600}>{student.teacherName || '배정 전'}</Typography>
+                <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 700 }}>담임</Typography>
+                <Typography sx={{ fontSize: '1.05rem', fontWeight: 800 }}>{student.teacherName || '배정 전'}</Typography>
               </Box>
             </Stack>
           </Grid>
@@ -179,28 +196,23 @@ const StudentDetailPage = () => {
               <Paper 
                 elevation={0} 
                 sx={{ 
-                  p: 2, 
+                  p: 3, 
                   bgcolor: attUX.bgColor, 
-                  borderRadius: 4, 
-                  border: '1px solid', 
+                  borderRadius: 5, 
+                  border: '2px solid', 
                   borderColor: attUX.color + '33',
-                  textAlign: 'center',
-                  cursor: 'help',
-                  transition: 'all 0.2s',
-                  '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }
+                  textAlign: 'center'
                 }}
               >
-                <Stack direction="row" spacing={0.5} justifyContent="center" alignItems="center" sx={{ color: attUX.color, mb: 0.5 }}>
-                  {attUX.icon}
-                  <Typography variant="caption" fontWeight={900}>{attUX.label}</Typography>
+                <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" sx={{ color: attUX.color, mb: 1 }}>
+                  {React.cloneElement(attUX.icon, { sx: { fontSize: '1.5rem' } })}
+                  <Typography sx={{ fontSize: '1rem', fontWeight: 900 }}>{attUX.label}</Typography>
                 </Stack>
-                <Typography variant="h4" fontWeight={900} color={attUX.color}>
-                  <Box component="span" sx={{ fontSize: '1rem', fontWeight: 700, mr: 0.5, verticalAlign: 'middle' }}>
-                    출석률 : 
-                  </Box>
+                <Typography sx={{ fontWeight: 950, color: attUX.color, fontSize: '1.8rem' }}>
+                  <Box component="span" sx={{ fontSize: '1.1rem', fontWeight: 800, mr: 0.5 }}>출석률 :</Box>
                   {attendance ? `${attendance.attendanceRate.toFixed(1)}%` : '--%'}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mt: 0.5 }}>
+                <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 700, mt: 1 }}>
                   {isInactive ? `변동일: ${student.dropoutDate || '-'}` : `집계일: ${attendance?.referenceDate || '-'}`}
                 </Typography>
               </Paper>
@@ -210,48 +222,44 @@ const StudentDetailPage = () => {
       </Paper>
 
       {/* 2. 상세 정보 영역 */}
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Stack spacing={2}>
-            <Paper elevation={0} sx={{ p: 3, border: '1px solid #e2e8f0', borderRadius: 4 }}>
-              <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 2.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PersonIcon /> 기본 정보
+          <Stack spacing={3}>
+            <Paper elevation={0} sx={{ p: 4, border: '1px solid #e2e8f0', borderRadius: 5 }}>
+              <Typography sx={{ fontSize: '1.25rem', fontWeight: 900, mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <PersonIcon sx={{ fontSize: '1.8rem' }} /> 기본 정보
               </Typography>
-              <InfoItem icon={<BadgeIcon fontSize="small" />} label="주민등록번호" value={student.identNumber} />
-              <InfoItem icon={<PhoneIphoneIcon fontSize="small" />} label="연락처" value={student.tel} />
-              <InfoItem icon={<WarningAmberIcon fontSize="small" />} label="비상연락처" value={student.emergencyTel} />
-              <InfoItem icon={<HomeIcon fontSize="small" />} label="주소" value={student.address} />
-              <InfoItem icon={<CakeIcon fontSize="small" />} label="생년월일(성별)" value={`${student.birth || '-'} (${student.gender === 'M' ? '남' : '여'})`} />
-              <InfoItem icon={<MilitaryTechIcon fontSize="small" />} label="군필 여부" value={student.militaryStatus || '미필'} />
+              <InfoItem icon={<BadgeIcon />} label="주민등록번호" value={student.identNumber} />
+              <InfoItem icon={<PhoneIphoneIcon />} label="연락처" value={student.tel} />
+              <InfoItem icon={<WarningAmberIcon />} label="비상연락처" value={student.emergencyTel} />
+              <InfoItem icon={<HomeIcon />} label="주소" value={student.address} />
+              <InfoItem icon={<CakeIcon />} label="생년월일(성별)" value={`${student.birth || '-'} (${student.gender === 'M' ? '남' : '여'})`} />
+              <InfoItem icon={<MilitaryTechIcon />} label="군필 여부" value={student.militaryStatus || '미필'} />
             </Paper>
 
-            <Paper elevation={0} sx={{ p: 3, border: '1px solid #e2e8f0', borderRadius: 4 }}>
-              <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 2.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <BusinessIcon /> 학적 및 이력
+            <Paper elevation={0} sx={{ p: 4, border: '1px solid #e2e8f0', borderRadius: 5 }}>
+              <Typography sx={{ fontSize: '1.25rem', fontWeight: 900, mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <BusinessIcon sx={{ fontSize: '1.8rem' }} /> 학적 및 이력
               </Typography>
               
-              {/* 중도탈락/철회 시 날짜 섹션 강조 */}
               {isInactive && (
-                <Box sx={{ mb: 3, p: 2, bgcolor: student.status === 'DROPOUT' ? '#fff1f2' : '#fffbeb', borderRadius: 2, border: '1px solid', borderColor: student.status === 'DROPOUT' ? '#fee2e2' : '#fef3c7' }}>
+                <Box sx={{ mb: 4, p: 2.5, bgcolor: student.status === 'DROPOUT' ? '#fff1f2' : '#fffbeb', borderRadius: 3, border: '1px solid', borderColor: student.status === 'DROPOUT' ? '#fee2e2' : '#fef3c7' }}>
                    <InfoItem 
-                    icon={<CalendarTodayIcon fontSize="small" color={student.status === 'DROPOUT' ? 'error' : 'warning'} />} 
+                    icon={<CalendarTodayIcon color={student.status === 'DROPOUT' ? 'error' : 'warning'} />} 
                     label={student.status === 'DROPOUT' ? "중도 탈락 일자" : "수강 철회 일자"} 
                     value={student.dropoutDate} 
                     color={student.status === 'DROPOUT' ? '#e11d48' : '#d97706'}
                   />
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: -1, display: 'block', fontSize: '0.7rem' }}>
-                    * 해당 일자 이후의 출석은 집계에서 제외되었습니다.
+                  <Typography sx={{ mt: -1, color: 'text.secondary', fontWeight: 600, fontSize: '0.85rem' }}>
+                    * 학적 변동으로 인해 출석 집계가 종료되었습니다.
                   </Typography>
                 </Box>
               )}
 
-              <InfoItem 
-                label="최종학력" 
-                value={student.edu ? `${student.edu} (${getGradTypeLabel(student.gradType)})` : '-'} 
-              />
+              <InfoItem label="최종학력" value={student.edu ? `${student.edu} (${getGradTypeLabel(student.gradType)})` : '-'} />
               <InfoItem label="전공" value={student.major} />
               <InfoItem label="자격증" value={student.licenses} />
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 3 }} />
               <InfoItem label="전 직장명" value={student.prevCompany} />
               <InfoItem label="퇴사일자" value={student.quitDate} />
               <InfoItem label="혼인여부" value={student.maritalStatus === 'Y' ? '기혼' : '미혼'} />
@@ -260,42 +268,45 @@ const StudentDetailPage = () => {
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
-          <Paper elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 4, minHeight: 650, overflow: 'hidden' }}>
+          <Paper elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 5, minHeight: 700, overflow: 'hidden' }}>
             <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} variant="fullWidth" sx={{ bgcolor: '#f8fafc', borderBottom: 1, borderColor: 'divider' }}>
-              <Tab icon={<EventAvailableIcon />} label="출석" sx={{ fontWeight: 700 }} />
-              <Tab icon={<AnalyticsIcon />} label="평가" sx={{ fontWeight: 700 }} />
-              <Tab icon={<AssignmentIndIcon />} label="경력/기록" sx={{ fontWeight: 700 }} />
-              <Tab icon={<ChatIcon />} label="상담" sx={{ fontWeight: 700 }} />
+              <Tab icon={<EventAvailableIcon />} label={<Typography sx={{ fontWeight: 800, fontSize: '1.05rem' }}>출석</Typography>} />
+              <Tab icon={<AnalyticsIcon />} label={<Typography sx={{ fontWeight: 800, fontSize: '1.05rem' }}>평가</Typography>} />
+              <Tab icon={<AssignmentIndIcon />} label={<Typography sx={{ fontWeight: 800, fontSize: '1.05rem' }}>경력/기록</Typography>} />
+              <Tab icon={<ChatIcon />} label={<Typography sx={{ fontWeight: 800, fontSize: '1.05rem' }}>상담</Typography>} />
             </Tabs>
 
-            <Box sx={{ p: 4 }}>
-              {tabValue === 0 && (
-                <AttendanceStatusView accountSeq={student.accountSeq} />
-              )}
+            <Box sx={{ p: 5 }}>
+              {tabValue === 0 && <AttendanceStatusView accountSeq={student.accountSeq} />}
               {tabValue === 2 && (
                 <Box>
-                  <Typography variant="h6" fontWeight={800} mb={2}>경력 기술 상세</Typography>
-                  <Paper variant="outlined" sx={{ p: 2, mb: 4, bgcolor: '#fcfcfc' }}>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                  <Typography sx={{ fontSize: '1.3rem', fontWeight: 900, mb: 3 }}>경력 기술 상세</Typography>
+                  <Paper variant="outlined" sx={{ p: 3, mb: 5, bgcolor: '#fcfcfc', borderRadius: 3 }}>
+                    <Typography sx={{ whiteSpace: 'pre-wrap', fontSize: '1.05rem', lineHeight: 1.6 }}>
                       {student.career || "등록된 경력 상세 내용이 없습니다."}
                     </Typography>
                   </Paper>
                   
-                  <Typography variant="h6" fontWeight={800} mb={2} color={isInactive ? 'error.main' : 'inherit'}>
+                  <Typography sx={{ fontSize: '1.3rem', fontWeight: 900, mb: 3, color: isInactive ? 'error.main' : 'inherit' }}>
                     학적 변동 상세 정보
                   </Typography>
                   <TextField 
-                    fullWidth multiline rows={3} 
-                    placeholder="탈락 사유 등이 여기에 표시됩니다."
+                    fullWidth multiline rows={4} 
                     value={student.dropoutInfo || ""} 
-                    slotProps={{input: {readOnly: true,},}}
-                    sx={{ mb: 4, bgcolor: isInactive ? '#fffafb' : '#f8fafc' }}
+                    slotProps={{ 
+                        input: { readOnly: true, sx: { fontSize: '1.05rem', p: 2 } } 
+                    }}
+                    sx={{ mb: 5, bgcolor: isInactive ? '#fffafb' : '#f8fafc' }}
                   />
 
-                  <Typography variant="h6" fontWeight={800} mb={2}>담당자 관찰 기록</Typography>
-                  <TextField fullWidth multiline rows={4} placeholder="학생 관찰 내용이나 특이사항을 입력하세요." />
-                  <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button variant="contained" startIcon={<SaveIcon />} sx={{ borderRadius: 2 }}>저장하기</Button>
+                  <Typography sx={{ fontSize: '1.3rem', fontWeight: 900, mb: 3 }}>담당자 관찰 기록</Typography>
+                  <TextField 
+                    fullWidth multiline rows={5} 
+                    placeholder="특이사항을 입력하세요." 
+                    slotProps={{ input: { sx: { fontSize: '1.05rem' } } }}
+                  />
+                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button variant="contained" startIcon={<SaveIcon />} sx={{ borderRadius: 3, px: 4, py: 1.5, fontSize: '1.1rem', fontWeight: 800 }}>저장하기</Button>
                   </Box>
                 </Box>
               )}

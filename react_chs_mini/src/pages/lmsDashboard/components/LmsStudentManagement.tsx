@@ -56,7 +56,7 @@ const LmsStudentManagement = () => {
             onClick={() => navigate('/lms/dashboard')}
             sx={{ fontWeight: 700, color: '#000000' }}
           >
-            목록
+            <Typography sx={{ fontSize: '1.1rem', fontWeight: 700 }}>목록</Typography>
           </Button>
           <Divider orientation="vertical" flexItem sx={{ height: 20, alignSelf: 'center' }} />
           <SchoolIcon sx={{ color: '#000000' }} />
