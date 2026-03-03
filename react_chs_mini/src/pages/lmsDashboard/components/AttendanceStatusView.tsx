@@ -22,6 +22,13 @@ interface AttendanceData {
   attendanceRate: number;
   accountStatus: string; 
   referenceDate: string; 
+  attList: Array<{
+    attendanceDate: string;
+    status: string;
+    remark: string;
+    startTime: string;
+    endTime: string;
+  }>;
 }
 
 const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
@@ -133,6 +140,100 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
       </Grid>
 
       <Divider sx={{ my: 4 }} />
+
+      {/* 2. 출석 특이사항 상세 내역 리스트 */}
+      <Box sx={{ mt: 4, mb: 2 }}>
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight={800}>출석 특이사항 목록</Typography>
+          <Chip 
+            label={data.attList?.length || 0} 
+            size="small" 
+            color="primary" 
+            sx={{ fontWeight: 700, height: 20 }} 
+          />
+        </Stack>
+
+        {data.attList && data.attList.length > 0 ? (
+          <Stack spacing={1.5}>
+            {data.attList.map((item, index) => {
+              // 상태별 설정 매핑
+              const statusConfig: any = {
+                'ABSENT': { label: '결석', color: '#ef4444', bgColor: '#fef2f2', timeLabel: '사유 발생' },
+                'LATE': { label: '지각', color: '#f59e0b', bgColor: '#fffbeb', timeLabel: '입실 시간' },
+                'EARLY': { label: '조퇴', color: '#8b5cf6', bgColor: '#f5f3ff', timeLabel: '조퇴 시간' },
+                'OUTING': { label: '외출', color: '#3b82f6', bgColor: '#eff6ff', timeLabel: '외출 시간' },
+              };
+              const config = statusConfig[item.status] || { label: item.status, color: '#64748b', bgColor: '#f8fafc', timeLabel: '시간' };
+              const isAbsent = item.status === 'ABSENT';
+
+              return (
+                <Paper 
+                  key={index} 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: 3, 
+                    borderLeft: `4px solid ${config.color}`,
+                    transition: 'all 0.2s',
+                    '&:hover': { bgcolor: '#f8fafc', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }
+                  }}
+                >
+                    <Grid container alignItems="center" spacing={2}>
+                        {/* 1. 날짜 및 상태 (공통) */}
+                        <Grid size={{ xs: 12, sm: 3 }}>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <Typography variant="body2" fontWeight={800}>{item.attendanceDate}</Typography>
+                                <Chip 
+                                label={config.label} 
+                                size="small" 
+                                sx={{ bgcolor: config.bgColor, color: config.color, fontWeight: 800, fontSize: '0.65rem', height: 20 }} 
+                                />
+                            </Stack>
+                        </Grid>
+
+                        {/* 2. 시간 정보 (결석이 아닐 때만 노출) */}
+                        {!isAbsent && (
+                        <Grid size={{ xs: 12, sm: 3 }}>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontWeight: 600 }}>
+                            {config.timeLabel}
+                            </Typography>
+                            <Typography variant="body2" fontWeight={700} color="primary.main">
+                            {item.status === 'OUTING' 
+                                ? `${item.startTime || '?'} ~ ${item.endTime || '?'}` 
+                                : item.startTime || '기록없음'}
+                            </Typography>
+                        </Grid>
+                        )}
+
+                        {/* 3. 비고(사유) - 결석이면 더 넓게(sm:9), 아니면 기본(sm:6) */}
+                        <Grid size={{ xs: 12, sm: isAbsent ? 9 : 6 }}>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ fontWeight: 600 }}>
+                                비고(사유)
+                            </Typography>
+                            <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                color: item.remark ? 'text.primary' : 'text.disabled', 
+                                fontStyle: item.remark ? 'normal' : 'italic',
+                                fontWeight: item.remark ? 500 : 400
+                                }}
+                            >
+                                {item.remark || "등록된 사유가 없습니다."}
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                </Paper>
+              );
+            })}
+          </Stack>
+        ) : (
+          /* 데이터가 없을 때 표시할 화면 */
+          <Paper variant="outlined" sx={{ p: 6, textAlign: 'center', borderRadius: 4, borderStyle: 'dashed', bgcolor: '#fcfcfc' }}>
+             <CheckCircleOutlineIcon sx={{ color: '#cbd5e1', fontSize: 48, mb: 1.5, opacity: 0.5 }} />
+             <Typography variant="subtitle2" color="text.secondary" fontWeight={700}>출석 특이사항이 없습니다.</Typography>
+          </Paper>
+        )}
+      </Box>
 
       <Box sx={{ p: 2, bgcolor: isInactive ? '#f1f5f9' : '#fffbeb', borderRadius: 3, border: '1px solid', borderColor: isInactive ? '#e2e8f0' : '#fef3c7' }}>
         <Typography variant="body2" color={isInactive ? '#475569' : '#92400e'} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
