@@ -141,6 +141,13 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
 
       <Divider sx={{ my: 4 }} />
 
+      <Box sx={{ p: 2, bgcolor: isInactive ? '#f1f5f9' : '#fffbeb', borderRadius: 3, border: '1px solid', borderColor: isInactive ? '#e2e8f0' : '#fef3c7' }}>
+        <Typography variant="body2" color={isInactive ? '#475569' : '#92400e'} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningAmberIcon fontSize="small" /> 
+          {isInactive ? "해당 학생은 학적 변동으로 인해 출석 관리 대상에서 제외되었습니다." : "출석률이 80% 미만일 경우 수당 지급에 제한이 있을 수 있으니 관리에 유의 바랍니다."}
+        </Typography>
+      </Box>
+
       {/* 2. 출석 특이사항 상세 내역 리스트 */}
       <Box sx={{ mt: 4, mb: 2 }}>
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
@@ -228,19 +235,13 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
           </Stack>
         ) : (
           /* 데이터가 없을 때 표시할 화면 */
-          <Paper variant="outlined" sx={{ p: 6, textAlign: 'center', borderRadius: 4, borderStyle: 'dashed', bgcolor: '#fcfcfc' }}>
-             <CheckCircleOutlineIcon sx={{ color: '#cbd5e1', fontSize: 48, mb: 1.5, opacity: 0.5 }} />
+          <Paper variant="outlined" sx={{ p: 1, textAlign: 'center', borderRadius: 4, borderStyle: 'dashed', bgcolor: '#fcfcfc' }}>
+             {/* <CheckCircleOutlineIcon sx={{ color: '#cbd5e1', fontSize: 48, mb: 1.5, opacity: 0.5 }} /> */}
              <Typography variant="subtitle2" color="text.secondary" fontWeight={700}>출석 특이사항이 없습니다.</Typography>
           </Paper>
         )}
       </Box>
 
-      <Box sx={{ p: 2, bgcolor: isInactive ? '#f1f5f9' : '#fffbeb', borderRadius: 3, border: '1px solid', borderColor: isInactive ? '#e2e8f0' : '#fef3c7' }}>
-        <Typography variant="body2" color={isInactive ? '#475569' : '#92400e'} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningAmberIcon fontSize="small" /> 
-          {isInactive ? "해당 학생은 학적 변동으로 인해 출석 관리 대상에서 제외되었습니다." : "출석률이 80% 미만일 경우 수당 지급에 제한이 있을 수 있으니 관리에 유의 바랍니다."}
-        </Typography>
-      </Box>
     </Box>
   );
 };
