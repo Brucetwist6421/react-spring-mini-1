@@ -50,8 +50,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
 
         // 상세 특이사항 목록 조회 후 VO에 주입
-        List<Map<String, Object>> details = attendanceMapper.selectAttendanceDetailList(accountSeq);
-        status.setDetails(details);
+        List<Map<String, Object>> attList = attendanceMapper.selectAttendanceDetailList(accountSeq);
+        status.setAttList(attList);
         
         return status;
     }
