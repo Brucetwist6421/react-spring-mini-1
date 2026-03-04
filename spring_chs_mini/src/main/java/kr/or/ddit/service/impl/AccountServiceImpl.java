@@ -48,16 +48,28 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void updateAccount(AccountVO accountVO, MultipartFile mainImage) {
         try {
-            // 1. 메인 이미지가 변경 된 경우에만 실행
-			if (mainImage != null && !mainImage.isEmpty()) {
-				String mainImagePath = fileService.saveMainImage(mainImage);
-				accountVO.setMainImagePath(mainImagePath);
-			}
-            // 2. 학생 정보 업데이트 (Mapper 호출)
+            // 1. 비밀번호 초기화 처리 (추가)
+            // 프론트에서 '1234'를 보냈다면 암호화해서 VO에 다시 세팅
+            if (accountVO.getAccountPasswd() != null && !accountVO.getAccountPasswd().isEmpty()) {
+                String encodedPassword = passwordEncoder.encode(accountVO.getAccountPasswd());
+                accountVO.setAccountPasswd(encodedPassword);
+                log.info("비밀번호 암호화 완료 (대상: {})", accountVO.getAccountSeq());
+            }
+
+            // 2. 메인 이미지가 변경 된 경우에만 실행
+            if (mainImage != null && !mainImage.isEmpty()) {
+                String mainImagePath = fileService.saveMainImage(mainImage);
+                accountVO.setMainImagePath(mainImagePath);
+            }
+
+            // 3. 학생 정보 업데이트 (Mapper 호출)
             int result = accountMapper.updateAccount(accountVO);
             
             if (result > 0) {
                 log.info("회원 정보 수정 완료: {}", accountVO.getAccountSeq());
+            } else {
+                // 업데이트 실패 시 예외를 던져야 Transactional이 롤백됩니다.
+                throw new RuntimeException("회원 정보 업데이트에 실패했습니다.");
             }
 
         } catch (IOException e) {

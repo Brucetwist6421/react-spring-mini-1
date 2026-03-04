@@ -2,6 +2,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import SaveIcon from '@mui/icons-material/Save';
+import LockResetIcon from '@mui/icons-material/LockReset';
 import {
   Avatar,
   Box,
@@ -39,10 +40,12 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
   const [formData, setFormData] = useState<any>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [isPwReset, setIsPwReset] = useState(false);
 
   useEffect(() => {
     if (studentData) {
       setFormData({ ...studentData });
+      setIsPwReset(false);
       if (studentData.mainImagePath) {
         setPreviewUrl(`http://168.107.51.143:8080/upload/${encodeURIComponent(studentData.mainImagePath)}`);
       } else {
@@ -50,6 +53,14 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       }
     }
   }, [studentData]);
+
+  // 1. 비밀번호 초기화 핸들러
+  const handlePasswordReset = () => {
+    if (window.confirm("비밀번호를 '1234'로 초기화하시겠습니까? 저장 버튼을 눌러야 최종 반영됩니다.")) {
+      setFormData((prev: any) => ({ ...prev, accountPasswd: '1234' }));
+      setIsPwReset(true);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -73,7 +84,13 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       const data = new FormData();
       if (imageFile) data.append('mainImage', imageFile);
 
-      // ⭐ 2. 빈 문자열("")을 null로 변환하여 전송 (DB Unique 에러 방지)
+      // 초기화 버튼을 누르지 않았다면 비밀번호 필드 제외 (기존 비번 유지)
+      const finalData = { ...formData };
+      if (!isPwReset) {
+        delete finalData.accountPasswd;
+      }
+
+      // 2. 빈 문자열("")을 null로 변환하여 전송 (DB Unique 에러 방지)
       const refinedData = Object.fromEntries(
         Object.entries(formData).map(([key, value]) => [
           key,
@@ -103,7 +120,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       <DialogContent sx={{ p: 4 }}>
         <Grid container spacing={2.5}>
           
-          {/* 📸 썸네일 섹션 생략 (기존과 동일) */}
+          {/* 썸네일 섹션 */}
           <Grid size={12}>
              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, gap: 2 }}>
                <Box sx={{ position: 'relative' }}>
@@ -115,12 +132,43 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
                    <PhotoCameraIcon sx={{ fontSize: '1.2rem' }} />
                  </IconButton>
                </Box>
+               <Typography 
+                variant="caption" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: 'text.secondary',
+                  letterSpacing: -0.5 
+                }}
+              >
+                프로필 사진 변경
+              </Typography>
              </Box>
+          </Grid>
+
+          <Grid size={12} sx={{ mt: 2 }}><Divider /></Grid>
+          <Grid size={12}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>
+                계정 보안 설정
+              </Typography>
+              
+              {/* 3. 비밀번호 초기화 버튼 */}
+              <Button
+                variant={isPwReset ? "contained" : "outlined"}
+                color={isPwReset ? "error" : "primary"}
+                size="small"
+                startIcon={<LockResetIcon />}
+                onClick={handlePasswordReset}
+                sx={{ fontWeight: 'bold' }}
+              >
+                {isPwReset ? "비밀번호 초기화 대기중 (1234)" : "비밀번호 '1234'로 초기화"}
+              </Button>
+            </Box>
           </Grid>
 
           <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>학적 상태 및 기본 정보</Typography></Grid>
           
-          {/* ⭐ 3. 학적 상태 선택 필드 추가 */}
+          {/*  3. 학적 상태 선택 필드 추가 */}
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
               fullWidth
