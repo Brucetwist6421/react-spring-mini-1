@@ -11,7 +11,7 @@ import DirectionsWalkIcon from '@mui/icons-material/DirectionsWalk';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import MonthlyAttendanceChart from './MonthlyAttendanceChart';
+import MonthlyAttendanceChart from './MonthlyAttendanceList';
 
 interface AttendanceData {
   totalWorkingDays: number;
@@ -164,13 +164,14 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
           <Stack spacing={1.8}>
             {data.attList.map((item, index) => {
               const statusConfig: any = {
+                'OFFICIAL': { label: '공결', color: '#646363', bgColor: '#fef2f2', timeLabel: '사유 발생' },
                 'ABSENT': { label: '결석', color: '#ef4444', bgColor: '#fef2f2', timeLabel: '사유 발생' },
                 'LATE': { label: '지각', color: '#f59e0b', bgColor: '#fffbeb', timeLabel: '입실 시간' },
                 'EARLY': { label: '조퇴', color: '#8b5cf6', bgColor: '#f5f3ff', timeLabel: '조퇴 시간' },
                 'OUTING': { label: '외출', color: '#3b82f6', bgColor: '#eff6ff', timeLabel: '외출 시간' },
               };
               const config = statusConfig[item.status] || { label: item.status, color: '#64748b', bgColor: '#f8fafc', timeLabel: '시간' };
-              const isAbsent = item.status === 'ABSENT';
+              const isAbsent = item.status === 'ABSENT' || item.status === 'OFFICIAL';
 
               return (
                 <Paper 

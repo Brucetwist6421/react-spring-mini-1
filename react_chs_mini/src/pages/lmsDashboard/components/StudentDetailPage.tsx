@@ -196,7 +196,7 @@ const StudentDetailPage = () => {
                 <PersonIcon sx={{ fontSize: '2rem' }} /> 기본 정보
               </Typography>
               
-              <InfoItem icon={<ContactPageIcon />} label="계정 아이디" value={student.accountId} color="primary.main" />
+              <InfoItem icon={<ContactPageIcon />} label="아이디" value={student.accountId} color="primary.main" />
               <InfoItem icon={<AlternateEmailIcon />} label="이메일 주소" value={student.accountEmail} />
               
               <Divider sx={{ my: 2.5, borderStyle: 'dashed' }} />
