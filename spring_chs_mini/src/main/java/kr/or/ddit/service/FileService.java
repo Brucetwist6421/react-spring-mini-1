@@ -1,22 +1,19 @@
 package kr.or.ddit.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component // Bean으로 등록하여 다른 서비스에서 의존성 주입(DI) 가능
 public class FileService {
 
-    // application.yml 또는 application.properties에 설정된 경로를 사용
-    // 설정이 없을 경우 기본값으로 /home/ubuntu/upload/ 사용
-    @Value("${file.upload-path:/home/ubuntu/upload/}")
-    private String uploadPath;
+    String uploadPath = "/home/ubuntu/upload/";
 
     /**
      * 파일 저장 공통 로직
