@@ -133,19 +133,20 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
                  </IconButton>
                </Box>
                <Typography 
-                variant="caption" 
-                sx={{ 
-                  fontWeight: 700, 
-                  color: 'text.secondary',
-                  letterSpacing: -0.5 
-                }}
-              >
-                프로필 사진 변경
-              </Typography>
+                  variant="caption" 
+                  sx={{ 
+                    fontSize: 16,
+                    fontWeight: 700, 
+                    color: 'text.secondary',
+                    letterSpacing: -0.5 
+                  }}
+                >
+                  프로필 사진 변경
+                </Typography>
              </Box>
           </Grid>
 
-          <Grid size={12} sx={{ mt: 2 }}><Divider /></Grid>
+          <Grid size={12} sx={{ mt: -2 }}><Divider /></Grid>
           <Grid size={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>
