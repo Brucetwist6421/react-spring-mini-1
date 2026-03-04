@@ -31,7 +31,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             int specialCaseSum = status.getLateCount() + status.getOutingCount() + status.getEarlyCount();
             int convertedAbsenceFromSpecial = specialCaseSum / 3;
             
-            // 3. 총 결석 환산 일수 계산 (실제 결석 + 특이사항 환산분)
+            // 3. 총 결석 환산 일 수 계산 (실제 결석 + 특이사항 환산분)
             double totalConvertedAbsence = (double) status.getAbsentCount() + convertedAbsenceFromSpecial;
             status.setConvertedAbsenceDays(totalConvertedAbsence);
 

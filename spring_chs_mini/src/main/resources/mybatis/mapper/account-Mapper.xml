@@ -117,4 +117,32 @@
 	    order by seq asc
 	</select>
 
+    <update id="updateAccount" parameterType="AccountVO">
+        UPDATE lms.tb_account
+        SET
+            account_name = #{accountName},
+            birth = #{birth},
+            gender = #{gender},
+            tel = #{tel},
+            edu = #{edu},
+            major = #{major},
+            grad_type = #{gradType},
+            career = #{career},
+            account_email = #{accountEmail},
+            ident_number = #{identNumber},
+            emergency_tel = #{emergencyTel},
+            address = #{address},
+            marital_status = #{maritalStatus},
+            licenses = #{licenses},
+            military_status = #{militaryStatus},
+            prev_company = #{prevCompany},
+            quit_date = #{quitDate},
+            update_id = #{updateId},
+            update_date = CURRENT_TIMESTAMP
+            <if test="mainImagePath != null">
+            , main_image_path = #{mainImagePath}
+            </if>
+        WHERE account_seq = #{accountSeq}
+    </update>
+
 </mapper>

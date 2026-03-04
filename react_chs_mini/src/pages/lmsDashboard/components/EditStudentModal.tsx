@@ -1,18 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'; // 아이콘 추가
 import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    MenuItem,
-    TextField,
-    Typography
+  Avatar,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  MenuItem,
+  TextField,
+  Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid'; // 또는 @mui/material/Grid2
+import Grid from '@mui/material/Grid';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
@@ -25,9 +29,19 @@ interface EditProps {
 
 const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) => {
   const [formData, setFormData] = useState<any>({});
+  const [imageFile, setImageFile] = useState<File | null>(null); // 신규 이미지 파일 상태
+  const [previewUrl, setPreviewUrl] = useState<string>(''); // 썸네일 미리보기 URL
 
   useEffect(() => {
-    if (studentData) setFormData({ ...studentData });
+    if (studentData) {
+      setFormData({ ...studentData });
+      // 기존 이미지가 있다면 썸네일 경로 설정
+      if (studentData.mainImagePath) {
+        setPreviewUrl(`http://168.107.51.143:8080/upload/${encodeURIComponent(studentData.mainImagePath)}`);
+      } else {
+        setPreviewUrl(''); // 이미지 없는 경우 빈값
+      }
+    }
   }, [studentData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,10 +49,38 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
     setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
+  // 이미지 변경 핸들러
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string); // 미리보기 생성
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = async () => {
     try {
-      // API 경로와 메서드는 실제 백엔드 명세에 맞춰 조정하세요.
-      await axios.put(`/api/account/${formData.accountSeq}`, formData);
+      // 이미지 포함 전송을 위한 FormData 생성
+      const data = new FormData();
+      
+      if (imageFile) {
+        data.append('file', imageFile); // 'file'은 서버에서 받는 파라미터명과 일치해야 함
+      }
+
+      // JSON 데이터를 Blob으로 추가 (서버 설정에 따라 다를 수 있음)
+      data.append('accountData', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
+
+      // 또는 서버가 개별 필드를 원할 경우:
+      // data.append('accountName', formData.accountName); ...
+
+      await axios.put(`/api/account/${formData.accountSeq}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
       alert('정보가 성공적으로 수정되었습니다.');
       onUpdate();
       onClose();
@@ -54,6 +96,41 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       <Divider />
       <DialogContent sx={{ p: 4 }}>
         <Grid container spacing={2.5}>
+          
+          {/* 📸 썸네일 수정 섹션 */}
+          <Grid size={12}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, gap: 2 }}>
+              <Box sx={{ position: 'relative' }}>
+                <Avatar 
+                  src={previewUrl} 
+                  sx={{ 
+                    width: 130, height: 130, 
+                    border: '4px solid #f1f5f9', 
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    bgcolor: '#e2e8f0'
+                  }}
+                >
+                  {formData.accountName?.[0]}
+                </Avatar>
+                <IconButton
+                  component="label"
+                  sx={{
+                    position: 'absolute', bottom: 4, right: 4,
+                    bgcolor: 'primary.main', color: 'white',
+                    '&:hover': { bgcolor: 'primary.dark' },
+                    width: 38, height: 38, border: '3px solid white'
+                  }}
+                >
+                  <input hidden accept="image/*" type="file" onChange={handleImageChange} />
+                  <PhotoCameraIcon sx={{ fontSize: '1.2rem' }} />
+                </IconButton>
+              </Box>
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                기본 사진 변경
+              </Typography>
+            </Box>
+          </Grid>
+
           <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>기본 신상 정보</Typography></Grid>
           
           <Grid size={{ xs: 12, sm: 4 }}>

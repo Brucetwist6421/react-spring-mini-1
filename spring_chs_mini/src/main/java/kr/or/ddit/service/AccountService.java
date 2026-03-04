@@ -2,10 +2,14 @@ package kr.or.ddit.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import kr.or.ddit.vo.AccountVO;
 
 public interface AccountService {
-    List<AccountVO> getStudentsByCurriculum(Integer curSeq);
+    public List<AccountVO> getStudentsByCurriculum(Integer curSeq);
 
-    AccountVO getAccountDetail(Integer accountSeq);
+    public AccountVO getAccountDetail(Integer accountSeq);
+
+    public void updateAccount(AccountVO accountVO, MultipartFile mainImage);
 }
