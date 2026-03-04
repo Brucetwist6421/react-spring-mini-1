@@ -1,7 +1,9 @@
 package kr.or.ddit.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,4 +65,24 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
+    @Override
+    @Transactional
+    public void registerStudent(AccountVO accountVO, MultipartFile mainImage) {
+        try {
+			// 1. 메인 이미지 저장 후 VO에 세팅
+			String mainImagePath = fileService.saveMainImage(mainImage);
+			accountVO.setMainImagePath(mainImagePath);
+
+			// 2. Account insert
+			accountMapper.insertAccount(accountVO);
+			// Long accountId = accountVO.getAccountSeq(); // insert 후 생성된 ID
+
+			// 3. 첨부파일 저장
+			// saveAttachments(accountId, accountVO.getName(), accountVO.getAttachmentFiles());
+
+		} catch (IOException e) {
+			throw new RuntimeException("createAccount 실패", e);
+		}
+        
+    }
 }

@@ -29,4 +29,6 @@ public interface AccountMapper {
     List<AccountAttachmentVO> selectAttachmentsByAccountSeq(Integer accountSeq);
 
     int updateAccount(AccountVO accountVO);
+
+    int insertAccount(AccountVO accountVO);
 }

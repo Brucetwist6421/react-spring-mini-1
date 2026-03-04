@@ -12,4 +12,6 @@ public interface AccountService {
     public AccountVO getAccountDetail(Integer accountSeq);
 
     public void updateAccount(AccountVO accountVO, MultipartFile mainImage);
+
+    public void registerStudent(AccountVO accountVO, MultipartFile mainImage);
 }

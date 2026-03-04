@@ -124,7 +124,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
                 </IconButton>
               </Box>
               <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                기본 사진 변경
+                프로필 사진 변경
               </Typography>
             </Box>
           </Grid>

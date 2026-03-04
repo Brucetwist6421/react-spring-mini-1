@@ -6,6 +6,8 @@ import type { LmsDashboardData } from "../types/lmsDashboardType";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import { Button } from "@mui/material";
 import LmsStudentStatusModal from "./LmsStudentStatusModal";
+import PersonAddIcon from "@mui/icons-material/PersonAdd"; // 아이콘 추가
+import LmsStudentAddModal from "./LmsStudentAddModal"; // 생성한 모달 임포트
 
 import { useNavigate } from "react-router-dom"; 
 import SettingsIcon from "@mui/icons-material/Settings"; 
@@ -14,6 +16,7 @@ import { Tooltip } from "@mui/material";
 const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -77,8 +80,22 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
         </TableCell>
 
         {/* 5. 버튼 그룹 셀 (현황보기 유지 + 과정관리 추가) */}
-        <TableCell align="center" width="20%">
+        <TableCell align="center" width="25%">
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+             {/* 학생 등록 버튼 */}
+            <Button
+              variant="outlined"
+              size="small"
+              color="secondary"
+              startIcon={<PersonAddIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAddModalOpen(true);
+              }}
+              sx={{ borderRadius: "6px", fontWeight: "bold" }}
+            >
+              학생등록
+            </Button>
             {/* 성적현황 버튼 - 인원이 없으면 볼 데이터가 없으므로 함께 비활성화 권장 */}
             <Button
               variant="outlined"
@@ -139,6 +156,19 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
         open={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         row={row} 
+      />
+
+      {/* 학생 등록 모달 */}
+      <LmsStudentAddModal 
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        curSeq={row.curSeq}
+        curName={row.curName}
+        curClass={row.className}
+        term={row.term}
+        onSuccess={() => {
+          // 필요 시 부모 페이지의 리스트를 다시 불러오는 로직 (window.location.reload() 등)
+        }}
       />
 
       {/* 확장 영역 (Collapse) */}

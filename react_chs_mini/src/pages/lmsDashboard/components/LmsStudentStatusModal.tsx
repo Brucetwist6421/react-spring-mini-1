@@ -27,9 +27,7 @@ const LmsStudentStatusModal = ({ open, onClose, row }: any) => {
 
   // 1. API 데이터 호출
   useEffect(() => {
-    // row 자체를 찍어서 정확한 필드명을 확인
-
-    // curSeq가 아니라 cur_seq 일 수도 있습니다.
+    // curSeq가 아니라 cur_seq 일 수도 있다.
     const targetSeq = row?.curSeq || row?.cur_seq || row?.CUR_SEQ;
 
     if (open && targetSeq) {

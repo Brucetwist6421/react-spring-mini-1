@@ -145,4 +145,17 @@
         WHERE account_seq = #{accountSeq}
     </update>
 
+    <insert id="insertAccount" parameterType="AccountVO">
+        INSERT INTO account (
+            account_name, gender, birth, ident_number, tel, 
+            emergency_tel, account_email, address, edu, major, 
+            grad_type, military_status, marital_status, prev_company, 
+            quit_date, licenses, career, main_image_path, status, cur_seq
+        ) VALUES (
+            #{accountName}, #{gender}, #{birth}, #{identNumber}, #{tel},
+            #{emergencyTel}, #{accountEmail}, #{address}, #{edu}, #{major},
+            #{gradType}, #{militaryStatus}, #{maritalStatus}, #{prevCompany},
+            #{quitDate}, #{licenses}, #{career}, #{mainImagePath}, #{status}, #{curSeq}
+        )
+    </insert>
 </mapper>

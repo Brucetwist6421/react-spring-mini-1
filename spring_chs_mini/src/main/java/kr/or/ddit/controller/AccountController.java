@@ -5,6 +5,7 @@ import kr.or.ddit.vo.AccountVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,7 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    //과정 별 학생 목록 조회
     @GetMapping("/{curSeq}/students")
     public ResponseEntity<List<AccountVO>> getStudentsByCurriculum(@PathVariable Integer curSeq) {
         return ResponseEntity.ok(accountService.getStudentsByCurriculum(curSeq));
@@ -30,6 +32,7 @@ public class AccountController {
         return accountService.getAccountDetail(accountSeq);
     }
 
+    //학생 정보 수정
     @PutMapping("update/{accountSeq}") 
     public ResponseEntity<?> updateAccount(
             @PathVariable Integer accountSeq, // URL의 ID를 받음
@@ -46,6 +49,20 @@ public class AccountController {
         } catch (Exception e) {
             log.error("Update failed", e);
             return ResponseEntity.status(500).body("fail");
+        }
+    }
+
+    //학생 등록
+    @PostMapping("/register")
+    public ResponseEntity<String> registerAccount(
+            @RequestPart(value = "mainImage", required = false) MultipartFile mainImage,
+            @RequestPart(value = "accountData") AccountVO accountData) {
+        
+        try {
+            accountService.registerStudent(accountData, mainImage);
+            return ResponseEntity.ok("Success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
         }
     }
 }
