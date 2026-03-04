@@ -107,7 +107,7 @@
             a.account_seq = #{accountSeq}
     </select>
 
-    <select id="selectAttachmentsByAccountSeq" parameterType="long" resultType="kr.or.ddit.vo.AccountAttachmentVO">
+    <select id="selectAttachmentsByAccountSeq" parameterType="Integer" resultType="kr.or.ddit.vo.AccountAttachmentVO">
 	    SELECT
 	        seq,
 	        account_seq,

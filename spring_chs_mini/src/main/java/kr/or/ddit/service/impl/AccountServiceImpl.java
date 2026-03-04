@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import kr.or.ddit.mapper.AccountMapper;
 import kr.or.ddit.service.AccountService;
 import kr.or.ddit.service.FileService;
-import kr.or.ddit.vo.AccountAttachmentVO;
 import kr.or.ddit.vo.AccountVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,14 +25,15 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<AccountVO> getStudentsByCurriculum(Integer curSeq) {
         List<AccountVO> accountList = accountMapper.selectStudentsByCurriculum(curSeq);
-		if (accountList != null && !accountList.isEmpty()) {
-			for (AccountVO vo : accountList) {
-				List<AccountAttachmentVO> attachments = accountMapper.selectAttachmentsByAccountSeq(vo.getAccountSeq());
-				if (attachments != null && !attachments.isEmpty()) {
-					vo.setAttachments(attachments);
-				}
-			}
-		}
+        // 첨부파일 정보도 함께 조회하여 VO에 세팅 (필요 시)
+		// if (accountList != null && !accountList.isEmpty()) {
+		// 	for (AccountVO vo : accountList) {
+		// 		List<AccountAttachmentVO> attachments = accountMapper.selectAttachmentsByAccountSeq(vo.getAccountSeq());
+		// 		if (attachments != null && !attachments.isEmpty()) {
+		// 			vo.setAttachments(attachments);
+		// 		}
+		// 	}
+		// }
 		return accountList;
     }
 
