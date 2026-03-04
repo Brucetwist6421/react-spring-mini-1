@@ -66,21 +66,16 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
     try {
         const data = new FormData();
         
-        // 1. 파일 키 이름을 백엔드의 @RequestParam과 맞춤 ('mainImage')
+        // 1. 이미지 파일 (키 이름을 백엔드의 mainImage와 맞춤)
         if (imageFile) {
         data.append('mainImage', imageFile); 
         }
 
-        // 2. Blob 대신 개별 필드를 append 하거나, 백엔드가 인식할 수 있는 폼 데이터 형태로 변환
-        // @ModelAttribute는 평면적인 폼 데이터를 객체로 매핑해줍니다.
-        Object.keys(formData).forEach(key => {
-        if (formData[key] !== null && formData[key] !== undefined) {
-            data.append(key, formData[key]);
-        }
-        });
+        // 2. VO 데이터 (Blob으로 만들어 'accountData'라는 키로 전송)
+        data.append('accountData', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
 
-        // 3. 메서드를 POST로 변경하고 URL을 /api/account/update (또는 실제 설정한 경로)로 변경
-        await api.post(`/api/account/update`, data, {
+        // 3. PUT 메서드 사용, URL은 /api/account/update/145 형태
+        await api.put(`/api/account/update/${formData.accountSeq}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
         });
 
@@ -91,7 +86,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
         console.error('수정 실패:', err);
         alert('정보 수정 중 오류가 발생했습니다.');
     }
-    };
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
