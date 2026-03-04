@@ -1,10 +1,9 @@
 package kr.or.ddit.service.impl;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +22,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountMapper accountMapper;
 	private final FileService fileService; // 공통 파일 업로드 서비스 의존성 주입
+    private final BCryptPasswordEncoder passwordEncoder; // 암호화 객체 주입
 
     @Override
     public List<AccountVO> getStudentsByCurriculum(Integer curSeq) {
@@ -69,6 +69,12 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void registerStudent(AccountVO accountVO, MultipartFile mainImage) {
         try {
+            // 1. 비밀번호 암호화 (복호화 불가능한 해시화)
+            if (accountVO.getAccountPasswd() != null && !accountVO.getAccountPasswd().isEmpty()) {
+                String encodedPw = passwordEncoder.encode(accountVO.getAccountPasswd());
+                accountVO.setAccountPasswd(encodedPw);
+            }
+
 			// 1. 메인 이미지 저장 후 VO에 세팅
 			String mainImagePath = fileService.saveMainImage(mainImage);
 			accountVO.setMainImagePath(mainImagePath);

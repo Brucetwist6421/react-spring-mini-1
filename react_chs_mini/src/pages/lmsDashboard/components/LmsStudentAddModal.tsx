@@ -3,37 +3,28 @@ import CloseIcon from '@mui/icons-material/Close';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import SaveIcon from '@mui/icons-material/Save';
 import {
-    Avatar,
-    Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    IconButton,
-    MenuItem,
-    TextField,
-    Typography
+    Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
+    Divider, IconButton, MenuItem, TextField, Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import React, { useState } from 'react';
+import Grid from '@mui/material/Grid'; // UI 깨짐 방지를 위해 Grid2 사용
+import React, { useState, useRef } from 'react';
 import api from '../../../api/axiosInstance';
 
 interface AddProps {
     open: boolean;
     onClose: () => void;
-    curSeq: number;    // 어떤 과정에 등록할지 식별자
-    curName: string;   // 과정명 (제목 표시용)
-    curClass: string;  // 반 정보 (선택적, 필요 시)
-    term: number;      // 학기 정보 (선택적, 필요 시)
+    curSeq: number;
+    curName: string;
+    curClass: string;
+    term: number;
     onSuccess: () => void;
 }
 
 const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, onSuccess }: AddProps) => {
-    // 초기값 설정
     const initialForm = {
         curSeq: curSeq,
+        accountId: '',
+        accountPasswd: '',
         accountName: '',
         gender: 'M',
         birth: '',
@@ -51,56 +42,57 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
         quitDate: '',
         licenses: '',
         career: '',
-        status: 'ENROLLED' // 신규 등록 시 기본값: 재학 중
+        status: 'ENROLLED'
     };
 
     const [formData, setFormData] = useState<any>(initialForm);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
 
+    // 필수 항목 Ref (alert 후 포커스용)
+    const inputRefs: any = {
+        accountId: useRef<HTMLInputElement>(null),
+        accountPasswd: useRef<HTMLInputElement>(null),
+        accountName: useRef<HTMLInputElement>(null),
+        tel: useRef<HTMLInputElement>(null),
+        address: useRef<HTMLInputElement>(null),
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev: any) => ({ ...prev, [name]: value }));
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewUrl(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
     const handleSave = async () => {
-        // 필수값 체크 (예: 이름)
-        if (!formData.accountName) {
-            alert('이름은 필수 입력 항목입니다.');
-            return;
+        // 필수 항목 유효성 검사
+        const requiredFields = [
+            { key: 'accountId', label: '접속 아이디', ref: inputRefs.accountId },
+            { key: 'accountPasswd', label: '접속 비밀번호', ref: inputRefs.accountPasswd },
+            { key: 'accountName', label: '이름', ref: inputRefs.accountName },
+            { key: 'tel', label: '연락처', ref: inputRefs.tel },
+            { key: 'address', label: '거주 주소', ref: inputRefs.address },
+        ];
+
+        for (const field of requiredFields) {
+            if (!formData[field.key] || formData[field.key].trim() === '') {
+                alert(`${field.label} 항목을 입력해주세요.`);
+                field.ref.current?.focus(); // 해당 위치로 커서 이동
+                return;
+            }
         }
 
         try {
             const data = new FormData();
-            
-            // 1. 이미지 파일
-            if (imageFile) {
-                data.append('mainImage', imageFile); 
-            }
-
-            // 2. 계정 데이터 (JSON)
+            if (imageFile) data.append('mainImage', imageFile);
             data.append('accountData', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
 
-            // 3. POST 요청 (엔드포인트는 백엔드 설계에 맞게 수정 가능)
             await api.post('/api/account/register', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             alert('신규 훈련생이 성공적으로 등록되었습니다.');
             onSuccess();
-            setFormData(initialForm); // 폼 초기화
+            setFormData(initialForm);
             setPreviewUrl('');
             onClose();
         } catch (err) {
@@ -118,47 +110,58 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
             <DialogContent sx={{ p: 4 }}>
                 <Grid container spacing={2.5}>
                     
-                    {/* 프로필 사진 등록 섹션 */}
+                    {/*  프로필 사진 섹션 */}
                     <Grid size={12}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, gap: 2 }}>
                             <Box sx={{ position: 'relative' }}>
-                                <Avatar 
-                                    src={previewUrl} 
-                                    sx={{ 
-                                        width: 130, height: 130, 
-                                        border: '4px solid #f1f5f9', 
-                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                        bgcolor: '#e2e8f0'
-                                    }}
-                                >
+                                <Avatar src={previewUrl} sx={{ width: 130, height: 130, border: '4px solid #f1f5f9', bgcolor: '#e2e8f0' }}>
                                     {!previewUrl && <PhotoCameraIcon sx={{ fontSize: '3rem', color: '#94a3b8' }} />}
                                 </Avatar>
-                                <IconButton
-                                    component="label"
-                                    sx={{
-                                        position: 'absolute', bottom: 4, right: 4,
-                                        bgcolor: 'success.main', color: 'white',
-                                        '&:hover': { bgcolor: 'success.dark' },
-                                        width: 38, height: 38, border: '3px solid white'
-                                    }}
-                                >
-                                    <input hidden accept="image/*" type="file" onChange={handleImageChange} />
+                                <IconButton component="label" sx={{ position: 'absolute', bottom: 4, right: 4, bgcolor: 'success.main', color: 'white', '&:hover': { bgcolor: 'success.dark' }, width: 38, height: 38, border: '3px solid white' }}>
+                                    <input hidden accept="image/*" type="file" onChange={(e: any) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setImageFile(file);
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => setPreviewUrl(reader.result as string);
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }} />
                                     <PhotoCameraIcon sx={{ fontSize: '1.2rem' }} />
                                 </IconButton>
                             </Box>
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                                프로필 사진 등록
-                            </Typography>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>프로필 사진 등록</Typography>
                         </Box>
                     </Grid>
 
-                    <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>기본 신상 정보</Typography></Grid>
-                    
+                    {/* 1. 계정 정보 */}
+                    <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>계정 정보 (필수)</Typography></Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField fullWidth label="접속 아이디" name="accountId" value={formData.accountId} onChange={handleChange} required inputRef={inputRefs.accountId} 
+                            slotProps={{
+                                htmlInput: {
+                                    autoComplete: 'off'
+                                }
+                            }}
+                        />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField fullWidth label="접속 비밀번호" name="accountPasswd" type="password" value={formData.accountPasswd} onChange={handleChange} required inputRef={inputRefs.accountPasswd} 
+                            slotProps={{
+                                htmlInput: {
+                                    autoComplete: 'new-password'
+                                }
+                            }}
+                        />
+                    </Grid>
+
+                    {/* 2. 기본 신상 정보 */}
+                    <Grid size={12} sx={{ mt: 1 }}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>기본 신상 정보</Typography></Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>
-                        <TextField fullWidth label="이름" name="accountName" value={formData.accountName} onChange={handleChange} required />
+                        <TextField fullWidth label="이름" name="accountName" value={formData.accountName} onChange={handleChange} required inputRef={inputRefs.accountName} />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>
-                        <TextField fullWidth select label="성별" name="gender" value={formData.gender} onChange={handleChange}>
+                        <TextField fullWidth select label="성별" name="gender" value={formData.gender} onChange={handleChange} required>
                             <MenuItem value="M">남성</MenuItem>
                             <MenuItem value="F">여성</MenuItem>
                         </TextField>
@@ -166,28 +169,25 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
                     <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField fullWidth label="생년월일" name="birth" type="date" InputLabelProps={{ shrink: true }} value={formData.birth} onChange={handleChange} />
                     </Grid>
-                    
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label="주민등록번호" name="identNumber" value={formData.identNumber} onChange={handleChange} placeholder="000000-0000000" />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField fullWidth label="연락처" name="tel" value={formData.tel} onChange={handleChange} placeholder="010-0000-0000" />
+                        <TextField fullWidth label="연락처" name="tel" value={formData.tel} onChange={handleChange} required inputRef={inputRefs.tel} placeholder="010-0000-0000" />
                     </Grid>
-                    
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label="비상연락처" name="emergencyTel" value={formData.emergencyTel} onChange={handleChange} />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label="이메일" name="accountEmail" value={formData.accountEmail} onChange={handleChange} />
                     </Grid>
-                    
                     <Grid size={12}>
-                        <TextField fullWidth label="거주 주소" name="address" value={formData.address} onChange={handleChange} />
+                        <TextField fullWidth label="거주 주소" name="address" value={formData.address} onChange={handleChange} required inputRef={inputRefs.address} />
                     </Grid>
 
+                    {/* 3. 학력 및 병역 */}
                     <Grid size={12} sx={{ mt: 2 }}><Divider /></Grid>
                     <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>학력 및 병역</Typography></Grid>
-                    
                     <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField fullWidth label="최종학력" name="edu" value={formData.edu} onChange={handleChange} />
                     </Grid>
@@ -202,7 +202,6 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
                             <MenuItem value="REST">휴학</MenuItem>
                         </TextField>
                     </Grid>
-                    
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label="병역 여부" name="militaryStatus" value={formData.militaryStatus} onChange={handleChange} />
                     </Grid>
@@ -213,16 +212,15 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
                         </TextField>
                     </Grid>
 
+                    {/* 4. 이력 및 기타 */}
                     <Grid size={12} sx={{ mt: 2 }}><Divider /></Grid>
                     <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>이력 및 기타</Typography></Grid>
-                    
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label="이전 직장" name="prevCompany" value={formData.prevCompany} onChange={handleChange} />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label="퇴사 일자" name="quitDate" type="date" InputLabelProps={{ shrink: true }} value={formData.quitDate} onChange={handleChange} />
                     </Grid>
-                    
                     <Grid size={12}>
                         <TextField fullWidth multiline rows={2} label="보유 자격증" name="licenses" value={formData.licenses} onChange={handleChange} />
                     </Grid>
