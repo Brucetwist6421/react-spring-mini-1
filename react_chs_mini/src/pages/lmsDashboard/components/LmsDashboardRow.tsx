@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import SettingsIcon from "@mui/icons-material/Settings"; 
 import { Tooltip } from "@mui/material";
 
-const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
+const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh: () => void }) => {
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -168,6 +168,8 @@ const LmsDashboardRow = ({ row }: { row: LmsDashboardData }) => {
         term={row.term}
         onSuccess={() => {
           // 필요 시 부모 페이지의 리스트를 다시 불러오는 로직 (window.location.reload() 등)
+          onRefresh();
+          setIsAddModalOpen(false);
         }}
       />
 

@@ -188,7 +188,7 @@ const LmsDashboard: React.FC = () => {
               </TableRow>
             ) : data.length > 0 ? (
               data.map((item, index) => (
-                <LmsDashboardRow key={`${item.className}-${index}`} row={item} />
+                <LmsDashboardRow key={`${item.className}-${index}`} row={item} onRefresh={() => fetchData(selectedYear)} />
               ))
             ) : (
               <TableRow>

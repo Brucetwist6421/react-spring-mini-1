@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CloseIcon from '@mui/icons-material/Close';
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'; // 아이콘 추가
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import SaveIcon from '@mui/icons-material/Save';
 import {
-    Avatar,
-    Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Divider,
-    IconButton,
-    MenuItem,
-    TextField,
-    Typography
+  Avatar,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  MenuItem,
+  TextField,
+  Typography
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import React, { useEffect, useState } from 'react';
@@ -27,19 +27,26 @@ interface EditProps {
   onUpdate: () => void;
 }
 
+// 1. 상태 옵션 정의
+const STATUS_OPTIONS = [
+  { value: 'ENROLLED', label: '재학 중' },
+  { value: 'DROPOUT', label: '중도 탈락' },
+  { value: 'EARLYOUT', label: '수강 철회' },
+  { value: 'GRADUATED', label: '수료' },
+];
+
 const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) => {
   const [formData, setFormData] = useState<any>({});
-  const [imageFile, setImageFile] = useState<File | null>(null); // 신규 이미지 파일 상태
-  const [previewUrl, setPreviewUrl] = useState<string>(''); // 썸네일 미리보기 URL
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
 
   useEffect(() => {
     if (studentData) {
       setFormData({ ...studentData });
-      // 기존 이미지가 있다면 썸네일 경로 설정
       if (studentData.mainImagePath) {
         setPreviewUrl(`http://168.107.51.143:8080/upload/${encodeURIComponent(studentData.mainImagePath)}`);
       } else {
-        setPreviewUrl(''); // 이미지 없는 경우 빈값
+        setPreviewUrl('');
       }
     }
   }, [studentData]);
@@ -49,14 +56,13 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
     setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  // 이미지 변경 핸들러
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrl(reader.result as string); // 미리보기 생성
+        setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -64,27 +70,29 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
 
   const handleSave = async () => {
     try {
-        const data = new FormData();
-        
-        // 1. 이미지 파일 (키 이름을 백엔드의 mainImage와 맞춤)
-        if (imageFile) {
-         data.append('mainImage', imageFile); 
-        }
+      const data = new FormData();
+      if (imageFile) data.append('mainImage', imageFile);
 
-        // 2. VO 데이터 (Blob으로 만들어 'accountData'라는 키로 전송)
-        data.append('accountData', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
+      // ⭐ 2. 빈 문자열("")을 null로 변환하여 전송 (DB Unique 에러 방지)
+      const refinedData = Object.fromEntries(
+        Object.entries(formData).map(([key, value]) => [
+          key,
+          typeof value === 'string' && value.trim() === '' ? null : value
+        ])
+      );
 
-        // 3. PUT 메서드 사용, URL은 /api/account/update/145 형태
-        await api.put(`/api/account/update/${formData.accountSeq}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+      data.append('accountData', new Blob([JSON.stringify(refinedData)], { type: 'application/json' }));
 
-        alert('정보가 성공적으로 수정되었습니다.');
-        onUpdate();
-        onClose();
+      await api.put(`/api/account/update/${formData.accountSeq}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      alert('정보가 성공적으로 수정되었습니다.');
+      onUpdate();
+      onClose();
     } catch (err) {
-        console.error('수정 실패:', err);
-        alert('정보 수정 중 오류가 발생했습니다.');
+      console.error('수정 실패:', err);
+      alert('정보 수정 중 오류가 발생했습니다.');
     }
   };
 
@@ -95,69 +103,70 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       <DialogContent sx={{ p: 4 }}>
         <Grid container spacing={2.5}>
           
-          {/* 📸 썸네일 수정 섹션 */}
+          {/* 📸 썸네일 섹션 생략 (기존과 동일) */}
           <Grid size={12}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, gap: 2 }}>
-              <Box sx={{ position: 'relative' }}>
-                <Avatar 
-                  src={previewUrl} 
-                  sx={{ 
-                    width: 130, height: 130, 
-                    border: '4px solid #f1f5f9', 
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    bgcolor: '#e2e8f0'
-                  }}
-                >
-                  {formData.accountName?.[0]}
-                </Avatar>
-                <IconButton
-                  component="label"
-                  sx={{
-                    position: 'absolute', bottom: 4, right: 4,
-                    bgcolor: 'primary.main', color: 'white',
-                    '&:hover': { bgcolor: 'primary.dark' },
-                    width: 38, height: 38, border: '3px solid white'
-                  }}
-                >
-                  <input hidden accept="image/*" type="file" onChange={handleImageChange} />
-                  <PhotoCameraIcon sx={{ fontSize: '1.2rem' }} />
-                </IconButton>
-              </Box>
-              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                프로필 사진 변경
-              </Typography>
-            </Box>
+             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, gap: 2 }}>
+               <Box sx={{ position: 'relative' }}>
+                 <Avatar src={previewUrl} sx={{ width: 130, height: 130, border: '4px solid #f1f5f9', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', bgcolor: '#e2e8f0' }}>
+                   {formData.accountName?.[0]}
+                 </Avatar>
+                 <IconButton component="label" sx={{ position: 'absolute', bottom: 4, right: 4, bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, width: 38, height: 38, border: '3px solid white' }}>
+                   <input hidden accept="image/*" type="file" onChange={handleImageChange} />
+                   <PhotoCameraIcon sx={{ fontSize: '1.2rem' }} />
+                 </IconButton>
+               </Box>
+             </Box>
           </Grid>
 
-          <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>기본 신상 정보</Typography></Grid>
+          <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>학적 상태 및 기본 정보</Typography></Grid>
           
+          {/* ⭐ 3. 학적 상태 선택 필드 추가 */}
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <TextField
+              fullWidth
+              select
+              label="학적 상태"
+              name="status"
+              value={formData.status || ''}
+              onChange={handleChange}
+              variant="outlined"
+              sx={{ '& .MuiOutlinedInput-root': { fontWeight: 'bold' } }}
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Grid>
+
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField fullWidth label="이름" name="accountName" value={formData.accountName || ''} onChange={handleChange} />
           </Grid>
+          
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField fullWidth select label="성별" name="gender" value={formData.gender || ''} onChange={handleChange}>
               <MenuItem value="M">남성</MenuItem>
               <MenuItem value="F">여성</MenuItem>
             </TextField>
           </Grid>
+
+          {/* 이하 생략 (기존 TextField 코드와 동일) */}
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField fullWidth label="생년월일" name="birth" type="date" InputLabelProps={{ shrink: true }} value={formData.birth || ''} onChange={handleChange} />
           </Grid>
-          
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <TextField fullWidth label="주민등록번호" name="identNumber" value={formData.identNumber || ''} onChange={handleChange} />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <TextField fullWidth label="연락처" name="tel" value={formData.tel || ''} onChange={handleChange} />
           </Grid>
-          
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField fullWidth label="비상연락처" name="emergencyTel" value={formData.emergencyTel || ''} onChange={handleChange} />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField fullWidth label="이메일" name="accountEmail" value={formData.accountEmail || ''} onChange={handleChange} />
           </Grid>
-          
           <Grid size={12}>
             <TextField fullWidth label="거주 주소" name="address" value={formData.address || ''} onChange={handleChange} />
           </Grid>
