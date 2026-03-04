@@ -88,7 +88,7 @@ const MonthlyAttendanceChart = ({ monthlyData }: Props) => {
                     lineHeight: 1 
                   }}
                 >
-                  {Number(item.mrate).toFixed(1)}%
+                  {Number(item.mrate).toFixed(2)}%
                 </Typography>
                 <Typography 
                   sx={{ 

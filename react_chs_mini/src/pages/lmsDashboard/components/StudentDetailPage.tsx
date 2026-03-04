@@ -31,10 +31,12 @@ import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom'; 
+import EditIcon from '@mui/icons-material/Edit';
 
 import RandomSpinner from '../../../components/RandomSpinner';
 import AttendanceStatusView from './AttendanceStatusView';
 import React from 'react';
+import EditStudentModal from './EditStudentModal';
 
 const StudentDetailPage = () => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
@@ -42,6 +44,7 @@ const StudentDetailPage = () => {
   const [attendance, setAttendance] = useState<any>(null);
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -60,6 +63,13 @@ const StudentDetailPage = () => {
       case 'DROPOUT': return '중퇴';
       case 'REST': return '휴학';
       default: return type || '-';
+    }
+  };
+
+  // 데이터 새로고침 함수
+  const refreshData = () => {
+    if (accountSeq) {
+      axios.get(`/api/account/${accountSeq}`).then(res => setStudent(res.data));
     }
   };
 
@@ -192,20 +202,31 @@ const StudentDetailPage = () => {
           <Stack spacing={3}>
             {/* 기본 정보 섹터 - 아이디, 이메일, 혼인여부 포함 */}
             <Paper elevation={0} sx={{ p: 4, border: '1px solid #e2e8f0', borderRadius: 5 }}>
-              <Typography sx={{ fontSize: '1.3rem', fontWeight: 900, mb: 3.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <PersonIcon sx={{ fontSize: '2rem' }} /> 기본 정보
-              </Typography>
-              
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3.5 }}>
+                <Typography sx={{ fontSize: '1.3rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <PersonIcon sx={{ fontSize: '2rem' }} /> 기본 정보
+                </Typography>
+                <Button 
+                  size="small" 
+                  variant="outlined" 
+                  startIcon={<EditIcon />}
+                  onClick={() => setEditModalOpen(true)}
+                  sx={{ fontWeight: 700, borderRadius: 2 }}
+                >
+                  학생 정보 수정
+                </Button>
+              </Stack>
               <InfoItem icon={<ContactPageIcon />} label="아이디" value={student.accountId} color="primary.main" />
               <InfoItem icon={<AlternateEmailIcon />} label="이메일 주소" value={student.accountEmail} />
               
               <Divider sx={{ my: 2.5, borderStyle: 'dashed' }} />
               
+              <InfoItem icon={<PersonIcon />} label="성별" value={student.gender === 'M' ? '남성' : '여성'} />
               <InfoItem icon={<BadgeIcon />} label="주민등록번호" value={student.identNumber} />
               <InfoItem icon={<PhoneIphoneIcon />} label="연락처" value={student.tel} />
               <InfoItem icon={<WarningAmberIcon />} label="비상연락처" value={student.emergencyTel} />
               <InfoItem icon={<HomeIcon />} label="거주 주소" value={student.address} />
-              <InfoItem icon={<CakeIcon />} label="생년월일(성별)" value={`${student.birth || '-'} (${student.gender === 'M' ? '남' : '여'})`} />
+              <InfoItem icon={<CakeIcon />} label="생년월일" value={`${student.birth || '-'}`} />
               
               <Divider sx={{ my: 2.5, borderStyle: 'dashed' }} />
               
@@ -288,6 +309,14 @@ const StudentDetailPage = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* 정보 수정 모달 */}
+      <EditStudentModal 
+        open={editModalOpen} 
+        onClose={() => setEditModalOpen(false)} 
+        studentData={student}
+        onUpdate={refreshData} 
+      />
     </Box>
   );
 };
