@@ -30,6 +30,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
+import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom'; 
 
 import RandomSpinner from '../../../components/RandomSpinner';
 import AttendanceStatusView from './AttendanceStatusView';
@@ -123,7 +124,7 @@ const StudentDetailPage = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pb: 4, mt: 1 }}>
       
-      {/* 1. 상단 프로필 요약 (Header) - 아이디/이메일 제거 및 간소화 */}
+      {/* 1. 상단 프로필 요약 (Header) */}
       <Paper elevation={0} sx={{ p: 4, border: '1px solid #e2e8f0', borderRadius: 5, bgcolor: '#ffffff' }}>
         <Grid container spacing={4} alignItems="center">
           <Grid size={{ xs: 12, md: 4 }}>
@@ -157,7 +158,7 @@ const StudentDetailPage = () => {
                 <Typography sx={{ fontSize: '1.1rem', fontWeight: 800 }}>{student.startDate} ~ {student.endDate}</Typography>
               </Box>
               <Box>
-                <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 700 }}>담임교사</Typography>
+                <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 700 }}>담임교수</Typography>
                 <Typography sx={{ fontSize: '1.1rem', fontWeight: 800 }}>{student.teacherName || '미배정'}</Typography>
               </Box>
             </Stack>
@@ -167,13 +168,13 @@ const StudentDetailPage = () => {
             <Tooltip title={attUX.desc} arrow>
               <Paper elevation={0} sx={{ p: 3, bgcolor: attUX.bgColor, borderRadius: 5, border: '2px solid', borderColor: attUX.color + '33', textAlign: 'center' }}>
                 <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" sx={{ color: attUX.color, mb: 1 }}>
-                  {/* React.cloneElement를 사용할 때 속성 타입을 명시적으로 캐스팅 */}
-                  {React.cloneElement(attUX.icon as React.ReactElement<any>, { 
-                    sx: { fontSize: '1.6rem' } 
-                  })}
+                  {React.cloneElement(attUX.icon as React.ReactElement<any>, { sx: { fontSize: '1.6rem' } })}
                   <Typography sx={{ fontSize: '1.1rem', fontWeight: 900 }}>{attUX.label}</Typography>
                 </Stack>
                 <Typography sx={{ fontWeight: 950, color: attUX.color, fontSize: '2rem' }}>
+                  <Box component="span" sx={{ fontSize: '1.2rem', fontWeight: 800, mr: 1, opacity: 0.9, color: 'text.secondary' }}>
+                    출석률 :
+                  </Box>
                   {attendance ? `${attendance.attendanceRate.toFixed(1)}%` : '--%'}
                 </Typography>
                 <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', fontWeight: 700, mt: 1 }}>
@@ -189,7 +190,7 @@ const StudentDetailPage = () => {
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 4 }}>
           <Stack spacing={3}>
-            {/* 기본 정보 섹터 - 아이디, 이메일 추가됨 */}
+            {/* 기본 정보 섹터 - 아이디, 이메일, 혼인여부 포함 */}
             <Paper elevation={0} sx={{ p: 4, border: '1px solid #e2e8f0', borderRadius: 5 }}>
               <Typography sx={{ fontSize: '1.3rem', fontWeight: 900, mb: 3.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <PersonIcon sx={{ fontSize: '2rem' }} /> 기본 정보
@@ -197,6 +198,7 @@ const StudentDetailPage = () => {
               
               <InfoItem icon={<ContactPageIcon />} label="계정 아이디" value={student.accountId} color="primary.main" />
               <InfoItem icon={<AlternateEmailIcon />} label="이메일 주소" value={student.accountEmail} />
+              
               <Divider sx={{ my: 2.5, borderStyle: 'dashed' }} />
               
               <InfoItem icon={<BadgeIcon />} label="주민등록번호" value={student.identNumber} />
@@ -204,7 +206,12 @@ const StudentDetailPage = () => {
               <InfoItem icon={<WarningAmberIcon />} label="비상연락처" value={student.emergencyTel} />
               <InfoItem icon={<HomeIcon />} label="거주 주소" value={student.address} />
               <InfoItem icon={<CakeIcon />} label="생년월일(성별)" value={`${student.birth || '-'} (${student.gender === 'M' ? '남' : '여'})`} />
+              
+              <Divider sx={{ my: 2.5, borderStyle: 'dashed' }} />
+              
               <InfoItem icon={<MilitaryTechIcon />} label="병역 여부" value={student.militaryStatus || '해당없음'} />
+              {/* 혼인여부 이동 배치 */}
+              <InfoItem icon={<FamilyRestroomIcon />} label="혼인 여부" value={student.maritalStatus === 'Y' ? '기혼' : '미혼'} />
             </Paper>
 
             <Paper elevation={0} sx={{ p: 4, border: '1px solid #e2e8f0', borderRadius: 5 }}>
@@ -229,7 +236,6 @@ const StudentDetailPage = () => {
               <Divider sx={{ my: 3 }} />
               <InfoItem label="이전 직장" value={student.prevCompany} />
               <InfoItem label="퇴사 일자" value={student.quitDate} />
-              <InfoItem label="혼인 여부" value={student.maritalStatus === 'Y' ? '기혼' : '미혼'} />
             </Paper>
           </Stack>
         </Grid>
