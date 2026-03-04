@@ -145,19 +145,35 @@
         WHERE account_seq = #{accountSeq}
     </update>
 
-    <insert id="insertAccount" parameterType="AccountVO">
+    <insert id="insertAccount" parameterType="kr.or.ddit.vo.AccountVO">
         INSERT INTO lms.tb_account (
-            account_id, account_passwd,
-            account_name, gender, birth, ident_number, tel, 
-            emergency_tel, account_email, address, edu, major, 
-            grad_type, military_status, marital_status, prev_company, 
-            quit_date, licenses, career, main_image_path, status, cur_seq
+            account_id, account_passwd, account_name, gender, birth, 
+            ident_number, tel, emergency_tel, account_email, address, 
+            edu, major, grad_type, military_status, marital_status, 
+            prev_company, quit_date, licenses, career, 
+            main_image_path, status, cur_seq
         ) VALUES (
-            #{accountId}, #{accountPasswd},
-            #{accountName}, #{gender}, #{birth}, #{identNumber}, #{tel},
-            #{emergencyTel}, #{accountEmail}, #{address}, #{edu}, #{major},
-            #{gradType}, #{militaryStatus}, #{maritalStatus}, #{prevCompany},
-            #{quitDate}, #{licenses}, #{career}, #{mainImagePath}, #{status}, #{curSeq}
+            #{accountId, jdbcType=VARCHAR}, 
+            #{accountPasswd, jdbcType=VARCHAR},
+            #{accountName, jdbcType=VARCHAR}, 
+            #{gender, jdbcType=VARCHAR}, 
+            #{birth, jdbcType=DATE}, 
+            #{identNumber, jdbcType=VARCHAR}, 
+            #{tel, jdbcType=VARCHAR},
+            #{emergencyTel, jdbcType=VARCHAR}, 
+            #{accountEmail, jdbcType=VARCHAR}, 
+            #{address, jdbcType=VARCHAR}, 
+            #{edu, jdbcType=VARCHAR}, 
+            #{major, jdbcType=VARCHAR},
+            #{gradType, jdbcType=VARCHAR}, #{militaryStatus, jdbcType=VARCHAR}, 
+            #{maritalStatus, jdbcType=VARCHAR}, 
+            #{prevCompany, jdbcType=VARCHAR},
+            #{quitDate, jdbcType=DATE}, 
+            #{licenses, jdbcType=VARCHAR}, 
+            #{career, jdbcType=VARCHAR}, 
+            #{mainImagePath, jdbcType=VARCHAR}, 
+            #{status, jdbcType=VARCHAR}, 
+            #{curSeq, jdbcType=INTEGER}
         )
     </insert>
 </mapper>
