@@ -26,12 +26,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        // 인증이 필요 없는 경로는 토큰 검사 없이 바로 통과 (SecurityConfig 설정과 맞춤) -- 나중에 인증, 인가를 위해서 주석을 해야될 수도 있음
+        if (path.startsWith("/api/account/") || path.startsWith("/api/auth/") || path.startsWith("/upload/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 1. 요청 헤더에서 JWT 토큰 추출
         String token = resolveToken(request);
 
         // 2. 토큰이 있고 유효하다면
         if (token != null && jwtProvider.validateToken(token)) {
-            
+
             // [중복 로그인 체크 로직 추가 시작]
             String accountId = jwtProvider.getAccountId(token); // 토큰에서 ID 추출
             String savedToken = accountMapper.getCurrentToken(accountId); // DB 최신 토큰 조회
@@ -41,13 +49,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // DB에 저장된 토큰이 없거나, 현재 토큰과 다르다면 (다른 곳에서 로그인함)
             if (savedToken == null || !savedToken.equals(token)) {
                 sendErrorResponse(response, "DUPLICATE_LOGIN", "다른 기기에서 로그인하여 접속이 종료되었습니다.");
-                return; //  더 이상 진행하지 않고 여기서 응답 종료
+                return; // 더 이상 진행하지 않고 여기서 응답 종료
             }
             // [중복 로그인 체크 로직 추가 끝]
 
             Authentication auth = jwtProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
-            
+
         } else if (token != null) {
             logger.info("유효하지 않은 토큰 요청: " + request.getRequestURI());
         }
@@ -59,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void sendErrorResponse(HttpServletResponse response, String code, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 에러
         response.setContentType("application/json;charset=UTF-8");
-        
+
         // React에서 파싱하기 쉽게 JSON 구조로 작성
         String json = String.format("{\"code\":\"%s\", \"message\":\"%s\"}", code, message);
         response.getWriter().write(json);

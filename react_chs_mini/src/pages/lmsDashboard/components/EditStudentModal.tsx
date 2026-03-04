@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'; // 아이콘 추가
+import SaveIcon from '@mui/icons-material/Save';
 import {
-  Avatar,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  MenuItem,
-  TextField,
-  Typography
+    Avatar,
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    IconButton,
+    MenuItem,
+    TextField,
+    Typography
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import api from '../../../api/axiosInstance';
 
 interface EditProps {
   open: boolean;
@@ -77,7 +77,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       // 또는 서버가 개별 필드를 원할 경우:
       // data.append('accountName', formData.accountName); ...
 
-      await axios.put(`/api/account/${formData.accountSeq}`, data, {
+      await api.put(`/api/account/${formData.accountSeq}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 

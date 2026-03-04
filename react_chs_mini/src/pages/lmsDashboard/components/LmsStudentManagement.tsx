@@ -3,9 +3,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import SchoolIcon from '@mui/icons-material/School';
 import { Avatar, Box, Button, Chip, Divider, List, ListItemButton, Paper, Stack, Typography } from "@mui/material";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import api from '../../../api/axiosInstance';
 import StudentDetailPage from "./StudentDetailPage";
 
 const LmsStudentManagement = () => {
@@ -27,7 +27,7 @@ const LmsStudentManagement = () => {
 
   useEffect(() => {
     if (curSeq) {
-      axios.get(`/api/account/${curSeq}/students`)
+      api.get(`/api/account/${curSeq}/students`)
         .then(res => {
           setStudents(res.data);
           if (res.data.length > 0) {

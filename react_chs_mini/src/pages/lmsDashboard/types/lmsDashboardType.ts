@@ -14,5 +14,7 @@ export interface LmsDashboardData {
   activeAccounts: number;
   dropoutCount: number;
   totalAvgRatio: number;
+  earlyoutCount: number;
+  graduatedCount: number;
   subjects: SubjectStat[];
 }
