@@ -25,7 +25,7 @@ const LmsStudentManagement = () => {
     }
   };
 
-  useEffect(() => {
+  const fetchStudents = () => {
     if (curSeq) {
       api.get(`/api/account/${curSeq}/students`)
         .then(res => {
@@ -42,7 +42,30 @@ const LmsStudentManagement = () => {
         })
         .catch(err => console.error("데이터 로딩 실패:", err));
     }
+  };
+
+  useEffect(() => {
+    fetchStudents(); // 최초 로드 시 실행
   }, [curSeq]);
+
+  // useEffect(() => {
+  //   if (curSeq) {
+  //     api.get(`/api/account/${curSeq}/students`)
+  //       .then(res => {
+  //         setStudents(res.data);
+  //         if (res.data.length > 0) {
+  //           const classData = res.data[0];
+  //           setCourseInfo({
+  //             curName: classData.curName,
+  //             className: classData.className || '1',
+  //             term: classData.term || '1',
+  //             room: classData.room || '미정',
+  //           });
+  //         }
+  //       })
+  //       .catch(err => console.error("데이터 로딩 실패:", err));
+  //   }
+  // }, [curSeq]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: 'calc(100vh - 120px)' }}>
@@ -153,7 +176,7 @@ const LmsStudentManagement = () => {
 
         {/* 오른쪽: 상세 정보 (생략 - 기존 유지) */}
         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-          {accountSeq ? <StudentDetailPage /> : (
+          {accountSeq ? <StudentDetailPage onUpdateSuccess={fetchStudents}/> : (
              <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 3, border: '1px dashed #cbd5e1', bgcolor: '#fbfcfd' }} elevation={0}>
                <SchoolIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
                <Typography color="text.secondary" fontWeight={500}>학생을 선택하면 상세 관리 화면이 나타납니다.</Typography>

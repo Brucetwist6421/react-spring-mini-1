@@ -38,7 +38,7 @@ import AttendanceStatusView from './AttendanceStatusView';
 import React from 'react';
 import EditStudentModal from './EditStudentModal';
 
-const StudentDetailPage = () => {
+const StudentDetailPage = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
   const [student, setStudent] = useState<any>(null);
   const [attendance, setAttendance] = useState<any>(null);
@@ -66,12 +66,41 @@ const StudentDetailPage = () => {
     }
   };
 
-  // 데이터 새로고침 함수
-  const refreshData = () => {
+  // 1. 상세 데이터를 불러오는 독립적인 함수 생성
+  const fetchDetail = React.useCallback(() => {
     if (accountSeq) {
-      axios.get(`/api/account/${accountSeq}`).then(res => setStudent(res.data));
+      setLoading(true);
+      Promise.all([
+        axios.get(`/api/account/${accountSeq}`),
+        axios.get(`/api/attendance/status/${accountSeq}`)
+      ]).then(([accRes, attRes]) => {
+        setStudent(accRes.data);
+        setAttendance(attRes.data);
+        setLoading(false);
+      }).catch(err => {
+        console.error("로딩 실패:", err);
+        setLoading(false);
+      });
     }
+  }, [accountSeq]);
+
+  // 2. 페이지 진입 시 데이터 로드
+  useEffect(() => {
+    fetchDetail();
+  }, [fetchDetail]);
+
+  // 3. 모달에서 수정 성공 시 호출할 핸들러
+  const handleUpdate = () => {
+    fetchDetail();       // 내 화면(상세) 갱신
+    onUpdateSuccess();   // 부모 화면(리스트) 갱신
   };
+
+  // 데이터 새로고침 함수
+  // const refreshData = () => {
+  //   if (accountSeq) {
+  //     axios.get(`/api/account/${accountSeq}`).then(res => setStudent(res.data));
+  //   }
+  // };
 
   useEffect(() => {
     if (accountSeq) {
@@ -315,7 +344,7 @@ const StudentDetailPage = () => {
         open={editModalOpen} 
         onClose={() => setEditModalOpen(false)} 
         studentData={student}
-        onUpdate={refreshData} 
+        onUpdate={handleUpdate}
       />
     </Box>
   );

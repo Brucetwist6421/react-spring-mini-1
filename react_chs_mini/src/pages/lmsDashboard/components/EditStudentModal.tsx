@@ -68,7 +68,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
         
         // 1. 이미지 파일 (키 이름을 백엔드의 mainImage와 맞춤)
         if (imageFile) {
-        data.append('mainImage', imageFile); 
+         data.append('mainImage', imageFile); 
         }
 
         // 2. VO 데이터 (Blob으로 만들어 'accountData'라는 키로 전송)
@@ -76,7 +76,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
 
         // 3. PUT 메서드 사용, URL은 /api/account/update/145 형태
         await api.put(`/api/account/update/${formData.accountSeq}`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { 'Content-Type': 'multipart/form-data' }
         });
 
         alert('정보가 성공적으로 수정되었습니다.');
