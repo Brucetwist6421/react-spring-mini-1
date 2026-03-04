@@ -146,7 +146,7 @@
     </update>
 
     <insert id="insertAccount" parameterType="AccountVO">
-        INSERT INTO account (
+        INSERT INTO lms.tb_account (
             account_id, account_passwd,
             account_name, gender, birth, ident_number, tel, 
             emergency_tel, account_email, address, edu, major, 
