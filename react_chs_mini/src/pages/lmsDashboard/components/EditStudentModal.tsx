@@ -64,31 +64,34 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
 
   const handleSave = async () => {
     try {
-      // 이미지 포함 전송을 위한 FormData 생성
-      const data = new FormData();
-      
-      if (imageFile) {
-        data.append('file', imageFile); // 'file'은 서버에서 받는 파라미터명과 일치해야 함
-      }
+        const data = new FormData();
+        
+        // 1. 파일 키 이름을 백엔드의 @RequestParam과 맞춤 ('mainImage')
+        if (imageFile) {
+        data.append('mainImage', imageFile); 
+        }
 
-      // JSON 데이터를 Blob으로 추가 (서버 설정에 따라 다를 수 있음)
-      data.append('accountData', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
+        // 2. Blob 대신 개별 필드를 append 하거나, 백엔드가 인식할 수 있는 폼 데이터 형태로 변환
+        // @ModelAttribute는 평면적인 폼 데이터를 객체로 매핑해줍니다.
+        Object.keys(formData).forEach(key => {
+        if (formData[key] !== null && formData[key] !== undefined) {
+            data.append(key, formData[key]);
+        }
+        });
 
-      // 또는 서버가 개별 필드를 원할 경우:
-      // data.append('accountName', formData.accountName); ...
-
-      await api.put(`/api/account/${formData.accountSeq}`, data, {
+        // 3. 메서드를 POST로 변경하고 URL을 /api/account/update (또는 실제 설정한 경로)로 변경
+        await api.post(`/api/account/update`, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
-      });
+        });
 
-      alert('정보가 성공적으로 수정되었습니다.');
-      onUpdate();
-      onClose();
+        alert('정보가 성공적으로 수정되었습니다.');
+        onUpdate();
+        onClose();
     } catch (err) {
-      console.error('수정 실패:', err);
-      alert('정보 수정 중 오류가 발생했습니다.');
+        console.error('수정 실패:', err);
+        alert('정보 수정 중 오류가 발생했습니다.');
     }
-  };
+    };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
