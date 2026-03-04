@@ -1,6 +1,17 @@
 package kr.or.ddit.service.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import kr.or.ddit.mapper.PokemonMapper;
+import kr.or.ddit.service.FileService;
 import kr.or.ddit.service.PokemonService;
 import kr.or.ddit.vo.FavoriteVO;
 import kr.or.ddit.vo.PokemonAttachmentVO;
@@ -8,31 +19,21 @@ import kr.or.ddit.vo.PokemonVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PokemonServiceImpl implements PokemonService {
 
 	// 실습 1 시작
-	@Autowired
 	private final PokemonMapper pokemonMapper;
+	private final FileService fileService; // 공통 파일 업로드 서비스 의존성 주입
 	
 
 	@Override
 	public void createPokemon(PokemonVO vo, MultipartFile mainImage) {
 		try {
 			// 1. 메인 이미지 저장 후 VO에 세팅
-			String mainImagePath = saveMainImage(mainImage);
+			String mainImagePath = fileService.saveMainImage(mainImage);
 			vo.setMainImagePath(mainImagePath);
 
 			// 2. Pokemon insert
@@ -96,27 +97,27 @@ public class PokemonServiceImpl implements PokemonService {
 	}
 
 	// 메인 이미지 저장
-	private String saveMainImage(MultipartFile mainImage) throws IOException {
-		if (mainImage == null || mainImage.isEmpty())
-			return null;
+	// private String saveMainImage(MultipartFile mainImage) throws IOException {
+	// 	if (mainImage == null || mainImage.isEmpty())
+	// 		return null;
 
-		// 1. 경로 통일 (첨부파일과 동일하게!)
-		String uploadPath = "/home/ubuntu/upload/";
+	// 	// 1. 경로 통일 (첨부파일과 동일하게!)
+	// 	String uploadPath = "/home/ubuntu/upload/";
 		
-		// 2. 방어 코드 추가 (폴더 없으면 생성)
-		File uploadDir = new File(uploadPath);
-		if (!uploadDir.exists()) {
-			uploadDir.mkdirs();
-		}
+	// 	// 2. 방어 코드 추가 (폴더 없으면 생성)
+	// 	File uploadDir = new File(uploadPath);
+	// 	if (!uploadDir.exists()) {
+	// 		uploadDir.mkdirs();
+	// 	}
 
-		String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
+	// 	String mainName = UUID.randomUUID() + "_" + mainImage.getOriginalFilename();
 
-		// 3. 전체 경로로 파일 생성
-		File mainFile = new File(uploadPath + mainName);
-		mainImage.transferTo(mainFile);
+	// 	// 3. 전체 경로로 파일 생성
+	// 	File mainFile = new File(uploadPath + mainName);
+	// 	mainImage.transferTo(mainFile);
 
-		return mainName;
-	}
+	// 	return mainName;
+	// }
 	// 실습 1 끝
 
 	@Override
@@ -154,7 +155,7 @@ public class PokemonServiceImpl implements PokemonService {
 		try {
 			// 1. 메인 이미지가 변경 된 경우에만 실행
 			if (mainImage != null && !mainImage.isEmpty()) {
-				String mainImagePath = saveMainImage(mainImage);
+				String mainImagePath = fileService.saveMainImage(mainImage);
 				pokemonVO.setMainImagePath(mainImagePath);
 			}
 
