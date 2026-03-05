@@ -64,7 +64,7 @@ const [loading, setLoading] = useState(false);
   const handleSubmit = async () => {
     if (!validate()) return;
 
-    // 🚩 1. localStorage에서 userInfo 가져오기
+    // 1. localStorage에서 userInfo 가져오기
     const userInfoString = localStorage.getItem('userInfo');
     let regId = '';
     
@@ -85,6 +85,7 @@ const [loading, setLoading] = useState(false);
       regId: regId // DB의 reg_id 컬럼과 매핑될 필드
     };
 
+    console.log("등록자 ID (regId):", regId);
     setLoading(true);
     try {
       await api.post('/api/curriculum/register', submitData);
