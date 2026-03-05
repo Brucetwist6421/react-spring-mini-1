@@ -8,4 +8,6 @@ public interface CurriculumService {
     int updateCurriculum(CurriculumVO curriculumVO);
 
     CurriculumVO getCurriculumDetail(Integer curSeq);
+
+    int deleteCurriculum(Integer curSeq);
 }

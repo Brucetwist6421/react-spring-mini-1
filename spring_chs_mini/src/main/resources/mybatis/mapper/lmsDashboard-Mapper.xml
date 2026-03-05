@@ -77,6 +77,8 @@
         LEFT JOIN lms.TB_SUBJECT s ON c.CUR_SEQ = s.CUR_SEQ
         LEFT JOIN TestStats tst ON s.SUB_SEQ = tst.SUB_SEQ
         <where>
+            AND c.STATUS = 'A'
+            
             <if test="year != null and year != ''">
                 AND TO_CHAR(c.START_DATE, 'YYYY') = #{year}
             </if>

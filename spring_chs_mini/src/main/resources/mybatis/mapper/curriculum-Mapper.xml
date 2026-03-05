@@ -54,4 +54,12 @@
         WHERE cur_seq = #{curSeq}
     </select>
 
+    <update id="deleteCurriculum" parameterType="int">
+        UPDATE lms.tb_curriculum
+        SET 
+            status = 'D',
+            update_date = NOW()
+        WHERE cur_seq = #{curSeq}
+    </update>
+
 </mapper>

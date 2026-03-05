@@ -3,6 +3,7 @@ package kr.or.ddit.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -63,5 +64,19 @@ public class CurriculumController {
             return ResponseEntity.ok("수정 성공");
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패");
+    }
+
+    @Operation(summary = "교육과정 삭제 (상태 변경)", description = "교육과정의 상태를 'D'로 변경하여 삭제 처리합니다.")
+    @PatchMapping("/delete/{curSeq}")
+    public ResponseEntity<?> deleteCurriculum(
+            @Parameter(description = "삭제할 과정 시퀀스") @PathVariable Integer curSeq) {
+        
+        // 수정자 정보를 위해 세션이나 토큰에서 가져온 ID를 넘겨줄 수도 있습니다.
+        int result = curriculumService.deleteCurriculum(curSeq);
+        
+        if (result > 0) {
+            return ResponseEntity.ok("삭제 성공");
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 실패");
     }
 }

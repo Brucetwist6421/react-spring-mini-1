@@ -30,4 +30,11 @@ public class CurriculumServiceImpl implements CurriculumService {
     public CurriculumVO getCurriculumDetail(Integer curSeq) {
         return curriculumMapper.selectCurriculumDetail(curSeq);
     }
+
+    @Override
+    @Transactional
+    public int deleteCurriculum(Integer curSeq) {
+        // 필요 시 여기서 추가적인 비즈니스 로직(하위 데이터 체크 등)을 수행할 수 있습니다.
+        return curriculumMapper.deleteCurriculum(curSeq);
+    }
 }

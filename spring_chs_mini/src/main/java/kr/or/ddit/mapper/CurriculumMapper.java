@@ -10,4 +10,6 @@ public interface CurriculumMapper {
     int updateCurriculum(CurriculumVO curriculumVO);
 
     CurriculumVO selectCurriculumDetail(Integer curSeq);
+
+    int deleteCurriculum(Integer curSeq);
 }
