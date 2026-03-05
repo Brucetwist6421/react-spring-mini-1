@@ -118,10 +118,11 @@
 	</select>
 
     <update id="updateAccount" parameterType="kr.or.ddit.vo.AccountVO">
-        UPDATE lms.tb_account
-        SET 
+    UPDATE lms.tb_account
+        <set>
             account_name = #{accountName},
-            birth = #{birth, jdbcType=DATE},        gender = #{gender},
+            birth = #{birth, jdbcType=DATE},
+            gender = #{gender},
             tel = #{tel},
             edu = #{edu},
             major = #{major},
@@ -132,17 +133,22 @@
             emergency_tel = #{emergencyTel},
             address = #{address},
             marital_status = #{maritalStatus},
-            status = #{status},                    licenses = #{licenses},
+            status = #{status},
+            licenses = #{licenses},
             military_status = #{militaryStatus},
             prev_company = #{prevCompany},
-            quit_date = #{quitDate, jdbcType=DATE}, update_id = #{updateId},
+            quit_date = #{quitDate, jdbcType=DATE},
+            update_id = #{updateId},
             update_date = CURRENT_TIMESTAMP,
+            
             <if test="mainImagePath != null and mainImagePath != ''">
                 main_image_path = #{mainImagePath},
             </if>
+            
             <if test="accountPasswd != null and accountPasswd != ''">
                 account_passwd = #{accountPasswd}
             </if>
+        </set>
         WHERE account_seq = #{accountSeq}
     </update>
 
