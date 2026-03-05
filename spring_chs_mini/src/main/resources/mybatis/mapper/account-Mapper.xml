@@ -10,6 +10,7 @@
             a.account_passwd,
             a.account_name,
             a.account_email,
+            a.main_image_path,
             a.status,
             a.account_type,
             c.cur_name AS curriculum_name, -- 교육과정 테이블과 조인

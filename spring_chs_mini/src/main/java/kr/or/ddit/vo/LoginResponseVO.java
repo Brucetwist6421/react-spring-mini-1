@@ -13,4 +13,5 @@ public class LoginResponseVO {
     String accEmail;
     String accName;
     String accType;
+    String mainImagePath;
 }

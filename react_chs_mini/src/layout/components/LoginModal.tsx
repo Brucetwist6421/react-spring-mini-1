@@ -50,12 +50,12 @@ export default function LoginModal({ open, onClose }: LoginProps) {
     setLoading(true);
     try {
       const response = await api.post("/api/auth/login", formData);
-      const { accessToken, accId, accName, accType } = response.data; // 응답 데이터 구조에 맞게 구조분해할당
+      const { accessToken, accId, accName, accType, mainImagePath } = response.data; // 응답 데이터 구조에 맞게 구조분해할당
 
       if (accessToken) {
           localStorage.setItem("accessToken", accessToken);
           // 사용자 정보를 JSON 문자열로 변환하여 저장
-          localStorage.setItem("userInfo", JSON.stringify({ accId, accName, accType }));
+          localStorage.setItem("userInfo", JSON.stringify({ accId, accName, accType, mainImagePath }));
           
           alert(`${accName}님, 환영합니다!`);
           onClose();
