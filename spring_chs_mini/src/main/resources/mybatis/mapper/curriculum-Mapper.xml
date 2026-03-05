@@ -4,7 +4,7 @@
 <mapper namespace="kr.or.ddit.mapper.CurriculumMapper">
 
     <insert id="insertCurriculum" parameterType="kr.or.ddit.vo.CurriculumVO" 
-            useGeneratedKeys="true" keyProperty="curSeq" keyColumn="cur_seq">
+        useGeneratedKeys="true" keyProperty="curSeq" keyColumn="cur_seq">
         INSERT INTO lms.tb_curriculum (
             room,
             term,
@@ -16,12 +16,12 @@
             business_name
         ) VALUES (
             #{room},
-            #{term},
-            #{manCount},
+            #{term, jdbcType=INTEGER},      
+            #{manCount, jdbcType=INTEGER},  
             #{startDate},
             #{endDate},
             #{curName},
-            #{accountSeq},
+            #{accountSeq, jdbcType=INTEGER}, 
             #{businessName}
         )
     </insert>

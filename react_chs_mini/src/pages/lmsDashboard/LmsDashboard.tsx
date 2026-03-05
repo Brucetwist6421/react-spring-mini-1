@@ -3,8 +3,9 @@ import PeopleIcon from "@mui/icons-material/People";
 import PersonAddIcon from "@mui/icons-material/PersonAdd"; // 재학 중용
 import PersonOffIcon from "@mui/icons-material/PersonOff"; // 중도 탈락용
 import SchoolIcon from "@mui/icons-material/School";
+import AddIcon from "@mui/icons-material/Add";
 import {
-  Box, CircularProgress,
+  Box, Button, CircularProgress,
   FormControl,
   Grid,
   InputLabel,
@@ -20,11 +21,13 @@ import api from "../../api/axiosInstance";
 import LmsDashboardRow from "./components/LmsDashboardRow";
 import LmsStatCard from "./components/LmsStatCard";
 import type { LmsDashboardData } from "./types/lmsDashboardType";
+import CurriculumAddModal from "./components/CurriculumAddModal";
 
 const LmsDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<LmsDashboardData[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [modalOpen, setModalOpen] = useState(false);
 
   // 1. API 호출 함수 (year 파라미터 전달)
   const fetchData = async (year: string) => {
@@ -83,21 +86,44 @@ const LmsDashboard: React.FC = () => {
           LMS 교육과정 모니터링
         </Typography>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel id="year-select-label">연도 선택</InputLabel>
-          <Select
-            labelId="year-select-label"
-            value={selectedYear}
-            label="연도 선택"
-            onChange={(e) => setSelectedYear(e.target.value)}
-            sx={{ borderRadius: 2, bgcolor: 'white' }}
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel id="year-select-label">연도 선택</InputLabel>
+            <Select
+              labelId="year-select-label"
+              value={selectedYear}
+              label="연도 선택"
+              onChange={(e) => setSelectedYear(e.target.value)}
+              sx={{ borderRadius: 2, bgcolor: 'white' }}
+            >
+              <MenuItem value="all">전체보기</MenuItem>
+              {availableYears.map(year => (
+                <MenuItem key={year} value={year}>{year}년</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* 과정 추가 버튼 추가 영역*/}
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setModalOpen(true)}
+            sx={{
+              bgcolor: "#1e293b",
+              color: "white",
+              px: 2,
+              borderRadius: 2,
+              fontWeight: 600,
+              boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+              "&:hover": {
+                bgcolor: "#334155",
+                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)",
+              }
+            }}
           >
-            <MenuItem value="all">전체보기</MenuItem>
-            {availableYears.map(year => (
-              <MenuItem key={year} value={year}>{year}년</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            과정 추가
+          </Button>
+        </Box>
       </Box>
 
       {/* 요약 통계 카드 섹션 */}
@@ -200,6 +226,13 @@ const LmsDashboard: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* 과정 추가 모달 영역 */}
+      <CurriculumAddModal 
+        open={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        onSuccess={() => fetchData(selectedYear)} // 성공 시 목록 새로고침
+      />
     </Box>
   );
 };
