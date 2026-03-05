@@ -6,7 +6,6 @@ import LoginModal from "./components/LoginModal";
 import MenuProfile from "../pages/MenuProfile";
 import { LoggedInMenu, LoggedOutMenu } from "./components/HeaderComponents";
 
-// 1. 이미지 임포트 (경로는 실제 파일 위치에 맞게 수정하세요)
 import dditLogo from "../api/datas/dditLogo.png"; 
 
 interface HeaderProps {
@@ -17,35 +16,28 @@ interface HeaderProps {
 export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderProps) {
   const [loginOpen, setLoginOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // 프로필 메뉴를 위한 상태
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isProfileOpen = Boolean(anchorEl);
 
-  // 사용자 정보 interface 정의 
   interface UserInfo {
     accId: string; 
     accName: string; 
     accType: string; 
     accEmail: string;
-    mainImagePath?: string; // 프로필 이미지 경로
+    mainImagePath?: string; 
   }
   
-  // 사용자 정보 state
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-  // 초기 로드 시 로그인 상태 체크
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     const savedInfo = localStorage.getItem("userInfo");
-    console.log("저장된 사용자 정보:", savedInfo);
     if (savedInfo) {
       setUserInfo(JSON.parse(savedInfo));
     }
     setIsLoggedIn(!!token);
   }, []);
 
-  // 이미지 경로 생성 함수
   const getProfileImageUrl = (path?: string) => {
     if (!path) return "";
     return `http://168.107.51.143:8080/upload/${encodeURIComponent(path)}`;
@@ -59,7 +51,6 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
     setAnchorEl(null);
   };
 
-  // 로그아웃 로직
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
@@ -88,35 +79,23 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
           <MenuIcon />
         </IconButton>
 
-        {/* 2. 로고 텍스트 및 이미지 영역 수정 */}
         <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
-          {/* 로그인 시에만 로고 이미지 표시 */}
           {isLoggedIn && (
             <Box
               component="img"
               src={dditLogo}
               alt="DDIT Logo"
-              sx={{
-                width: 32,
-                height: 32,
-                objectFit: "contain",
-                borderRadius: "4px" // 필요 시 조절
-              }}
+              sx={{ width: 32, height: 32, objectFit: "contain", borderRadius: "4px" }}
             />
           )}
           <Typography 
             variant="h6" 
             component="div" 
-            sx={{ 
-              fontWeight: 700, 
-              fontSize: "1.1rem",
-              color: "#f8fafc" 
-            }}
+            sx={{ fontWeight: 700, fontSize: "1.1rem", color: "#f8fafc" }}
           >
-            {/* 로그인 여부에 따라 타이틀 변경 */}
             {isLoggedIn && userInfo 
-              ? `대덕인재개발원 (${userInfo.accName}) ` 
-            : title}
+              ? `대덕인재개발원 (${userInfo.accName})` 
+              : title}
           </Typography>
         </Box>
 
@@ -126,28 +105,45 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
           ) : (
             <LoggedOutMenu onLoginClick={() => setLoginOpen(true)} />
           )}
-          {isLoggedIn && (
-            <IconButton 
-              color="inherit" 
-              onClick={handleProfileClick} 
-              sx={{ p: 0.5 }}
-            >
-              {/* 프로필 이미지 구현부 */}
-              <Avatar 
-                src={getProfileImageUrl(userInfo?.mainImagePath)} 
+          
+          {/* 로그인 시 환영 문구 및 프로필 영역 */}
+          {isLoggedIn && userInfo && (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {/* ⭐ 환영 문구 추가 (모바일에서는 숨김 처리) */}
+              <Typography 
+                variant="body2" 
                 sx={{ 
-                  width: 35, 
-                  height: 35, 
-                  border: '2px solid #38bdf8', // 테두리 추가로 포인트
-                  bgcolor: '#334155', // 이미지 로딩 전 배경색
-                  fontSize: '1rem',
-                  fontWeight: 'bold'
+                  display: { xs: "none", md: "block" }, 
+                  mr: 1, 
+                  color: "#cbd5e1" 
                 }}
               >
-                {/* 이미지가 없을 때: 이름 첫 글자 혹은 기본 아이콘 */}
-                {userInfo?.accName ? userInfo.accName[0] : <AccountCircle />}
-              </Avatar>
-            </IconButton>
+                <Box component="span" sx={{ color: "#38bdf8", fontWeight: 700 }}>
+                  {userInfo.accName}
+                </Box>
+                님 환영합니다!
+              </Typography>
+
+              <IconButton 
+                color="inherit" 
+                onClick={handleProfileClick} 
+                sx={{ p: 0.5 }}
+              >
+                <Avatar 
+                  src={getProfileImageUrl(userInfo?.mainImagePath)} 
+                  sx={{ 
+                    width: 35, 
+                    height: 35, 
+                    border: '2px solid #38bdf8',
+                    bgcolor: '#334155',
+                    fontSize: '1rem',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {userInfo?.accName ? userInfo.accName[0] : <AccountCircle />}
+                </Avatar>
+              </IconButton>
+            </Box>
           )}
         </Box>
       </Toolbar>

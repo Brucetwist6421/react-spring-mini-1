@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Logout from "@mui/icons-material/Logout";
+import AccountCircle from "@mui/icons-material/AccountCircle"; // 기본 아이콘 추가
 import { Avatar, Box, Divider, ListItemIcon, Menu, MenuItem, Typography } from "@mui/material";
 
 interface ProfileMenuProps {
@@ -6,13 +8,16 @@ interface ProfileMenuProps {
   open: boolean;
   onClose: () => void;
   onLogout: () => void;
-  // 유저 정보 전달을 위한 프롭 추가
-  userInfo: { accId: string; accName: string; accType: string } | null;
+  // userInfo 인터페이스에 mainImagePath 추가
+  userInfo: { accId: string; accName: string; accType: string; mainImagePath?: string } | null;
 }
 
 export default function MenuProfile({ anchorEl, open, onClose, onLogout, userInfo }: ProfileMenuProps) {
-  // 이름의 첫 글자를 아바타에 표시 (정보가 없으면 'A')
-  const initial = userInfo?.accName ? userInfo.accName.charAt(0) : 'A';
+  // 이미지 경로 생성 함수 (Header와 동일)
+  const getProfileImageUrl = (path?: string) => {
+    if (!path) return "";
+    return `http://168.107.51.143:8080/upload/${encodeURIComponent(path)}`;
+  };
 
   return (
     <Menu
@@ -47,9 +52,22 @@ export default function MenuProfile({ anchorEl, open, onClose, onLogout, userInf
       }}
     >
       <Box sx={{ px: 2, py: 1.5, textAlign: 'center' }}>
-        {/* 아바타에 이름 첫 글자 표시 */}
-        <Avatar sx={{ mx: 'auto', mb: 1, bgcolor: '#38bdf8', fontWeight: 'bold' }}>
-          {initial}
+        
+        {/* 아바타에 이미지 소스 적용 */}
+        <Avatar 
+          src={getProfileImageUrl(userInfo?.mainImagePath)} // 경로 적용
+          sx={{ 
+            mx: 'auto', 
+            mb: 1, 
+            width: 60, // 메뉴 내부는 조금 더 크게
+            height: 60,
+            bgcolor: '#38bdf8', // 이미지 없을 때 배경색
+            fontWeight: 'bold',
+            fontSize: '1.5rem' // 폴백 이니셜 크기
+          }}
+        >
+          {/* 이미지가 없을 때: 이름 첫 글자 혹은 기본 아이콘 */}
+          {userInfo?.accName ? userInfo.accName[0] : <AccountCircle />}
         </Avatar>
         
         {/* 실제 로그인 정보로 세팅 */}
