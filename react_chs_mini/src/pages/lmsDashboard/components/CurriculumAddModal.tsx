@@ -202,7 +202,7 @@ const CurriculumAddModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
             <TextField 
               name="manCount" label="인원 수" fullWidth 
               value={formData.manCount} onChange={handleChange}
-              placeholder="최대 수용 인원 입력"
+              placeholder="인원 수 입력"
               slotProps={{
                 input: {
                   startAdornment: <InputAdornment position="start"><GroupsIcon fontSize="small" /></InputAdornment>,

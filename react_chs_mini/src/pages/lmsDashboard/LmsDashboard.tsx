@@ -102,27 +102,6 @@ const LmsDashboard: React.FC = () => {
               ))}
             </Select>
           </FormControl>
-
-          {/* 과정 추가 버튼 추가 영역*/}
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setModalOpen(true)}
-            sx={{
-              bgcolor: "#1e293b",
-              color: "white",
-              px: 2,
-              borderRadius: 2,
-              fontWeight: 600,
-              boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
-              "&:hover": {
-                bgcolor: "#334155",
-                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)",
-              }
-            }}
-          >
-            과정 추가
-          </Button>
         </Box>
       </Box>
 
@@ -191,6 +170,33 @@ const LmsDashboard: React.FC = () => {
             선택된 연도 전체 학생 LMS 시험 이행률 평균: <span style={{ color: '#f59e0b', fontSize: '1.2rem' }}>{avgRatio}%</span>
          </Typography>
       </Paper>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 1.5, px: 0.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: '#334155' }}>
+          교육과정 목록
+        </Typography>
+        
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setModalOpen(true)}
+          sx={{
+            bgcolor: "#1e293b",
+            color: "white",
+            px: 2.5,
+            py: 0.8,
+            borderRadius: 2,
+            fontWeight: 700,
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+            "&:hover": {
+              bgcolor: "#334155",
+              boxShadow: "0 10px 15px -3px rgba(0,0,0,0.2)",
+            }
+          }}
+        >
+          과정 추가
+        </Button>
+      </Box>
 
       {/* 상세 리스트 테이블 */}
       <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", overflow: 'hidden' }}>

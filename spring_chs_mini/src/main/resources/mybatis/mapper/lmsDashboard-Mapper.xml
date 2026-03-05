@@ -50,26 +50,31 @@
             COALESCE(ast.total_enrolled, 0) AS total_enrolled,
             COALESCE(ast.active_accounts, 0) AS active_accounts,
             COALESCE(ast.dropout_count, 0) AS dropout_count,
-            COALESCE(ast.earlyout_count, 0) AS earlyout_count,     COALESCE(ast.graduated_count, 0) AS graduated_count, ROUND(AVG(
+            COALESCE(ast.earlyout_count, 0) AS earlyout_count,
+            COALESCE(ast.graduated_count, 0) AS graduated_count,
+            ROUND(AVG(
                 CASE 
                     WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
                     ELSE (COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100)
                 END
             ), 1) AS total_avg_ratio,
             
-            JSONB_AGG(
-                JSONB_BUILD_OBJECT(
-                    'subjectName', s.SUB_NAME,
-                    'submittedCount', COALESCE(tst.submitted_count, 0),
-                    'ratio', CASE 
-                                WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
-                                ELSE ROUND(COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100, 1)
-                            END
-                ) ORDER BY s.SUB_SEQ
+            COALESCE(
+                JSONB_AGG(
+                    JSONB_BUILD_OBJECT(
+                        'subjectName', s.SUB_NAME,
+                        'submittedCount', COALESCE(tst.submitted_count, 0),
+                        'ratio', CASE 
+                                    WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
+                                    ELSE ROUND(COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100, 1)
+                                END
+                    ) ORDER BY s.SUB_SEQ
+                ) FILTER (WHERE s.SUB_SEQ IS NOT NULL), 
+                '[]'::JSONB
             ) AS subjects
         FROM lms.TB_CURRICULUM c
         LEFT JOIN AccountStats ast ON c.CUR_SEQ = ast.CUR_SEQ
-        JOIN lms.TB_SUBJECT s ON c.CUR_SEQ = s.CUR_SEQ
+        LEFT JOIN lms.TB_SUBJECT s ON c.CUR_SEQ = s.CUR_SEQ
         LEFT JOIN TestStats tst ON s.SUB_SEQ = tst.SUB_SEQ
         <where>
             <if test="year != null and year != ''">
