@@ -19,7 +19,7 @@ interface Props {
 }
 
 const CurriculumAddModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
-  const [loading, setLoading] = useState(false);
+const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     curName: '',
     term: '',
@@ -63,10 +63,26 @@ const CurriculumAddModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
 
   const handleSubmit = async () => {
     if (!validate()) return;
+
+    // 🚩 1. localStorage에서 userInfo 가져오기
+    const userInfoString = localStorage.getItem('userInfo');
+    let regId = '';
+    
+    if (userInfoString) {
+      try {
+        const userInfo = JSON.parse(userInfoString);
+        regId = userInfo.accId || ''; // accId 추출
+      } catch (err) {
+        console.error("사용자 정보 파싱 실패:", err);
+      }
+    }
+
+    // 2. 전송 데이터 구성 (reg_id 포함)
     const submitData = {
       ...formData,
       term: formData.term !== "" ? Number(formData.term) : null,
       manCount: formData.manCount !== "" ? Number(formData.manCount) : null,
+      regId: regId // DB의 reg_id 컬럼과 매핑될 필드
     };
 
     setLoading(true);
