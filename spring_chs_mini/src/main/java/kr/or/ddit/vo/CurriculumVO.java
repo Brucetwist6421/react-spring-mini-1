@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -20,4 +21,9 @@ public class CurriculumVO {
     private String curName;        // 교육과정명
     private Integer accountSeq;    // 담당자 일련번호
     private String businessName;   // 업체명
+    private String status;         // 상태 (A:활성, D:삭제)
+    private String regId;         // 등록자ID
+    private LocalDateTime regDate;  // 등록일시
+    private String updateId;        // 수정자ID
+    private LocalDateTime updateDate; // 수정일시
 }

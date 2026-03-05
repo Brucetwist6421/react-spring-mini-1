@@ -17,6 +17,7 @@ public class CurriculumServiceImpl implements CurriculumService {
     @Override
     @Transactional
     public int insertCurriculum(CurriculumVO curriculumVO) {
+        curriculumVO.setStatus("A");
         return curriculumMapper.insertCurriculum(curriculumVO);
     }
 }
