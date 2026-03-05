@@ -50,12 +50,13 @@ public class AuthServiceImpl implements AuthService {
         log.info("유저 [{}]의 새로운 토큰이 DB에 저장되었습니다.", user.getAccountId());
 
         // 5. 반환
-        return new LoginResponseVO(
-            token, 
-            user.getAccountId(), 
-            user.getAccountEmail(), 
-            user.getAccountName(), 
-            user.getAccountType()
-        );
+        return LoginResponseVO.builder()
+            .accessToken(token)
+            .accId(user.getAccountId())
+            .accEmail(user.getAccountEmail())
+            .accName(user.getAccountName())
+            .accType(user.getAccountType())
+            .mainImagePath(user.getMainImagePath())
+            .build();
     }
 }
