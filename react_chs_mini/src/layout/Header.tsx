@@ -106,16 +106,29 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
             <LoggedOutMenu onLoginClick={() => setLoginOpen(true)} />
           )}
           
-          {/* 로그인 시 환영 문구 및 프로필 영역 */}
+          {/* 로그인 시 환영 문구 및 프로필 영역을 하나의 버튼 영역으로 인식하게 함 */}
           {isLoggedIn && userInfo && (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              {/* ⭐ 환영 문구 추가 (모바일에서는 숨김 처리) */}
+            <Box 
+              onClick={handleProfileClick} // 영역 전체 클릭 시 메뉴 오픈
+              sx={{ 
+                display: "flex", 
+                alignItems: "center", 
+                cursor: "pointer", // 마우스 커서 변경
+                padding: "4px 8px",
+                borderRadius: "20px",
+                transition: "background-color 0.2s",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.05)", // 살짝 호버 효과
+                }
+              }}
+            >
               <Typography 
                 variant="body2" 
                 sx={{ 
                   display: { xs: "none", md: "block" }, 
-                  mr: 1, 
-                  color: "#cbd5e1" 
+                  mr: 1.5, // 간격 살짝 넓힘
+                  color: "#cbd5e1",
+                  userSelect: "none" // 텍스트 드래그 방지
                 }}
               >
                 <Box component="span" sx={{ color: "#38bdf8", fontWeight: 700 }}>
@@ -124,25 +137,17 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
                 님 환영합니다!
               </Typography>
 
-              <IconButton 
-                color="inherit" 
-                onClick={handleProfileClick} 
-                sx={{ p: 0.5 }}
+              <Avatar 
+                src={getProfileImageUrl(userInfo?.mainImagePath)} 
+                sx={{ 
+                  width: 35, 
+                  height: 35, 
+                  border: '2px solid #38bdf8',
+                  bgcolor: '#334155',
+                }}
               >
-                <Avatar 
-                  src={getProfileImageUrl(userInfo?.mainImagePath)} 
-                  sx={{ 
-                    width: 35, 
-                    height: 35, 
-                    border: '2px solid #38bdf8',
-                    bgcolor: '#334155',
-                    fontSize: '1rem',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {userInfo?.accName ? userInfo.accName[0] : <AccountCircle />}
-                </Avatar>
-              </IconButton>
+                {userInfo?.accName ? userInfo.accName[0] : <AccountCircle />}
+              </Avatar>
             </Box>
           )}
         </Box>

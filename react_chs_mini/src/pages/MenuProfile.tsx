@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Logout from "@mui/icons-material/Logout";
 import AccountCircle from "@mui/icons-material/AccountCircle"; // 기본 아이콘 추가
 import { Avatar, Box, Divider, ListItemIcon, Menu, MenuItem, Typography } from "@mui/material";
