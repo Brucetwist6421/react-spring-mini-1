@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,12 +28,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.ddit.service.PokemonService;
 import kr.or.ddit.vo.FavoriteVO;
 import kr.or.ddit.vo.PokemonVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Tag(name = "Pokemon", description = "포켓몬 관련 API")
 @RestController
 @RequestMapping("/pokemon")
 @RequiredArgsConstructor
@@ -43,6 +48,7 @@ public class PokemonController {
     private final PokemonService pokemonService;
 
     // 즐겨찾기 확인
+    @Operation(summary = "즐겨찾기 확인", description = "특정 사용자가 특정 포켓몬을 즐겨찾기에 추가했는지 확인합니다.")
     @GetMapping("/favoriteCheck")
     public ResponseEntity<Map<String, Object>> checkFavorite(
             @RequestParam("userId") String userId,
@@ -72,6 +78,7 @@ public class PokemonController {
         }
     }
 
+    @Operation(summary = "즐겨찾기 목록 조회", description = "특정 사용자가 즐겨찾기에 추가한 포켓몬 목록을 조회합니다.")
     @GetMapping("/favoriteList")
     public ResponseEntity<List<FavoriteVO>> getFavoritePokemonList(
         @RequestParam(value = "userId", required = false, defaultValue = "GUEST_USER") String userId
@@ -89,10 +96,11 @@ public class PokemonController {
         }
     }
 
+    @Operation(summary = "포켓몬 생성", description = "새로운 포켓몬을 생성합니다. (이미지 및 첨부파일 포함)")
     @PostMapping("/createPokemon")
     public ResponseEntity<Map<String, Object>> createPokemon(
-            @ModelAttribute PokemonVO pokemonVO,
-            @RequestParam(value = "mainImage", required = false) MultipartFile mainImage
+            @Parameter(description = "포켓몬 정보") @ModelAttribute PokemonVO pokemonVO,
+            @Parameter(description = "메인 이미지") @RequestParam(value = "mainImage", required = false) MultipartFile mainImage
     ) {
         Map<String, Object> resultMap = new HashMap<>();
 
@@ -138,6 +146,7 @@ public class PokemonController {
     }
     // 실습 1 끝
 
+    @Operation(summary = "포켓몬 목록 조회", description = "모든 포켓몬의 목록을 조회합니다.")  
      @GetMapping("/list")
     public ResponseEntity<?> getPokemonList() {
         List<PokemonVO> pokemonList = pokemonService.getPokemonList();
@@ -149,8 +158,9 @@ public class PokemonController {
     }
     
     // 실습 2 시작
+    @Operation(summary = "포켓몬 상세 조회", description = "특정 포켓몬의 상세 정보를 조회합니다.")
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPokemonDetail(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getPokemonDetail(@Parameter(description = "포켓몬 ID") @PathVariable("id") Long id) {
         PokemonVO pokemon = pokemonService.getPokemonDetail(id);
         if (pokemon == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -178,8 +188,9 @@ public class PokemonController {
     // }
     // 실습 3 끝
 
+    @Operation(summary = "파일 다운로드", description = "포켓몬과 관련된 파일을 다운로드합니다. 파일명이 URL 인코딩되어 전달됩니다.")
     @GetMapping("/download/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable("fileName") String fileName) throws IOException {
+    public ResponseEntity<Resource> downloadFile(@Parameter(description = "다운로드할 파일명") @PathVariable("fileName") String fileName) throws IOException {
         
         // 1. 핵심: 이미 Spring이 @PathVariable로 받으면서 디코딩을 수행합니다. 
         // 중복 디코딩(URLDecoder.decode)은 파일명을 깨뜨릴 수 있으므로 제거하거나 주의해야 합니다.
@@ -207,11 +218,12 @@ public class PokemonController {
     }
     
     // 실습 4 시작
+    @Operation(summary = "포켓몬 수정", description = "기존 포켓몬의 정보를 수정합니다. (이미지 및 첨부파일 포함)")
     @PostMapping("/updatePokemon")
     public String updatePokemon(
-            @ModelAttribute PokemonVO pokemonVO,
-            @RequestParam(value = "mainImage", required = false) MultipartFile mainImage,
-            @RequestParam(value = "existingAttachmentIdList", required = false) List<Long> existingAttachmentIdList
+            @Parameter(description = "포켓몬 정보") @ModelAttribute PokemonVO pokemonVO,
+            @Parameter(description = "메인 이미지") @RequestParam(value = "mainImage", required = false) MultipartFile mainImage,
+            @Parameter(description = "기존 첨부파일 ID 목록") @RequestParam(value = "existingAttachmentIdList", required = false) List<Long> existingAttachmentIdList
     ) {
     	List<MultipartFile> uploaded = pokemonVO.getAttachmentFiles();
 //        System.out.println("폼데이터 수신 완료: " + pokemonVO);
@@ -231,9 +243,10 @@ public class PokemonController {
     // 실습 4 끝
     
     // 실습 5 시작
+    @Operation(summary = "포켓몬 삭제", description = "특정 포켓몬을 삭제합니다.")
     @DeleteMapping("/deletePokemon/{id}")
     public ResponseEntity<?> deletePokemon(
-            @PathVariable Long id) {
+            @Parameter(description = "삭제할 포켓몬 ID") @PathVariable Long id) {
         log.info("deletePokemon->id : {}", id);
         int result = pokemonService.deletePokemon(id);
         if (result == 1) {
@@ -246,8 +259,9 @@ public class PokemonController {
     // 실습 5 끝
     
     // 실습 6 시작
+    @Operation(summary = "포켓몬 일괄 삭제", description = "여러 포켓몬을 한 번에 삭제합니다. ID 목록을 전달받아 처리합니다.")
     @DeleteMapping("/deletePokemons")
-    public ResponseEntity<?> deletePokemons(@RequestBody List<Long> idList) {
+    public ResponseEntity<?> deletePokemons(@Parameter(description = "삭제할 포켓몬 ID 목록") @RequestBody List<Long> idList) {
         int result = pokemonService.deletePokemons(idList);
         if (result == 1) {
             return ResponseEntity.ok("삭제 성공");
@@ -259,9 +273,10 @@ public class PokemonController {
     // 실습 6 끝
 
     //즐겨찾기 토글
+    @Operation(summary = "즐겨찾기 토글", description = "특정 포켓몬에 대해 즐겨찾기 상태를 토글합니다. (추가/제거)")
     @PostMapping("/toggleFavorite")
     public ResponseEntity<Map<String, Object>> toggleFavorite(
-            @RequestBody FavoriteVO favoriteVO
+            @Parameter(description = "즐겨찾기 정보") @RequestBody FavoriteVO favoriteVO
             /* , @AuthenticationPrincipal CustomUser user */ // 나중에 인증 도입 시 사용
     ) {
         Map<String, Object> resultMap = new HashMap<>();

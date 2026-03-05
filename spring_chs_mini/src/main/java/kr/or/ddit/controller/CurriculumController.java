@@ -1,14 +1,21 @@
 package kr.or.ddit.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.ddit.service.CurriculumService;
 import kr.or.ddit.vo.CurriculumVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+@Tag(name = "Curriculum", description = "교육과정 관련 API")
 @Slf4j
 @RestController
 @RequestMapping("/api/curriculum")
@@ -17,8 +24,9 @@ public class CurriculumController {
 
     private final CurriculumService curriculumService;
 
+    @Operation(summary = "교육과정 등록", description = "새로운 교육과정을 등록합니다.")
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody CurriculumVO curriculumVO) {
+    public ResponseEntity<?> register(@Parameter(description = "교육과정 정보") @RequestBody CurriculumVO curriculumVO) {
         try {
             int result = curriculumService.insertCurriculum(curriculumVO);
             if (result > 0) {

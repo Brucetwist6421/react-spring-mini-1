@@ -9,14 +9,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Schema(description = "계정 관련 VO")
 public class AccountVO {
 
     // 1. tb_account (계정 기본 정보)
+    @Schema(description = "계정 시퀀스", example = "1")
     private Integer accountSeq;         // 계정 일련번호 (serial)
+
     private Integer curSeq;         // 교육과정 일련번호 (fk)
     private String accountId;       // 아이디 (unique)
     private String accountName;     // 이름
