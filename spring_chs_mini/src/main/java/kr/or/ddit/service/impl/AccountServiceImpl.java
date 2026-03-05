@@ -1,6 +1,7 @@
 package kr.or.ddit.service.impl;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -63,6 +64,8 @@ public class AccountServiceImpl implements AccountService {
             }
 
             // 3. 학생 정보 업데이트 (Mapper 호출)
+            accountVO.setUpdateId(accountVO.getUpdateId()); // 수정자ID 업데이트 
+            accountVO.setUpdateDate(LocalDateTime.now());// 수정일시 업데이트
             int result = accountMapper.updateAccount(accountVO);
             
             if (result > 0) {

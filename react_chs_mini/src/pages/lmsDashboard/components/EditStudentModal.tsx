@@ -92,19 +92,36 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       const data = new FormData();
       if (imageFile) data.append('mainImage', imageFile);
 
-      // 초기화 버튼을 누르지 않았다면 비밀번호 필드 제외 (기존 비번 유지)
+      // 1. localStorage에서 userInfo 가져오기 및 updateId 설정
+      const userInfoString = localStorage.getItem('userInfo');
+      let updateId = '';
+      
+      if (userInfoString) {
+        try {
+          const userInfo = JSON.parse(userInfoString);
+          updateId = userInfo.accId || ''; 
+        } catch (err) {
+          console.error("사용자 정보 파싱 실패:", err);
+        }
+      }
+
       const finalData = { ...formData };
+      
+      // 초기화 버튼을 누르지 않았다면 비밀번호 필드 제외
       if (!isPwReset) {
         delete finalData.accountPasswd;
       }
 
-      // 2. 빈 문자열("")을 null로 변환하여 전송 (DB Unique 에러 방지)
+      // 2. 데이터 정제 및 updateId 세팅
       const refinedData = Object.fromEntries(
         Object.entries(finalData).map(([key, value]) => [
           key,
           typeof value === 'string' && value.trim() === '' ? null : value
         ])
       );
+
+      // 수정자 ID 추가
+      refinedData.updateId = updateId;
 
       data.append('accountData', new Blob([JSON.stringify(refinedData)], { type: 'application/json' }));
 
