@@ -15,7 +15,7 @@ public class CorsConfig implements WebMvcConfigurer { // WebMvcConfigurer를 구
                     "http://168.107.51.143", 
                     "http://168.107.51.143:80"
                 ) // 허용할 도메인들
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 메서드
+                .allowedMethods("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS") // 허용할 메서드
                 .allowedHeaders("*") // 모든 헤더 허용
                 .allowCredentials(true) // 쿠키/인증정보 포함 허용
                 .maxAge(3600); // 프리플라이트 요청 캐싱 시간
