@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.mapper.CurriculumMapper">
+
+    <insert id="insertCurriculum" parameterType="kr.or.ddit.vo.CurriculumVO" 
+            useGeneratedKeys="true" keyProperty="curSeq" keyColumn="cur_seq">
+        INSERT INTO lms.tb_curriculum (
+            room,
+            term,
+            man_count,
+            start_date,
+            end_date,
+            cur_name,
+            account_seq,
+            business_name
+        ) VALUES (
+            #{room},
+            #{term},
+            #{manCount},
+            #{startDate},
+            #{endDate},
+            #{curName},
+            #{accountSeq},
+            #{businessName}
+        )
+    </insert>
+
+</mapper>
