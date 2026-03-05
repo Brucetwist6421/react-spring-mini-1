@@ -43,16 +43,24 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
   const [isPwReset, setIsPwReset] = useState(false);
 
   useEffect(() => {
-    if (studentData) {
+    if (open && studentData) {
+      // 1. 모달이 열릴 때: 원본 데이터로 덮어쓰기
       setFormData({ ...studentData });
       setIsPwReset(false);
+      setImageFile(null); // 선택했던 이미지 파일 초기화
+      
       if (studentData.mainImagePath) {
         setPreviewUrl(`http://168.107.51.143:8080/upload/${encodeURIComponent(studentData.mainImagePath)}`);
       } else {
         setPreviewUrl('');
       }
+    } else if (!open) {
+      // 2. 모달이 닫힐 때: 내부 상태 청소 (Optional)
+      setFormData({});
+      setPreviewUrl('');
+      setImageFile(null);
     }
-  }, [studentData]);
+  }, [open, studentData]); // [open]을 의존성 배열에 추가하여 열고 닫힐 때마다 실행
 
   // 1. 비밀번호 초기화 핸들러
   const handlePasswordReset = () => {
@@ -92,7 +100,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
 
       // 2. 빈 문자열("")을 null로 변환하여 전송 (DB Unique 에러 방지)
       const refinedData = Object.fromEntries(
-        Object.entries(formData).map(([key, value]) => [
+        Object.entries(finalData).map(([key, value]) => [
           key,
           typeof value === 'string' && value.trim() === '' ? null : value
         ])
