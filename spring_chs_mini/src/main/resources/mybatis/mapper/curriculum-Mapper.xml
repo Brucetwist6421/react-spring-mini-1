@@ -46,4 +46,10 @@
         WHERE cur_seq = #{curSeq}
     </update>
 
+    <select id="selectCurriculumDetail" parameterType="int" resultType="kr.or.ddit.vo.CurriculumVO">
+        SELECT *
+        FROM lms.tb_curriculum
+        WHERE cur_seq = #{curSeq}
+    </select>
+
 </mapper>

@@ -2,6 +2,8 @@ package kr.or.ddit.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +27,14 @@ public class CurriculumController {
 
     private final CurriculumService curriculumService;
 
+
+    @Operation(summary = "교육과정 단건 상세 조회", description = "특정 일련번호의 교육과정 상세 정보를 가져옵니다.")
+    @GetMapping("/{curSeq}")
+    public ResponseEntity<CurriculumVO> getCurriculumDetail(@Parameter(description = "과정 시퀀스") @PathVariable Integer curSeq) {
+        CurriculumVO detail = curriculumService.getCurriculumDetail(curSeq);
+        return detail != null ? ResponseEntity.ok(detail) : ResponseEntity.notFound().build();
+    }
+
     @Operation(summary = "교육과정 등록", description = "새로운 교육과정을 등록합니다.")
     @PostMapping("/register")
     public ResponseEntity<?> register(@Parameter(description = "교육과정 정보") @RequestBody CurriculumVO curriculumVO) {
@@ -47,7 +57,7 @@ public class CurriculumController {
 
     @Operation(summary = "교육과정 수정", description = "기존 교육과정 정보를 업데이트합니다.")
     @PutMapping("/update")
-    public ResponseEntity<?> updateCurriculum(@RequestBody CurriculumVO curriculumVO) {
+    public ResponseEntity<?> updateCurriculum(@Parameter(description = "교육과정 정보") @RequestBody CurriculumVO curriculumVO) {
         int result = curriculumService.updateCurriculum(curriculumVO);
         if (result > 0) {
             return ResponseEntity.ok("수정 성공");

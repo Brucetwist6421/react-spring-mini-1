@@ -25,4 +25,9 @@ public class CurriculumServiceImpl implements CurriculumService {
     public int updateCurriculum(CurriculumVO curriculumVO) {
         return curriculumMapper.updateCurriculum(curriculumVO);
     }
+
+    @Override
+    public CurriculumVO getCurriculumDetail(Integer curSeq) {
+        return curriculumMapper.selectCurriculumDetail(curSeq);
+    }
 }

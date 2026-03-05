@@ -8,4 +8,6 @@ public interface CurriculumMapper {
     int insertCurriculum(CurriculumVO curriculumVO);
 
     int updateCurriculum(CurriculumVO curriculumVO);
+
+    CurriculumVO selectCurriculumDetail(Integer curSeq);
 }

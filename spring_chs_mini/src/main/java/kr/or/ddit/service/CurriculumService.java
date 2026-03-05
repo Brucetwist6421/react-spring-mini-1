@@ -6,4 +6,6 @@ public interface CurriculumService {
     int insertCurriculum(CurriculumVO curriculumVO);
 
     int updateCurriculum(CurriculumVO curriculumVO);
+
+    CurriculumVO getCurriculumDetail(Integer curSeq);
 }
