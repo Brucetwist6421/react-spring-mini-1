@@ -84,7 +84,7 @@
         GROUP BY 
             c.CUR_SEQ, c.CUR_NAME, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, 
             ast.total_enrolled, ast.active_accounts, ast.dropout_count, ast.earlyout_count, ast.graduated_count
-        ORDER BY c.TERM DESC
+        ORDER BY c.START_DATE DESC
     </select>
 
     <resultMap id="studentScoreMap" type="kr.or.ddit.vo.LmsStudentScoreVO">
