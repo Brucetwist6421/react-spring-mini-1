@@ -15,7 +15,8 @@
             account_seq,
             business_name,
             reg_id,
-            reg_date
+            reg_date,
+            status
         ) VALUES (
             #{room},
             #{term, jdbcType=INTEGER},      
@@ -26,7 +27,8 @@
             #{accountSeq, jdbcType=INTEGER}, 
             #{businessName},
             #{regId},
-            NOW()
+            NOW(),
+            #{status}
         )
     </insert>
 
