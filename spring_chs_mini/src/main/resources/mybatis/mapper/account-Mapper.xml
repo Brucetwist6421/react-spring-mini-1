@@ -137,9 +137,11 @@
             prev_company = #{prevCompany},
             quit_date = #{quitDate, jdbcType=DATE}, update_id = #{updateId},
             update_date = CURRENT_TIMESTAMP,
-            main_image_path = #{mainImagePath},
+            <if test="mainImagePath != null and mainImagePath != ''">
+                main_image_path = #{mainImagePath},
+            </if>
             <if test="accountPasswd != null and accountPasswd != ''">
-                account_passwd = #{accountPasswd},
+                account_passwd = #{accountPasswd}
             </if>
         WHERE account_seq = #{accountSeq}
     </update>
