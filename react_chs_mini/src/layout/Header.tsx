@@ -1,6 +1,6 @@
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
-import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, IconButton, Toolbar, Typography, Avatar } from "@mui/material";
 import { useState, useEffect, type MouseEvent } from "react";
 import LoginModal from "./components/LoginModal";
 import MenuProfile from "../pages/MenuProfile";
@@ -22,18 +22,34 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isProfileOpen = Boolean(anchorEl);
 
+  // 사용자 정보 interface 정의 
+  interface UserInfo {
+    accId: string; 
+    accName: string; 
+    accType: string; 
+    accEmail: string;
+    mainImagePath?: string; // 프로필 이미지 경로
+  }
+  
   // 사용자 정보 state
-  const [userInfo, setUserInfo] = useState<{ accId: string; accName: string; accType: string; accEmail: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   // 초기 로드 시 로그인 상태 체크
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     const savedInfo = localStorage.getItem("userInfo");
+    console.log("저장된 사용자 정보:", savedInfo);
     if (savedInfo) {
       setUserInfo(JSON.parse(savedInfo));
     }
     setIsLoggedIn(!!token);
   }, []);
+
+  // 이미지 경로 생성 함수
+  const getProfileImageUrl = (path?: string) => {
+    if (!path) return "";
+    return `http://168.107.51.143:8080/upload/${encodeURIComponent(path)}`;
+  };
 
   const handleProfileClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget); 
@@ -114,14 +130,23 @@ export default function Header({ title = "Pokemon Admin", onMenuClick }: HeaderP
             <IconButton 
               color="inherit" 
               onClick={handleProfileClick} 
+              sx={{ p: 0.5 }}
             >
-              <AccountCircle 
+              {/* 프로필 이미지 구현부 */}
+              <Avatar 
+                src={getProfileImageUrl(userInfo?.mainImagePath)} 
                 sx={{ 
-                  fontSize: 28, 
-                  color: "#38bdf8", 
-                  transition: "color 0.2s"
-                }} 
-              />
+                  width: 35, 
+                  height: 35, 
+                  border: '2px solid #38bdf8', // 테두리 추가로 포인트
+                  bgcolor: '#334155', // 이미지 로딩 전 배경색
+                  fontSize: '1rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                {/* 이미지가 없을 때: 이름 첫 글자 혹은 기본 아이콘 */}
+                {userInfo?.accName ? userInfo.accName[0] : <AccountCircle />}
+              </Avatar>
             </IconButton>
           )}
         </Box>
