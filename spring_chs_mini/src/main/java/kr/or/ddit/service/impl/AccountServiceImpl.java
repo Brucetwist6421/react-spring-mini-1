@@ -90,6 +90,8 @@ public class AccountServiceImpl implements AccountService {
 			// 1. 메인 이미지 저장 후 VO에 세팅
 			String mainImagePath = fileService.saveMainImage(mainImage);
 			accountVO.setMainImagePath(mainImagePath);
+            
+            accountVO.setStatus("A"); // 신규 등록 시 상태 'A'로 설정 (Active)
 
 			// 2. Account insert
 			accountMapper.insertAccount(accountVO);
