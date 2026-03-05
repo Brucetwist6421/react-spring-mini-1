@@ -8,15 +8,18 @@ import { Button } from "@mui/material";
 import LmsStudentStatusModal from "./LmsStudentStatusModal";
 import PersonAddIcon from "@mui/icons-material/PersonAdd"; // 아이콘 추가
 import LmsStudentAddModal from "./LmsStudentAddModal"; // 생성한 모달 임포트
+import EditIcon from "@mui/icons-material/Edit";
 
 import { useNavigate } from "react-router-dom"; 
 import SettingsIcon from "@mui/icons-material/Settings"; 
 import { Tooltip } from "@mui/material";
+import LmsCurriculumEditModal from "./LmsCurriculumEditModal";
 
 const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh: () => void }) => {
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -49,9 +52,24 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
 
         {/* 2. 과정 정보 */}
         <TableCell component="th" scope="row" width="20%">
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-            {row.curName} - {row.className}호 ({row.term}기)
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+              {row.curName} - {row.className}호 ({row.term}기)
+            </Typography>
+            {/* 🚩 과정 정보 수정 버튼 추가 */}
+            <Tooltip title="과정 정보 수정">
+              <IconButton 
+                size="small" 
+                onClick={(e) => {
+                  e.stopPropagation(); // 행 클릭 이벤트 전파 방지
+                  setIsEditModalOpen(true);
+                }}
+                sx={{ color: 'primary.main', bgcolor: '#eff6ff' }}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
             {row.period}
           </Typography>
@@ -171,6 +189,14 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
           onRefresh();
           setIsAddModalOpen(false);
         }}
+      />
+
+      {/* 과정 정보 수정 모달 */}
+      <LmsCurriculumEditModal 
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        curData={row}
+        onUpdate={onRefresh} // 수정 성공 시 부모 리스트 갱신
       />
 
       {/* 확장 영역 (Collapse) */}

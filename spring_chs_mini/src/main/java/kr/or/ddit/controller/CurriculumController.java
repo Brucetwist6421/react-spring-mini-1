@@ -3,6 +3,7 @@ package kr.or.ddit.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,5 +43,15 @@ public class CurriculumController {
             log.error("교육과정 등록 중 오류가 발생했습니다.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("등록에 실패했습니다.");
         }
+    }
+
+    @Operation(summary = "교육과정 수정", description = "기존 교육과정 정보를 업데이트합니다.")
+    @PutMapping("/update")
+    public ResponseEntity<?> updateCurriculum(@RequestBody CurriculumVO curriculumVO) {
+        int result = curriculumService.updateCurriculum(curriculumVO);
+        if (result > 0) {
+            return ResponseEntity.ok("수정 성공");
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 실패");
     }
 }

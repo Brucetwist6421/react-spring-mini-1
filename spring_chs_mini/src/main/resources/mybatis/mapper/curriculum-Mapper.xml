@@ -30,4 +30,20 @@
         )
     </insert>
 
+    <update id="updateCurriculum" parameterType="kr.or.ddit.vo.CurriculumVO">
+        UPDATE lms.tb_curriculum
+        SET
+            room = #{room},
+            term = #{term, jdbcType=INTEGER},
+            man_count = #{manCount, jdbcType=INTEGER},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            cur_name = #{curName},
+            account_seq = #{accountSeq, jdbcType=INTEGER},
+            business_name = #{businessName},
+            update_id = #{updateId},      
+            update_date = CURRENT_TIMESTAMP 
+        WHERE cur_seq = #{curSeq}
+    </update>
+
 </mapper>

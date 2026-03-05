@@ -20,4 +20,9 @@ public class CurriculumServiceImpl implements CurriculumService {
         curriculumVO.setStatus("A");
         return curriculumMapper.insertCurriculum(curriculumVO);
     }
+
+    @Override
+    public int updateCurriculum(CurriculumVO curriculumVO) {
+        return curriculumMapper.updateCurriculum(curriculumVO);
+    }
 }
