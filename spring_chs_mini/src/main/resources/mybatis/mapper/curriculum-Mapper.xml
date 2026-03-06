@@ -49,8 +49,9 @@
     </update>
 
     <select id="selectCurriculumDetail" parameterType="int" resultType="kr.or.ddit.vo.CurriculumVO">
-        SELECT *
-        FROM lms.tb_curriculum
+        SELECT c.*,
+            (SELECT account_name FROM lms.tb_account WHERE account_seq = c.account_seq) AS teacherName
+        FROM lms.tb_curriculum c
         WHERE cur_seq = #{curSeq}
     </select>
 

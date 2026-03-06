@@ -26,4 +26,5 @@ public class CurriculumVO {
     private LocalDateTime regDate;  // 등록일시
     private String updateId;        // 수정자ID
     private LocalDateTime updateDate; // 수정일시
+    private String teacherName;     // 담당자 이름 (조인해서 가져올 필드)
 }

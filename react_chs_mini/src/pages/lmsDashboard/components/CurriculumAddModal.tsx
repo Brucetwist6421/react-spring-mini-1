@@ -1,16 +1,19 @@
-import CloseIcon from '@mui/icons-material/Close';
-import SchoolIcon from '@mui/icons-material/School';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import BusinessIcon from '@mui/icons-material/Business';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import CloseIcon from '@mui/icons-material/Close';
 import GroupsIcon from '@mui/icons-material/Groups';
-import AssignmentIcon from '@mui/icons-material/Assignment'; // AddChartIcon 대체
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import SchoolIcon from '@mui/icons-material/School';
 import {
   Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-  Divider, Grid, IconButton, TextField, Typography, InputAdornment
+  Divider, Grid, IconButton,
+  InputAdornment,
+  TextField, Typography
 } from '@mui/material';
 import React, { useState } from 'react';
 import api from "../../../api/axiosInstance";
+import TeacherSelectField from './TeacherSelectField';
 
 interface Props {
   open: boolean;
@@ -19,7 +22,8 @@ interface Props {
 }
 
 const CurriculumAddModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     curName: '',
     term: '',
@@ -27,15 +31,16 @@ const [loading, setLoading] = useState(false);
     manCount: '',
     startDate: '',
     endDate: '',
-    businessName: ''
+    businessName: '',
+    accountSeq: null as number | null // 🚩 선택된 교사 시퀀스
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -51,6 +56,7 @@ const [loading, setLoading] = useState(false);
     if (!formData.businessName.trim()) newErrors.businessName = "사업 명을 입력해주세요.";
     if (!formData.startDate) newErrors.startDate = "시작일을 선택해주세요.";
     if (!formData.endDate) newErrors.endDate = "종료일을 선택해주세요.";
+    if (!formData.accountSeq) newErrors.accountSeq = "담당 교사를 선택해주세요."; // 🚩 교사 선택 검증
     
     if (formData.startDate && formData.endDate) {
       if (new Date(formData.startDate) > new Date(formData.endDate)) {
@@ -64,28 +70,26 @@ const [loading, setLoading] = useState(false);
   const handleSubmit = async () => {
     if (!validate()) return;
 
-    // 1. localStorage에서 userInfo 가져오기
     const userInfoString = localStorage.getItem('userInfo');
     let regId = '';
     
     if (userInfoString) {
       try {
         const userInfo = JSON.parse(userInfoString);
-        regId = userInfo.accId || ''; // accId 추출
+        regId = userInfo.accId || '';
       } catch (err) {
         console.error("사용자 정보 파싱 실패:", err);
       }
     }
 
-    // 2. 전송 데이터 구성 (reg_id 포함)
     const submitData = {
       ...formData,
       term: formData.term !== "" ? Number(formData.term) : null,
       manCount: formData.manCount !== "" ? Number(formData.manCount) : null,
-      regId: regId // DB의 reg_id 컬럼과 매핑될 필드
+      regId: regId,
+      status: 'A' // 초기 상태값 세팅
     };
 
-    console.log("등록자 ID (regId):", regId);
     setLoading(true);
     try {
       await api.post('/api/curriculum/register', submitData);
@@ -106,12 +110,8 @@ const [loading, setLoading] = useState(false);
       onClose={onClose} 
       maxWidth="sm" 
       fullWidth 
-      scroll="paper"
-      // 1. PaperProps 대체: slotProps.paper 사용
       slotProps={{
-        paper: {
-          sx: { borderRadius: 4, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" }
-        }
+        paper: { sx: { borderRadius: 4, boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)" } }
       }}
     >
       <DialogTitle sx={{ m: 0, p: 2.5, display: 'flex', alignItems: 'center', bgcolor: '#1e293b', color: 'white' }}>
@@ -124,108 +124,94 @@ const [loading, setLoading] = useState(false);
 
       <DialogContent sx={{ p: 4, mt: 2 }}>
         <Grid container spacing={3}>
-          <Grid size={{ xs: 12 }}>
+          {/* 과정 및 사업 정보 헤더 */}
+          <Grid size={12}>
             <Typography variant="subtitle2" sx={{ mb: 1, color: '#64748b', fontWeight: 700, display: 'flex', alignItems: 'center' }}>
               <SchoolIcon sx={{ fontSize: 18, mr: 0.5 }} /> 과정 및 사업 정보
             </Typography>
           </Grid>
           
-          <Grid size={{ xs: 12 }}>
+          <Grid size={12}>
             <TextField 
               name="curName" label="과정 명" fullWidth required
               value={formData.curName} onChange={handleChange}
               error={!!errors.curName} helperText={errors.curName}
-              placeholder="예: 자바 기반 웹 개발자 양성 과정"
-              // 2. InputProps 대체: slotProps.input 사용
-              slotProps={{
-                input: {
-                  startAdornment: <InputAdornment position="start"><SchoolIcon fontSize="small" /></InputAdornment>
-                }
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><SchoolIcon fontSize="small" /></InputAdornment> } }}
             />
           </Grid>
 
-          <Grid size={{ xs: 12 }}>
+          {/* 🚩 교사 선택 Autocomplete 추가 */}
+          <Grid size={12}>
+            <TeacherSelectField 
+              value={formData.accountSeq}
+              onChange={(seq) => {
+                setFormData({ ...formData, accountSeq: seq });
+                if (errors.accountSeq) setErrors(prev => ({ ...prev, accountSeq: '' }));
+              }}
+              error={!!errors.accountSeq}
+              helperText={errors.accountSeq}
+            />
+          </Grid>
+
+          <Grid size={12}>
             <TextField 
               name="businessName" label="사업 명" fullWidth required
               value={formData.businessName} onChange={handleChange}
               error={!!errors.businessName} helperText={errors.businessName}
-              placeholder="예: 내일배움카드 K-Digital Training"
-              slotProps={{
-                input: {
-                  startAdornment: <InputAdornment position="start"><BusinessIcon fontSize="small" /></InputAdornment>
-                }
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><BusinessIcon fontSize="small" /></InputAdornment> } }}
             />
           </Grid>
 
-          <Grid size={{ xs: 6 }}>
+          {/* 기수 및 강의실 */}
+          <Grid size={6}>
             <TextField 
               name="term" label="기수" fullWidth 
               value={formData.term} onChange={handleChange}
-              placeholder="숫자 입력"
-              slotProps={{
-                input: {
-                  endAdornment: <InputAdornment position="end">기</InputAdornment>
-                }
-              }}
+              slotProps={{ input: { endAdornment: <InputAdornment position="end">기</InputAdornment> } }}
             />
           </Grid>
 
-          <Grid size={{ xs: 6 }}>
+          <Grid size={6}>
             <TextField 
               name="room" label="강의실" fullWidth 
               value={formData.room} onChange={handleChange}
-              placeholder="예: 301호"
-              slotProps={{
-                input: {
-                  startAdornment: <InputAdornment position="start"><MeetingRoomIcon fontSize="small" /></InputAdornment>
-                }
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><MeetingRoomIcon fontSize="small" /></InputAdornment> } }}
             />
           </Grid>
 
-          <Grid size={{ xs: 12 }} sx={{ mt: 1 }}>
+          <Grid size={12} sx={{ mt: 1 }}>
             <Divider sx={{ mb: 3 }} />
             <Typography variant="subtitle2" sx={{ mb: 1, color: '#64748b', fontWeight: 700, display: 'flex', alignItems: 'center' }}>
               <CalendarMonthIcon sx={{ fontSize: 18, mr: 0.5 }} /> 일정 및 인원 관리
             </Typography>
           </Grid>
 
-          <Grid size={{ xs: 6 }}>
+          <Grid size={6}>
             <TextField 
               name="startDate" label="시작일" type="date" fullWidth required
               onChange={handleChange}
               error={!!errors.startDate} helperText={errors.startDate}
-              // 3. InputLabelProps 대체: slotProps.inputLabel 사용
-              slotProps={{
-                inputLabel: { shrink: true }
-              }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
 
-          <Grid size={{ xs: 6 }}>
+          <Grid size={6}>
             <TextField 
               name="endDate" label="종료일" type="date" fullWidth required
               onChange={handleChange}
               error={!!errors.endDate} helperText={errors.endDate}
-              slotProps={{
-                inputLabel: { shrink: true }
-              }}
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
 
-          <Grid size={{ xs: 12 }}>
+          <Grid size={12}>
             <TextField 
               name="manCount" label="인원 수" fullWidth 
               value={formData.manCount} onChange={handleChange}
-              placeholder="인원 수 입력"
-              slotProps={{
-                input: {
-                  startAdornment: <InputAdornment position="start"><GroupsIcon fontSize="small" /></InputAdornment>,
-                  endAdornment: <InputAdornment position="end">명</InputAdornment>
-                }
-              }}
+              slotProps={{ input: { 
+                startAdornment: <InputAdornment position="start"><GroupsIcon fontSize="small" /></InputAdornment>,
+                endAdornment: <InputAdornment position="end">명</InputAdornment>
+              } }}
             />
           </Grid>
         </Grid>

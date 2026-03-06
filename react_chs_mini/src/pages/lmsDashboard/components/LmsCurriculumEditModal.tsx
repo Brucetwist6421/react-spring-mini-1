@@ -4,6 +4,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, TextField, CircularProgress, Box } from '@mui/material';
 import React, { useEffect, useState, useCallback } from 'react'; // useCallback 추가
 import api from '../../../api/axiosInstance';
+import TeacherSelectField from './TeacherSelectField';
 
 interface EditModalProps {
   open: boolean;
@@ -85,6 +86,14 @@ const LmsCurriculumEditModal = ({ open, onClose, curData, onUpdate }: EditModalP
           <Grid container spacing={2.5}>
             <Grid size={12}>
               <TextField fullWidth label="과정명" name="curName" value={formData.curName || ''} onChange={handleChange} />
+            </Grid>
+
+            {/* 담당 교사 선택 컴포넌트 */}
+            <Grid size={12}>
+              <TeacherSelectField 
+                value={formData.accountSeq || null}
+                onChange={(seq) => setFormData((prev: any) => ({ ...prev, accountSeq: seq }))}
+              />
             </Grid>
             
             <Grid size={12}>
