@@ -79,4 +79,10 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
         }
     }
+
+    @Operation(summary = "교사 계정 목록 조회", description = "teacher_yn이 'Y'인 모든 교사 목록을 조회합니다.")
+    @GetMapping("/teachers")
+    public ResponseEntity<List<AccountVO>> getTeacherList() {
+        return ResponseEntity.ok(accountService.getTeacherList());
+    }
 }

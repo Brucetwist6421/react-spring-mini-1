@@ -140,7 +140,7 @@ create table lms.tb_account (
   account_id character varying(50) not null,
   account_name character varying(50) not null,
   birth date null,
-  gender character(1) null,
+  gender character varying(1) null,
   tel character varying(20) null,
   edu character varying(50) null,
   major character varying(50) null,
@@ -159,17 +159,23 @@ create table lms.tb_account (
   ident_number character varying(255) null,
   emergency_tel character varying(20) null,
   address text null,
-  marital_status character(1) null,
+  marital_status character varying(1) null,
   licenses text null,
   military_status character varying(20) null,
   prev_company character varying(100) null,
   quit_date date null,
   main_image_path character varying null,
+  dropout_date date null,
   constraint tb_student_pkey primary key (account_seq),
   constraint tb_account_account_email_key unique (account_email),
   constraint tb_student_user_id_key unique (account_id),
   constraint fk_account_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq)
 ) TABLESPACE pg_default;
+
+  reg_id character varying(100) null,
+  reg_date timestamp without time zone null default CURRENT_TIMESTAMP,
+update_id character varying(100) null,
+  update_date timestamp without time zone null,
 
 create table lms.tb_curriculum (
   cur_seq serial not null,
@@ -185,3 +191,16 @@ create table lms.tb_curriculum (
 ) TABLESPACE pg_default;
 
 //출석 테이블 생성 및 조회 서비스 back layer 구현
+
+대시보드 UI 수정 
+1. 통계 항목 추가
+대시보드 기능 추가
+1. 학생 등록 기능 추가
+학생 관리 기능 추가
+1. 출석현황 조회
+2. 학생 정보 조회
+3. 학생 정보 수정
+
+--과정 등록/수정 시 account_seq (담임 계정 시퀀스) 삽입 로직 추가 필요
+--선생 조회/선택 selectBox 컴포넌트 생성 필요
+

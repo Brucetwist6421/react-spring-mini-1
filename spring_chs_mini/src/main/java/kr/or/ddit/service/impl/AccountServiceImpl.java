@@ -106,4 +106,9 @@ public class AccountServiceImpl implements AccountService {
 		}
         
     }
+
+    @Override
+    public List<AccountVO> getTeacherList() {
+        return accountMapper.selectTeacherList();
+    }
 }

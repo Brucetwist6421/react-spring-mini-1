@@ -14,4 +14,6 @@ public interface AccountService {
     public void updateAccount(AccountVO accountVO, MultipartFile mainImage);
 
     public void registerStudent(AccountVO accountVO, MultipartFile mainImage);
+
+    public List<AccountVO> getTeacherList();
 }

@@ -31,4 +31,6 @@ public interface AccountMapper {
     int updateAccount(AccountVO accountVO);
 
     int insertAccount(AccountVO accountVO);
+
+    List<AccountVO> selectTeacherList();
 }

@@ -185,4 +185,14 @@
             #{regId, jdbcType=VARCHAR}
         )
     </insert>
+
+    <select id="selectTeacherList" resultType="kr.or.ddit.vo.AccountVO">
+        SELECT 
+            account_seq, 
+            account_id, 
+            account_name
+        FROM lms.tb_account
+        WHERE teacher_yn = 'Y'
+        ORDER BY account_name ASC
+    </select>
 </mapper>
