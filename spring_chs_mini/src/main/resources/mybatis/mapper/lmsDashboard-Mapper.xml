@@ -8,6 +8,8 @@
         <result property="className" column="class_name"/>
         <result property="term" column="term"/>
         <result property="period" column="period"/>
+        <result property="accountSeq" column="account_seq"/>
+        <result property="teacherName" column="teacher_name"/>
         <result property="totalEnrolled" column="total_enrolled"/>
         <result property="activeAccounts" column="active_accounts"/>
         <result property="dropoutCount" column="dropout_count"/>
@@ -47,6 +49,8 @@
             c.ROOM AS class_name,
             c.TERM AS term,
             c.START_DATE || ' ~ ' || c.END_DATE AS period,
+            c.ACCOUNT_SEQ AS account_seq,              -- 담임 교수 시퀀스
+            t.ACCOUNT_NAME AS teacher_name,            --  담임 교수명 추가
             COALESCE(ast.total_enrolled, 0) AS total_enrolled,
             COALESCE(ast.active_accounts, 0) AS active_accounts,
             COALESCE(ast.dropout_count, 0) AS dropout_count,
@@ -73,18 +77,23 @@
                 '[]'::JSONB
             ) AS subjects
         FROM lms.TB_CURRICULUM c
+        LEFT JOIN lms.TB_ACCOUNT t ON c.ACCOUNT_SEQ = t.ACCOUNT_SEQ --  교수 정보 조인
         LEFT JOIN AccountStats ast ON c.CUR_SEQ = ast.CUR_SEQ
         LEFT JOIN lms.TB_SUBJECT s ON c.CUR_SEQ = s.CUR_SEQ
         LEFT JOIN TestStats tst ON s.SUB_SEQ = tst.SUB_SEQ
         <where>
             AND c.STATUS = 'A'
             
+            <if test="accountSeq != null and accountSeq != ''">
+                AND c.ACCOUNT_SEQ = #{accountSeq}
+            </if>
+
             <if test="year != null and year != ''">
                 AND TO_CHAR(c.START_DATE, 'YYYY') = #{year}
             </if>
         </where>
         GROUP BY 
-            c.CUR_SEQ, c.CUR_NAME, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, 
+            c.CUR_SEQ, c.CUR_NAME, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, c.ACCOUNT_SEQ, t.ACCOUNT_NAME,
             ast.total_enrolled, ast.active_accounts, ast.dropout_count, ast.earlyout_count, ast.graduated_count
         ORDER BY c.START_DATE DESC
     </select>

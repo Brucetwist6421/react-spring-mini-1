@@ -16,8 +16,8 @@ public class LmsDashboardServiceImpl implements LmsDashboardService{
     private final LmsDashboardMapper dashboardMapper;
 
     @Override
-    public List<LmsDashboardVO> getLmsDashboardStats(String year) {
-        return dashboardMapper.selectLmsDashboardStats(year);
+    public List<LmsDashboardVO> getLmsDashboardStats(String year, Integer accountSeq) {
+        return dashboardMapper.selectLmsDashboardStats(year, accountSeq);
     }
     
     @Override

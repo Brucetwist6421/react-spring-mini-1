@@ -18,6 +18,8 @@ public class LmsDashboardVO {
     private int graduatedCount;
     private double totalAvgRatio;
     private List<SubjectStatVO> subjects; // JSON 내역 매핑
+    private Integer accountSeq; // 담임 교수 시퀀스
+    private String teacherName; // 담임 교수명
 
     @Data
     public static class SubjectStatVO {

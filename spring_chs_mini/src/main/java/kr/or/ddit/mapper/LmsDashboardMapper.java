@@ -10,7 +10,7 @@ import kr.or.ddit.vo.LmsStudentScoreVO;
 
 @Mapper
 public interface LmsDashboardMapper {
-    List<LmsDashboardVO> selectLmsDashboardStats(@Param("year") String year);
+    List<LmsDashboardVO> selectLmsDashboardStats(@Param("year") String year, @Param("accountSeq") Integer accountSeq);
 
     List<LmsStudentScoreVO> selectStudentScoresByCurriculum(@Param("curSeq") Integer curSeq);
 }
