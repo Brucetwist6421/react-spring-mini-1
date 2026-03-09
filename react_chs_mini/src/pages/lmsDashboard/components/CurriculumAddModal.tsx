@@ -32,7 +32,7 @@ const CurriculumAddModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
     startDate: '',
     endDate: '',
     businessName: '',
-    accountSeq: null as number | null // 🚩 선택된 교사 시퀀스
+    accountSeq: null as number | null //  선택된 교사 시퀀스
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,7 +56,7 @@ const CurriculumAddModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
     if (!formData.businessName.trim()) newErrors.businessName = "사업 명을 입력해주세요.";
     if (!formData.startDate) newErrors.startDate = "시작일을 선택해주세요.";
     if (!formData.endDate) newErrors.endDate = "종료일을 선택해주세요.";
-    if (!formData.accountSeq) newErrors.accountSeq = "담당 교사를 선택해주세요."; // 🚩 교사 선택 검증
+    if (!formData.accountSeq) newErrors.accountSeq = "담당 교사를 선택해주세요."; //  교사 선택 검증
     
     if (formData.startDate && formData.endDate) {
       if (new Date(formData.startDate) > new Date(formData.endDate)) {
@@ -140,7 +140,7 @@ const CurriculumAddModal: React.FC<Props> = ({ open, onClose, onSuccess }) => {
             />
           </Grid>
 
-          {/* 🚩 교사 선택 Autocomplete 추가 */}
+          {/*  교사 선택 Autocomplete 추가 */}
           <Grid size={12}>
             <TeacherSelectField 
               value={formData.accountSeq}

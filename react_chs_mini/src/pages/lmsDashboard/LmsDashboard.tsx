@@ -83,7 +83,7 @@ const LmsDashboard: React.FC = () => {
     : "0.0";
 
   const myAccSeq = useMemo(() => {
-    const userInfo = localStorage.getItem("user"); // 혹은 저장하신 키값
+    const userInfo = localStorage.getItem("userInfo"); // 혹은 저장하신 키값
     if (!userInfo) return null;
     try {
       return JSON.parse(userInfo).accSeq;
@@ -132,7 +132,7 @@ const LmsDashboard: React.FC = () => {
                 color="primary"
               />
             }
-            label="내 담당 수업만 보기"
+            label="내 담당 과정만 보기"
             sx={{ 
               ml: 1, 
               '& .MuiFormControlLabel-label': { fontWeight: 600, fontSize: '0.9rem' } 
