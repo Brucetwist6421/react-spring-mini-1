@@ -17,4 +17,6 @@ export interface LmsDashboardData {
   earlyoutCount: number;
   graduatedCount: number;
   subjects: SubjectStat[];
+  teacherName: string;
+  accountSeq: number;
 }

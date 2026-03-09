@@ -72,6 +72,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
             <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: "1rem" }}>
               {row.curName} - {row.className}호 ({row.term}기)
             </Typography>
+
             <Box sx={{ display: 'flex', ml: 'auto' }}>
               {/* 수정 버튼 */}
               <Tooltip title="과정 수정">
@@ -104,6 +105,13 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
           </Typography>
         </TableCell>
 
+        {/* 담당 교수 */}
+        <TableCell width="10%" align="left">
+          <Typography variant="body2" sx={{ fontWeight: 600, color: '#475569' }}>
+            {row.teacherName || '미정'}
+          </Typography>
+        </TableCell>
+
         {/* 3. 인원 현황 */}
         <TableCell align="left" width="15%">
           <Typography sx={{ fontSize: "1rem", fontWeight: 500 }}>
@@ -112,7 +120,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         </TableCell>
 
         {/* 4. 이행률 */}
-        <TableCell align="left" width="40%"> 
+        <TableCell align="left" width="30%"> 
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <Typography variant="body1" sx={{ mr: 2, minWidth: 50, fontWeight: "bold", fontSize: "1rem" }}>
               {row.totalAvgRatio}%
@@ -127,7 +135,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         </TableCell>
 
         {/* 5. 버튼 그룹 셀 (현황보기 유지 + 과정관리 추가) */}
-        <TableCell align="center" width="25%">
+        <TableCell align="center" width="30%">
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
              {/* 학생 등록 버튼 */}
             <Button

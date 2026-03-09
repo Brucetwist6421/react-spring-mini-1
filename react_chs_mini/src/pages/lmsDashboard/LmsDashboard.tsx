@@ -7,11 +7,13 @@ import AddIcon from "@mui/icons-material/Add";
 import {
   Box, Button, CircularProgress,
   FormControl,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  Switch,
   Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Typography
 } from "@mui/material";
@@ -28,6 +30,7 @@ const LmsDashboard: React.FC = () => {
   const [data, setData] = useState<LmsDashboardData[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
+  const [myClassOnly, setMyClassOnly] = useState<boolean>(false);
 
   // 1. API 호출 함수 (year 파라미터 전달)
   const fetchData = async (year: string) => {
@@ -79,6 +82,24 @@ const LmsDashboard: React.FC = () => {
     ? (data.reduce((acc, curr) => acc + (Number(curr.totalAvgRatio) || 0), 0) / data.length).toFixed(1) 
     : "0.0";
 
+  const myAccSeq = useMemo(() => {
+    const userInfo = localStorage.getItem("user"); // 혹은 저장하신 키값
+    if (!userInfo) return null;
+    try {
+      return JSON.parse(userInfo).accSeq;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // 5. 내 과정만 보기 필터링 (선택적)
+  const filteredData = useMemo(() => {
+    if (!myClassOnly) return data;
+    
+    // 데이터 객체 내에 교수님의 식별값(예: teacherId)이 있다고 가정
+    return data.filter(item => item.accountSeq === myAccSeq); 
+  }, [data, myClassOnly, myAccSeq]);
+
   return (
     <Box sx={{ p: 1 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -102,6 +123,21 @@ const LmsDashboard: React.FC = () => {
               ))}
             </Select>
           </FormControl>
+          
+          <FormControlLabel
+            control={
+              <Switch 
+                checked={myClassOnly} 
+                onChange={(e) => setMyClassOnly(e.target.checked)} 
+                color="primary"
+              />
+            }
+            label="내 담당 수업만 보기"
+            sx={{ 
+              ml: 1, 
+              '& .MuiFormControlLabel-label': { fontWeight: 600, fontSize: '0.9rem' } 
+            }}
+          />
         </Box>
       </Box>
 
@@ -205,26 +241,27 @@ const LmsDashboard: React.FC = () => {
             <TableRow>
               <TableCell width="50px" sx={{ bgcolor: "#f8fafc" }} />
               <TableCell width="20%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 명 (기수)</TableCell>
+              <TableCell width="10%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>담당 교수</TableCell>
               <TableCell width="15%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>현재 인원 / 시작 인원</TableCell>
-              <TableCell width="40%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 이행률</TableCell>
-              <TableCell width="20%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>기능</TableCell>
+              <TableCell width="30%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 이행률</TableCell>
+              <TableCell width="30%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>기능</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 10 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 10 }}>
                    <CircularProgress thickness={4} size={40} sx={{ color: '#1e293b' }} />
                    <Typography sx={{ mt: 2, color: '#64748b' }}>데이터를 불러오는 중...</Typography>
                 </TableCell>
               </TableRow>
-            ) : data.length > 0 ? (
-              data.map((item, index) => (
+            ) : filteredData.length > 0 ? (
+              filteredData.map((item, index) => (
                 <LmsDashboardRow key={`${item.className}-${index}`} row={item} onRefresh={() => fetchData(selectedYear)} />
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 10, color: '#94a3b8', fontSize: '1.1rem' }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 10, color: '#94a3b8', fontSize: '1.1rem' }}>
                   데이터가 없습니다.
                 </TableCell>
               </TableRow>

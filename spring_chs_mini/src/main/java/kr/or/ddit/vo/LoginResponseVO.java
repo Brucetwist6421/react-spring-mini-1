@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder // 빌더 패턴 지원
 public class LoginResponseVO {
     String accessToken;
+    Integer accSeq;
     String accId;
     String accEmail;
     String accName;

@@ -52,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
         // 5. 반환
         return LoginResponseVO.builder()
             .accessToken(token)
+            .accSeq(user.getAccountSeq())
             .accId(user.getAccountId())
             .accEmail(user.getAccountEmail())
             .accName(user.getAccountName())
