@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.mapper.SubjectDailyLogMapper">
+    <select id="selectDailyLogList" parameterType="map" resultType="kr.or.ddit.vo.SubjectDailyLogVO">
+        SELECT d.*, s.sub_name
+        FROM lms.tb_subject_daily_log d
+        JOIN lms.tb_subject s ON d.sub_seq = s.sub_seq
+        WHERE d.sub_seq = #{subSeq}
+        <if test="logDate != null and logDate != ''">
+            AND d.log_date = #{logDate}
+        </if>
+        ORDER BY d.log_date DESC
+    </select>
+</mapper>

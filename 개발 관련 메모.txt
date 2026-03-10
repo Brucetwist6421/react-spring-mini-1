@@ -1,0 +1,209 @@
+-- 현재 세션의 작업 경로를 lms 스키마로 고정합니다.
+SET search_path TO lms, public;
+
+-- 1. 과정 테이블
+CREATE TABLE TB_CURRICULUM (
+    CUR_SEQ      SERIAL PRIMARY KEY,
+    ROOM         VARCHAR(50),
+    TERM         INTEGER,
+    MAN_COUNT    INTEGER,
+    START_DATE   DATE NOT NULL,
+    END_DATE     DATE NOT NULL
+);
+
+-- 2. 과목 테이블
+CREATE TABLE TB_SUBJECT (
+    SUB_SEQ      SERIAL PRIMARY KEY,
+    CUR_SEQ      INTEGER NOT NULL,
+    SUB_NAME     VARCHAR(100) NOT NULL,
+    START_DATE   DATE,
+    END_DATE     DATE,
+    CONSTRAINT FK_SUBJECT_CURRICULUM FOREIGN KEY (CUR_SEQ) 
+        REFERENCES TB_CURRICULUM (CUR_SEQ) ON DELETE CASCADE
+);
+
+-- 3. 학생 테이블 (기존 4번)
+CREATE TABLE TB_STUDENT (
+    STU_SEQ      SERIAL PRIMARY KEY,
+    CUR_SEQ      INTEGER NOT NULL,
+    USER_ID      VARCHAR(50) UNIQUE NOT NULL,
+    USER_NAME    VARCHAR(50) NOT NULL,
+    BIRTH        DATE,
+    GENDER       CHAR(1),
+    TEL          VARCHAR(20),
+    EDU          VARCHAR(50),
+    MAJOR        VARCHAR(50),
+    GRAD_TYPE    VARCHAR(20),
+    CAREER       TEXT,
+    DROPOUT_INFO TEXT,
+    CONSTRAINT FK_STUDENT_CURRICULUM FOREIGN KEY (CUR_SEQ) 
+        REFERENCES TB_CURRICULUM (CUR_SEQ)
+);
+
+-- 4. 테스트(시험지) 테이블 (기존 1번)
+CREATE TABLE TB_TEST (
+    TEST_SEQ      SERIAL PRIMARY KEY,
+    SUB_SEQ       INTEGER NOT NULL,
+    TEST_NAME     VARCHAR(200) NOT NULL,
+    DURATION      INTEGER,
+    START_TIME    TIMESTAMP,
+    END_TIME      TIMESTAMP,
+    CONSTRAINT FK_TEST_SUBJECT FOREIGN KEY (SUB_SEQ) REFERENCES TB_SUBJECT (SUB_SEQ) ON DELETE CASCADE
+);
+
+-- 5. 문제 테이블
+CREATE TABLE TB_QUESTION (
+    QUES_SEQ      SERIAL PRIMARY KEY,
+    TEST_SEQ      INTEGER NOT NULL,
+    QUES_NUM      INTEGER NOT NULL,
+    CONTENT       TEXT NOT NULL,
+    QUES_TYPE     VARCHAR(20),
+    ANSWER        TEXT NOT NULL,
+    POINT         INTEGER DEFAULT 5,
+    CONSTRAINT FK_QUES_TEST FOREIGN KEY (TEST_SEQ) REFERENCES TB_TEST (TEST_SEQ) ON DELETE CASCADE
+);
+
+-- 6. 보기 테이블
+CREATE TABLE TB_CHOICE (
+    CHOICE_SEQ    SERIAL PRIMARY KEY,
+    QUES_SEQ      INTEGER NOT NULL,
+    CHOICE_NUM    INTEGER NOT NULL,
+    CONTENT       TEXT NOT NULL,
+    CONSTRAINT FK_CHOICE_QUES FOREIGN KEY (QUES_SEQ) REFERENCES TB_QUESTION (QUES_SEQ) ON DELETE CASCADE
+);
+
+-- 7. 학생 답안 제출 테이블
+CREATE TABLE TB_STUDENT_ANSWER (
+    ANS_SEQ       SERIAL PRIMARY KEY,
+    STU_SEQ       INTEGER NOT NULL,
+    QUES_SEQ      INTEGER NOT NULL,
+    SUBMITTED_ANS TEXT,
+    IS_CORRECT    BOOLEAN,
+    CONSTRAINT FK_ANS_STUDENT FOREIGN KEY (STU_SEQ) REFERENCES TB_STUDENT (STU_SEQ),
+    CONSTRAINT FK_ANS_QUES FOREIGN KEY (QUES_SEQ) REFERENCES TB_QUESTION (QUES_SEQ)
+);
+
+-- 8. 최종 성적 테이블
+CREATE TABLE TB_TEST_RESULT (
+    RESULT_SEQ    SERIAL PRIMARY KEY,
+    STU_SEQ       INTEGER NOT NULL,
+    TEST_SEQ      INTEGER NOT NULL,
+    TOTAL_SCORE   INTEGER DEFAULT 0,
+    STATUS        VARCHAR(20),
+    REG_DATE      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT FK_RESULT_STUDENT FOREIGN KEY (STU_SEQ) REFERENCES TB_STUDENT (STU_SEQ),
+    CONSTRAINT FK_RESULT_TEST FOREIGN KEY (TEST_SEQ) REFERENCES TB_TEST (TEST_SEQ)
+);
+
+-- 출석 테이블
+CREATE TABLE lms.tb_attendance (
+  attendance_seq SERIAL NOT NULL,
+  account_seq INTEGER NOT NULL,     -- 학생 (tb_account 참조)
+  cur_seq INTEGER NOT NULL,         -- 과정 (tb_curriculum 참조)
+  attendance_date DATE NOT NULL DEFAULT CURRENT_DATE, -- 예외 발생 일자
+  
+  -- 상태: LATE(지각), EARLY(조퇴), ABSENT(결석), OUTING(외출), OFFICIAL(공결)
+  status CHARACTER VARYING(20) NOT NULL, 
+  
+  -- 시작/종료 시간 (외출: 외출/복귀시간, 지각: 입실시간, 조퇴: 퇴실시간)
+  start_time TIMESTAMP WITHOUT TIME ZONE NULL, 
+  end_time TIMESTAMP WITHOUT TIME ZONE NULL, 
+  
+  remark TEXT NULL,                 -- 사유 (병원, 은행, 개인용무 등)
+  
+  reg_id CHARACTER VARYING(50) NOT NULL, 
+  reg_date TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_id CHARACTER VARYING(50) NULL,
+  update_date TIMESTAMP WITHOUT TIME ZONE NULL,
+
+  CONSTRAINT tb_attendance_pkey PRIMARY KEY (attendance_seq),
+  -- 한 학생이 하루에 여러 번 외출할 수 있다면 이 제약조건을 제거하거나, 
+  -- status를 포함하여 복합키를 구성해야 합니다. (아래는 하루 1건 예외 기록 기준)
+  CONSTRAINT unique_attendance_exception UNIQUE (account_seq, cur_seq, attendance_date, status),
+  CONSTRAINT fk_attendance_account FOREIGN KEY (account_seq) REFERENCES lms.tb_account (account_seq) ON DELETE CASCADE,
+  CONSTRAINT fk_attendance_curriculum FOREIGN KEY (cur_seq) REFERENCES lms.tb_curriculum (cur_seq) ON DELETE CASCADE
+) TABLESPACE pg_default;
+
+
+과목시퀀스, 과목명, 시작일자, 종료일자 컬럼이 과목 테이블에 있고 과정 시퀀스, 호실, 기수, 시작일자, 종료일자, 인원수 컬럼이 과정 테이블에 있고 학생시퀀스, 과정 시퀀스(FK), 아이디, 이름, 생년월일, 성별, 연락처, 학력, 전공, 졸업구분, 경력사항, 제적정보 컬럼이 학생 테이블에 있습니다. 또한 학생이 모든 과목에 대한 테스트를 진행해야 합니다. DB를 어떻게 설계하면 좋을까요?
+
+해당 xml 을 구현할 수 있게 vo(lombok), controller, service(인터페이스), serviceImpl, mapper(인터페이스), mapper.xml 구조를 구현해주세요.
+
+학생 클릭 시 이름, id, 전화번호, 과정명, 사업명, 과정 기간, 담당자(.tb_curriculum 의 account_seq), 생일, 성별, 주소, 이메일, edu,major, grad_type, military_status 조회를  구현할 수 있게 vo(lombok), controller, service(인터페이스), serviceImpl, mapper(인터페이스), mapper.xml 구조를 구현해주세요.
+
+학생 클릭 시 학생 사진, 이름, id, 전화번호, 과정명, 사업명, 과정 기간, 담당자(.tb_curriculum 의 account_seq), 생일, 성별, 주소, 이메일, edu,major, grad_type, military_status 가 조회되고 출석현황정보, 평가정보, 의견 및 특이사항 정보, 상담 정보가 ui, ux 최적화된 상태로 구현하고 싶습니다.
+
+lms.tb_account 테이블 account_seq ,  account_id, account_name, teacher_yn
+
+create table lms.tb_account (
+  account_seq serial not null,
+  cur_seq integer null,
+  account_id character varying(50) not null,
+  account_name character varying(50) not null,
+  birth date null,
+  gender character varying(1) null,
+  tel character varying(20) null,
+  edu character varying(50) null,
+  major character varying(50) null,
+  grad_type character varying(20) null,
+  career text null,
+  dropout_info text null,
+  status character varying(20) null default 'ENROLLED'::character varying,
+  account_email character varying(100) null,
+  account_passwd character varying(255) null,
+  account_type character varying(20) null default 'STU'::character varying,
+  reg_date timestamp without time zone null default CURRENT_TIMESTAMP,
+  update_id character varying(50) null,
+  update_date timestamp without time zone null default CURRENT_TIMESTAMP,
+  current_token text null,
+  teacher_yn character varying null default 'N'::character varying,
+  ident_number character varying(255) null,
+  emergency_tel character varying(20) null,
+  address text null,
+  marital_status character varying(1) null,
+  licenses text null,
+  military_status character varying(20) null,
+  prev_company character varying(100) null,
+  quit_date date null,
+  main_image_path character varying null,
+  dropout_date date null,
+  constraint tb_student_pkey primary key (account_seq),
+  constraint tb_student_user_id_key unique (account_id),
+  constraint fk_account_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq)
+) TABLESPACE pg_default;
+
+  reg_id character varying(100) null,
+  reg_date timestamp without time zone null default CURRENT_TIMESTAMP,
+update_id character varying(100) null,
+  update_date timestamp without time zone null,
+
+create table lms.tb_curriculum (
+  cur_seq serial not null,
+  room character varying(50) null,
+  term integer null,
+  man_count integer null,
+  start_date date not null,
+  end_date date not null,
+  cur_name character varying null,
+  account_seq integer null,
+  business_name character varying(255) null,
+  constraint tb_curriculum_pkey primary key (cur_seq)
+) TABLESPACE pg_default;
+
+//출석 테이블 생성 및 조회 서비스 back layer 구현
+
+대시보드 UI 수정 
+1. 통계 항목 추가
+대시보드 기능 추가
+1. 학생 등록 기능 추가
+학생 관리 기능 추가
+1. 출석현황 조회
+2. 학생 정보 조회
+3. 학생 정보 수정
+
+--과정 등록/수정 시 account_seq (담임 계정 시퀀스) 삽입 로직 추가 필요
+--선생 조회/선택 selectBox 컴포넌트 생성 필요
+
+
+과목 별 훈련 내용 테이블 생성
+-> 시퀀스,과목 시퀀스 외래키, 내용, 비고, 일지 작성 일자, 상태, 등록 ID, 등록일자, 수정 ID, 수정일시

@@ -122,14 +122,14 @@ public class PokemonServiceImpl implements PokemonService {
 	@Override
 	public List<PokemonVO> getPokemonList() {
 		List<PokemonVO> pokemonList = pokemonMapper.selectPokemonList();
-		if (pokemonList == null || pokemonList.isEmpty()) {
-			for (PokemonVO vo : pokemonList) {
-				List<PokemonAttachmentVO> attachments = pokemonMapper.selectAttachmentsByPokemonId(vo.getId());
-				if (attachments != null && !attachments.isEmpty()) {
-					vo.setAttachments(attachments);
-				}
-			}
-		}
+		// if (pokemonList == null || pokemonList.isEmpty()) {
+		// 	for (PokemonVO vo : pokemonList) {
+		// 		List<PokemonAttachmentVO> attachments = pokemonMapper.selectAttachmentsByPokemonId(vo.getId());
+		// 		if (attachments != null && !attachments.isEmpty()) {
+		// 			vo.setAttachments(attachments);
+		// 		}
+		// 	}
+		// }
 		return pokemonList;
 	}
 
