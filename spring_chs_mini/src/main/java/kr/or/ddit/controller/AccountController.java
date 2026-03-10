@@ -76,6 +76,7 @@ public class AccountController {
             accountService.registerStudent(accountData, mainImage);
             return ResponseEntity.ok("Success");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
         }
     }

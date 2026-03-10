@@ -1,10 +1,11 @@
 package kr.or.ddit.vo;
 
-import lombok.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -14,8 +15,7 @@ public class SubjectDailyLogVO {
     private Integer dailyLogSeq;
     private Integer subSeq;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate logDate;
+    private String logDate;
 
     private Integer period;
     private String content;
