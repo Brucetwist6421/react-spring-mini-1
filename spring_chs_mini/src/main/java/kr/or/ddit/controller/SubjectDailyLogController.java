@@ -31,7 +31,7 @@ public class SubjectDailyLogController {
     private final SubjectDailyLogService service;
 
     @Operation(summary = "훈련일지 조회", description = "특정 과정의 일자 별 훈련일지를 조회합니다.")
-    @GetMapping("/{subSeq}")
+    @GetMapping("/curriculum/{subSeq}")
     public ResponseEntity<List<SubjectDailyLogVO>> getDailyLogList(
             @Parameter(description = "과정 일련번호") @PathVariable Integer subSeq,
             @Parameter(description = "일지 날짜") @RequestParam(required = false) String logDate) {
