@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,10 +41,13 @@ public class SubjectDailyLogController {
     @Operation(summary = "훈련일지 저장", description = "훈련일지 및 첨부파일을 저장합니다.")
     @PostMapping(value = "/save")
     public ResponseEntity<String> saveDailyLogs(
-            @Parameter(description = "훈련일지 정보") @RequestPart(value = "logs") List<SubjectDailyLogVO> logs,
+            @Parameter(description = "훈련일지 정보") @RequestPart(value = "logs") String logsJson, // 리스트를 JSON 문자열로 받음
             @Parameter(description = "첨부파일") @RequestPart(value = "attachFile", required = false) MultipartFile attachFile) {
         
         try {
+            ObjectMapper mapper = new ObjectMapper();
+            List<SubjectDailyLogVO> logs = mapper.readValue(logsJson, new TypeReference<List<SubjectDailyLogVO>>(){});
+            
             service.saveDailyLogs(logs, attachFile);
             return ResponseEntity.ok("Success");
         } catch (Exception e) {
