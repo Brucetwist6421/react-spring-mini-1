@@ -17,22 +17,38 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
   const [attendance, setAttendance] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. 초기 데이터 로드 (과목 목록 및 조회)
+  // 1. 초기 데이터 로드 및 폼 초기화
   useEffect(() => {
     if (open) {
+      // 모달이 열릴 때마다 파일 입력창 초기화
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      // 과목 리스트 로드
       api.get(`/api/curriculum/subjects/${curSeq}`).then(res => setSubjects(res.data));
     }
   }, [open, curSeq]);
 
   useEffect(() => {
     if (open && logDate) {
+      // 데이터가 없거나 조회 실패 시 폼이 초기화되도록 빈 객체로 설정
+      setDailyLogs({}); 
+      setAttendance([]);
+
       api.get(`/api/daily-log/curriculum/${curSeq}`, { params: { logDate } })
          .then(res => {
-           const logMap = res.data.reduce((acc: any, cur: any) => ({ ...acc, [cur.period]: cur }), {});
-           setDailyLogs(logMap);
-         });
+           // 서버에서 온 데이터가 있을 경우만 맵핑
+           if (res.data && res.data.length > 0) {
+             const logMap = res.data.reduce((acc: any, cur: any) => ({ ...acc, [cur.period]: cur }), {});
+             setDailyLogs(logMap);
+           }
+         })
+         .catch(() => setDailyLogs({})); // 에러 발생 시에도 초기화
+
       api.get(`/api/attendance/${curSeq}/${logDate}`)
-         .then(res => setAttendance(res.data));
+         .then(res => setAttendance(res.data))
+         .catch(() => setAttendance([]));
     }
   }, [logDate, curSeq, open]);
 
@@ -46,9 +62,12 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
 
   // 3. 저장 로직
   const handleSave = async () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    const regId = userInfo.accId; // accId 추출
+
     const logsPayload = Object.values(dailyLogs)
         .filter(log => log.subSeq && log.content)
-        .map(log => ({ ...log, logDate: logDate }));
+        .map(log => ({ ...log, logDate: logDate, regId: regId, status: "A" }));
 
     if (logsPayload.length === 0) return;
 

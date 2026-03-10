@@ -8,7 +8,7 @@
         JOIN lms.tb_subject s ON d.sub_seq = s.sub_seq
         WHERE d.sub_seq = #{subSeq}
         <if test="logDate != null and logDate != ''">
-            AND d.log_date = #{logDate}
+            AND d.log_date = #{logDate}::date
         </if>
         ORDER BY d.log_date DESC
     </select>
