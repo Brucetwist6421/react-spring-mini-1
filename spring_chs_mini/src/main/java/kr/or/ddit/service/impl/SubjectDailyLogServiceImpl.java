@@ -23,10 +23,12 @@ public class SubjectDailyLogServiceImpl implements SubjectDailyLogService {
 
     @Override
         public List<SubjectDailyLogVO> getDailyLogList(Integer subSeq, String logDate) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("subSeq", subSeq);
-        params.put("logDate", logDate);
-        return mapper.selectDailyLogList(params);
+            System.out.println("DEBUG: getDailyLogList -> subSeq: " + subSeq + ", logDate: " + logDate);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("subSeq", subSeq);
+            params.put("logDate", logDate);
+            return mapper.selectDailyLogList(params);
     }
 
     @Override
