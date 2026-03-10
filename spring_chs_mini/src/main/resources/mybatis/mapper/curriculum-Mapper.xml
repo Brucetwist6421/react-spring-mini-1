@@ -63,4 +63,21 @@
         WHERE cur_seq = #{curSeq}
     </update>
 
+    <select id="selectSubjectListByCurSeq" parameterType="int" resultType="kr.or.ddit.vo.SubjectVO">
+        SELECT 
+            sub_seq, 
+            cur_seq, 
+            sub_name, 
+            start_date, 
+            end_date,
+            status,
+            reg_id,
+            reg_date,
+            update_id,
+            update_date
+        FROM lms.tb_subject
+        WHERE cur_seq = #{curSeq}
+        ORDER BY sub_seq ASC
+    </select>
+
 </mapper>

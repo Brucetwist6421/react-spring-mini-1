@@ -1,11 +1,14 @@
 package kr.or.ddit.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.or.ddit.mapper.CurriculumMapper;
 import kr.or.ddit.service.CurriculumService;
 import kr.or.ddit.vo.CurriculumVO;
+import kr.or.ddit.vo.SubjectVO;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -36,5 +39,10 @@ public class CurriculumServiceImpl implements CurriculumService {
     public int deleteCurriculum(Integer curSeq) {
         // 필요 시 여기서 추가적인 비즈니스 로직(하위 데이터 체크 등)을 수행할 수 있습니다.
         return curriculumMapper.deleteCurriculum(curSeq);
+    }
+
+    @Override
+    public List<SubjectVO> getSubjectList(Integer curSeq) {
+        return curriculumMapper.selectSubjectListByCurSeq(curSeq);
     }
 }

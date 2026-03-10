@@ -1,5 +1,7 @@
 package kr.or.ddit.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.ddit.service.CurriculumService;
 import kr.or.ddit.vo.CurriculumVO;
+import kr.or.ddit.vo.SubjectVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,5 +81,11 @@ public class CurriculumController {
             return ResponseEntity.ok("삭제 성공");
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 실패");
+    }
+
+    @Operation(summary = "과정별 과목 목록 조회", description = "특정 교육과정에 속한 과목 목록을 조회합니다.")
+    @GetMapping("/subjects/{curSeq}") // 경로를 명확하게 맞춤
+    public ResponseEntity<List<SubjectVO>> getSubjectList(@PathVariable Integer curSeq) {
+        return ResponseEntity.ok(curriculumService.getSubjectList(curSeq));
     }
 }

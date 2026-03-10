@@ -26,6 +26,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
   }, [open, curSeq]);
 
   useEffect(() => {
+    console.log("Selected Subject:", selectedSub, "Log Date:", logDate);
     if (selectedSub && logDate) {
       // 교시별 데이터를 조회하여 상태 업데이트
       api.get(`/api/daily-log/${selectedSub}`, { params: { logDate } })
