@@ -1,0 +1,52 @@
+내 git 코드를 개발하기 위한 개발환경 세팅
+
+1. vs code 설치
+https://code.visualstudio.com// -> Download for Windows 클릭하여 설치
+
+2. git 설치
+https://git-scm.com/ -> Install for Windows 다운로드 후 설치
+ 'Next' 대신 확인해야 할 주요 설정단계 
+1) Choosing the default editor : Visual Studio Code (기본은 Vim)Vim은 익숙하지 않으면 종료조차 어렵습니다. VS Code가 훨씬 편합니다.
+2) Adjusting the name of the initial branch : Override default branch name to 'main'GitHub의 기본 브랜치명이 main이므로, master 대신 맞춰주는 게 꼬이지 않는다.
+3) Configuring the line ending conversions : Checkout Windows-style, commit Unix-style윈도우와 리눅스(서버) 간의 줄바꿈 문자 차이로 발생하는 에러를 자동 방지해 줍니다.
+
+3. git 설치 확인
+cmd 에서 git --version 입력
+
+4. 내 컴퓨터르 프로젝트 복제 
+1) 바탕화면이나 원하는 경로에 폴더를 하나 만듭니다. (예: workspace)
+2) 그 폴더 안에서 마우스 우클릭 후 'Open Git Bash here' 또는 **'터미널에서 열기'**를 선택합니다.
+3) 명령어를 입력 : git clone https://github.com/Brucetwist6421/react-spring-mini-1.git
+
+5. nvm 설치 
+1) https://github.com/coreybutler/nvm-windows/releases 접속 후 하단의 nvm-setup.exe 다운로드 후 설치
+2) cmd 오픈 후 nvm -v 로 설치 확인
+
+6. node.js 설치
+1) nvm 설치 완료 후 cmd 에 명령어 입력 : nvm install --lts
+2) 설치 완료 후 사용 명령어 입력 : nvm use 24.14.0
+
+7. 리액트 프로젝트 의존성 설치 확인
+1) vscode 에서 cmd 터미널을 통해 npm i 명령어가 실행되는지 확인
+
+8. spring boot 프로젝트를 위한 jdk 설치 
+1) https://developers.redhat.com/products/openjdk/download#downloads 접속 후 jdk-21.0.10-x64 MSI | OpenJDK 21 Windows 64-bit 다운로드 후 설치
+* 설치 시 유의점
+아이콘 클릭: PATH Variable, JAVA_HOME Variable, JAR Files Association 옆에 있는 X 모양 아이콘을 각각 클릭하세요.
+선택 변경: 클릭하면 메뉴가 나오는데, 거기서 "Entire feature will be installed on local hard drive" (보통 가장 위에 있는 선택지)를 선택하세요.
+
+9. java 설치 확인
+1) vs code cmd 터미널에서 java -version 입력 -- 정상 작동 안하면 모든 vscode 종료 후 다시 시작 후 입력(재부팅 필요없음)
+
+10. VS code 확장팩 설치
+1) Extension Pack for Java
+2) Spring Boot Extension Pack
+
+--git commit & push
+git add .
+git commit -m "lms dashboard update"
+git push origin main
+
+--docker spring log 보기
+ssh -i "ssh-key-2026-01-22.key" ubuntu@168.107.51.143
+docker logs spring-container
