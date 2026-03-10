@@ -22,11 +22,10 @@ public class SubjectDailyLogServiceImpl implements SubjectDailyLogService {
     private final FileService fileService; // 공통 파일 업로드 서비스 의존성 주입
 
     @Override
-        public List<SubjectDailyLogVO> getDailyLogList(Integer subSeq, String logDate) {
-            System.out.println("DEBUG: getDailyLogList -> subSeq: " + subSeq + ", logDate: " + logDate);
+        public List<SubjectDailyLogVO> getDailyLogList(Integer curSeq, String logDate) {
 
             Map<String, Object> params = new HashMap<>();
-            params.put("subSeq", subSeq);
+            params.put("curSeq", curSeq);
             params.put("logDate", logDate);
             return mapper.selectDailyLogList(params);
     }

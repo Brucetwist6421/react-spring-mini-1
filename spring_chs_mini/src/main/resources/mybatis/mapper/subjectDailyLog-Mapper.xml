@@ -6,11 +6,11 @@
         SELECT d.*, s.sub_name
         FROM lms.tb_subject_daily_log d
         JOIN lms.tb_subject s ON d.sub_seq = s.sub_seq
-        WHERE d.sub_seq = #{subSeq}
+        WHERE s.cur_seq = #{curSeq}
         <if test="logDate != null and logDate != ''">
             AND d.log_date = #{logDate}::date
         </if>
-        ORDER BY d.log_date DESC
+        ORDER BY d.period ASC
     </select>
 
     <insert id="upsertDailyLog" parameterType="SubjectDailyLogVO">
