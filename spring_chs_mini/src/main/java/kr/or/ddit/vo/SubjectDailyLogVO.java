@@ -12,6 +12,7 @@ public class SubjectDailyLogVO {
     private Integer dailyLogSeq;
     private Integer subSeq;
     private LocalDate logDate;
+    private Integer period;
     private String content;
     private String status;
     private String regId;

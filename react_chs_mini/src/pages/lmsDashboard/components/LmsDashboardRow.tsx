@@ -10,12 +10,14 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd"; // 아이콘 추가
 import LmsStudentAddModal from "./LmsStudentAddModal"; // 생성한 모달 임포트
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 
 import { useNavigate } from "react-router-dom"; 
 import SettingsIcon from "@mui/icons-material/Settings"; 
 import { Tooltip } from "@mui/material";
 import LmsCurriculumEditModal from "./LmsCurriculumEditModal";
 import api from "../../../api/axiosInstance";
+import LmsDailyLogModal from "./LmsDailyLogModal";
 
 const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -23,6 +25,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -151,6 +154,21 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
             >
               학생등록
             </Button>
+
+            <Button
+              variant="outlined"
+              size="small"
+              color="info"
+              startIcon={<LibraryBooksIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLogModalOpen(true);
+              }}
+              sx={{ borderRadius: "6px", fontWeight: "bold" }}
+            >
+              훈련일지 등록
+            </Button>
+
             {/* 성적현황 버튼 - 인원이 없으면 볼 데이터가 없으므로 함께 비활성화 권장 */}
             <Button
               variant="outlined"
@@ -271,6 +289,12 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         onClose={() => setIsEditModalOpen(false)}
         curData={row}
         onUpdate={onRefresh} // 수정 성공 시 부모 리스트 갱신
+      />
+
+      <LmsDailyLogModal 
+        open={isLogModalOpen}
+        onClose={() => setIsLogModalOpen(false)}
+        curSeq={row.curSeq} // 과정 시퀀스 전달
       />
 
       {/* 확장 영역 (Collapse) */}
