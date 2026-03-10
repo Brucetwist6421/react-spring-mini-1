@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dialog, DialogContent, DialogTitle, MenuItem, TextField, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import Grid from "@mui/material/Grid"; // Grid2 전용 임포트
+import Grid from "@mui/material/Grid"; 
 import { useState, useEffect } from "react";
 import api from "../../../api/axiosInstance";
 
@@ -12,30 +12,38 @@ interface LmsDailyLogModalProps {
 
 const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
   const [subjects, setSubjects] = useState<any[]>([]);
-  const [selectedSub, setSelectedSub] = useState("");
-  const [logDate, setLogDate] = useState(new Date().toISOString().split('T')[0]);
-  
-  // 1~8교시 데이터를 객체로 관리: { 1: "내용", 2: "내용", ... }
+  const [selectedSub, setSelectedSub] = useState<string>("");
+  const [logDate, setLogDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [dailyLogs, setDailyLogs] = useState<Record<number, string>>({});
   const [attendance, setAttendance] = useState<any[]>([]);
 
+  // 1. 모달이 열릴 때 해당 커리큘럼의 과목 목록 조회
   useEffect(() => {
     if (open) {
-      api.get(`/api/curriculum/subjects/${curSeq}`).then(res => setSubjects(res.data));
+      api.get(`/api/curriculum/subjects/${curSeq}`).then(res => {
+        setSubjects(res.data);
+        if (res.data.length > 0) {
+          setSelectedSub(res.data[0].subSeq.toString()); // 첫 번째 과목 자동 선택
+        }
+      });
     }
   }, [open, curSeq]);
 
+  // 2. 과목이나 날짜가 변경될 때 일지 및 출석 데이터 조회
   useEffect(() => {
-    console.log("Selected Subject:", selectedSub, "Log Date:", logDate);
     if (selectedSub && logDate) {
-      // 교시별 데이터를 조회하여 상태 업데이트
+      // 훈련일지 조회 (subSeq, logDate 기준)
       api.get(`/api/daily-log/${selectedSub}`, { params: { logDate } })
          .then(res => {
            const logs = res.data.reduce((acc: any, cur: any) => ({ ...acc, [cur.period]: cur.content }), {});
            setDailyLogs(logs);
-         });
+         })
+         .catch(err => console.error("일지 조회 실패", err));
       
-      api.get(`/api/attendance/${curSeq}/${logDate}`).then(res => setAttendance(res.data));
+      // 출석 데이터 조회 (curSeq, logDate 기준)
+      api.get(`/api/attendance/${curSeq}/${logDate}`)
+         .then(res => setAttendance(res.data))
+         .catch(err => console.error("출석 조회 실패", err));
     }
   }, [selectedSub, logDate, curSeq]);
 
@@ -58,7 +66,6 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
           </Grid>
         </Grid>
 
-        {/* 1~8교시 입력 폼 반복 생성 */}
         {[...Array(8)].map((_, i) => (
           <TextField 
             key={i + 1}

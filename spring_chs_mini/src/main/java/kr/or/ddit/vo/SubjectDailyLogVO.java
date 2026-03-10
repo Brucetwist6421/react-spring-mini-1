@@ -20,6 +20,8 @@ public class SubjectDailyLogVO {
     private String updateId;
     private LocalDateTime updateDate;
 
+    private String mainFilePath; // 첨부파일 경로
+
     // 조인 조회 시 추가 활용 필드
     private String subName;
 }

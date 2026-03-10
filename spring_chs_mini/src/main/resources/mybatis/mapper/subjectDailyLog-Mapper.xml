@@ -12,4 +12,17 @@
         </if>
         ORDER BY d.log_date DESC
     </select>
+
+    <insert id="upsertDailyLog" parameterType="SubjectDailyLogVO">
+        INSERT INTO lms.tb_subject_daily_log 
+        (sub_seq, log_date, content, status, reg_id, period, main_file_path)
+        VALUES (#{subSeq}, #{logDate}, #{content}, #{status}, #{regId}, #{period}, #{mainFilePath})
+        ON CONFLICT (sub_seq, log_date, period) 
+        DO UPDATE SET 
+            content = EXCLUDED.content,
+            status = EXCLUDED.status,
+            main_file_path = EXCLUDED.main_file_path,
+            update_id = #{regId},
+            update_date = CURRENT_TIMESTAMP
+    </insert>
 </mapper>

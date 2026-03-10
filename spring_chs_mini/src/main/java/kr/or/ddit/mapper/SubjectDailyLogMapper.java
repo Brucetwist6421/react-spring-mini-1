@@ -9,5 +9,8 @@ import java.util.Map;
 
 @Mapper
 public interface SubjectDailyLogMapper {
+
+    void upsertDailyLog(SubjectDailyLogVO vo);
+    
     List<SubjectDailyLogVO> selectDailyLogList(Map<String, Object> params);
 }
