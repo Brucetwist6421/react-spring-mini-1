@@ -45,12 +45,16 @@ public class SubjectDailyLogController {
             @Parameter(description = "첨부파일") @RequestPart(value = "attachFile", required = false) MultipartFile attachFile) {
         
         try {
+            // [디버깅] 클라이언트에서 받은 raw 데이터 확인
+            System.out.println("받은 logsJson: " + logsJson);
+            
             ObjectMapper mapper = new ObjectMapper();
             List<SubjectDailyLogVO> logs = mapper.readValue(logsJson, new TypeReference<List<SubjectDailyLogVO>>(){});
             
             service.saveDailyLogs(logs, attachFile);
             return ResponseEntity.ok("Success");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
         }
     }
