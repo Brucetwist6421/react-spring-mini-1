@@ -133,6 +133,7 @@ CREATE TABLE lms.tb_attendance (
 
 학생 클릭 시 학생 사진, 이름, id, 전화번호, 과정명, 사업명, 과정 기간, 담당자(.tb_curriculum 의 account_seq), 생일, 성별, 주소, 이메일, edu,major, grad_type, military_status 가 조회되고 출석현황정보, 평가정보, 의견 및 특이사항 정보, 상담 정보가 ui, ux 최적화된 상태로 구현하고 싶습니다.
 
+lms.tb_account 테이블 account_seq ,  account_id, account_name, teacher_yn
 
 create table lms.tb_account (
   account_seq serial not null,
@@ -167,7 +168,6 @@ create table lms.tb_account (
   main_image_path character varying null,
   dropout_date date null,
   constraint tb_student_pkey primary key (account_seq),
-  constraint tb_account_account_email_key unique (account_email),
   constraint tb_student_user_id_key unique (account_id),
   constraint fk_account_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq)
 ) TABLESPACE pg_default;
@@ -204,3 +204,9 @@ create table lms.tb_curriculum (
 --과정 등록/수정 시 account_seq (담임 계정 시퀀스) 삽입 로직 추가 필요
 --선생 조회/선택 selectBox 컴포넌트 생성 필요
 
+
+과목 별 훈련 내용 테이블 생성
+-> 시퀀스,과목 시퀀스 외래키, 내용, 비고, 일지 작성 일자, 상태, 등록 ID, 등록일자, 수정 ID, 수정일시
+
+
+ 현재 있는 기능들 모두 유지한 상태 첨부 시 이미지 파일 썸네일 조회, 이미지 파일이 아닌 것은 파일명 조회 등등.. 모달 오픈 시 기본으로 현재일자 데이터를 조회하도록 하고 과목명이 길어질 경우를 대비해서 전체적인 모달의 너비를 확장해야합니다. 또한 훈련내용은 textField 처럼 입력되게 해주세요. 모달 오픈 시 오늘 날짜로만 조회되도록 기능 추가. 그리고 날짜 선택 영역을 누르게 되면 달력이 뜨도록 수정. 적용된 모달의 ui,ux 최적화도 부탁드립니다.

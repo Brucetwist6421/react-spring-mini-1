@@ -155,8 +155,29 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
                       ) : (
                         <>
                           <InsertDriveFileIcon color="primary" />
-                          <Typography sx={{ fontSize: '10px', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {log.file ? log.file.name : (log.mainFilePath?.split('/').pop() || '파일')}
+                          <Typography 
+                            sx={{ 
+                              fontSize: '10px', 
+                              textAlign: 'center', 
+                              width: '100%', 
+                              whiteSpace: 'nowrap', 
+                              overflow: 'hidden', 
+                              textOverflow: 'ellipsis' 
+                            }}
+                          >
+                            {(() => {
+                              // 1. 표시할 이름 결정 (로컬 파일명 우선)
+                              const rawName = log.file ? log.file.name : (log.mainFilePath?.split('/').pop() || '파일');
+                              
+                              // 2. UUID_파일명.ext 구조에서 첫 번째 '_' 이후의 문자열만 추출
+                              if (rawName.includes('_')) {
+                                const parts = rawName.split('_');
+                                // UUID를 제외한 나머지 부분들을 다시 합침 (혹시 파일명에 '_'가 또 있을 경우를 대비)
+                                return parts.slice(1).join('_');
+                              }
+                              
+                              return rawName;
+                            })()}
                           </Typography>
                         </>
                       )}
