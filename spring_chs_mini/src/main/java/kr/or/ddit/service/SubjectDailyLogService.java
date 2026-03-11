@@ -2,7 +2,6 @@ package kr.or.ddit.service;
 
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import kr.or.ddit.vo.SubjectDailyLogVO;

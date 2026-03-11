@@ -1,9 +1,13 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Box, Button, Dialog, DialogContent, DialogTitle, MenuItem, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import RandomSpinner from "../../../components/RandomSpinner";
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+// 요청하신 경로에 맞춰 유틸리티 함수 import
+import { fileListDownload } from "../../../api/fileListDownload";
 
 interface LmsDailyLogModalProps {
   open: boolean;
@@ -38,13 +42,11 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
       });
     }
 
-    // 모달이 닫힐 때 생성된 모든 미리보기 URL 해제
     return () => {
       Object.values(dailyLogs).forEach((log: any) => {
         if (log.preview) URL.revokeObjectURL(log.preview);
       });
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, curSeq, logDate]);
 
   const handleLogChange = (period: number, field: string, value: any) => {
@@ -56,9 +58,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
 
   const handleFileChange = (period: number, file: File) => {
     setDailyLogs(prev => {
-      // 이전 파일의 미리보기 URL이 있다면 메모리에서 해제
       if (prev[period]?.preview) URL.revokeObjectURL(prev[period].preview);
-      
       return {
         ...prev,
         [period]: { 
@@ -70,10 +70,20 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
     });
   };
 
+  // 모듈화된 다운로드 함수 호출
+  const handleDownload = (log: any) => {
+    if (log.mainFilePath && !log.file) {
+      // .trim()을 통해 공백 제거 후 URL 인코딩 수행
+      const cleanPath = log.mainFilePath.trim();
+      fileListDownload({
+        url: `http://168.107.51.143:8080/upload/${encodeURIComponent(cleanPath)}`
+      });
+    }
+  };
+
   const handleSave = async () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     const regId = userInfo.accId;
-
     const formData = new FormData();
     const logsPayload: any[] = [];
 
@@ -86,10 +96,13 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
     });
 
     if (logsPayload.length === 0) return alert("저장할 내용이 없습니다.");
+    
     formData.append("logs", new Blob([JSON.stringify(logsPayload)], { type: 'application/json' }));
 
     try {
-      await api.post("/api/daily-log/save", formData);
+      await api.post("/api/daily-log/save", formData, {
+        headers: { 'Content-Type': undefined }
+      });
       alert("저장되었습니다.");
       onClose();
     } catch (error) {
@@ -99,9 +112,9 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle>훈련일지 관리 (1~8교시)</DialogTitle>
-      <DialogContent sx={{ minHeight: '400px' }}>
+      <DialogContent sx={{ minHeight: '600px', pt: 2 }}>
         {!isReady ? <RandomSpinner /> : (
           <>
             <TextField type="date" fullWidth label="일자 선택" value={logDate} onChange={(e) => setLogDate(e.target.value)} sx={{ my: 2 }} />
@@ -109,37 +122,50 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: LmsDailyLogModalProps) => {
             {[...Array(8)].map((_, i) => {
               const p = i + 1;
               const log = dailyLogs[p] || {};
-              // 파일이 있는지 체크 (새로 선택한 파일 OR 서버에 존재하는 파일 경로)
               const hasFile = !!(log.file || log.mainFilePath);
 
               return (
-                <Box key={p} sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }}>
-                  <TextField select label={`${p}교시`} sx={{ width: '20%' }} value={log.subSeq || ""} onChange={(e) => handleLogChange(p, 'subSeq', e.target.value)}>
+                <Box key={p} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
+                  <TextField select label={`${p}교시`} sx={{ width: '15%' }} value={log.subSeq || ""} onChange={(e) => handleLogChange(p, 'subSeq', e.target.value)}>
                     {subjects.map((sub) => <MenuItem key={sub.subSeq} value={sub.subSeq}>{sub.subName}</MenuItem>)}
                   </TextField>
                   <TextField fullWidth label="수업 내용" value={log.content || ""} onChange={(e) => handleLogChange(p, 'content', e.target.value)} />
                   
-                  <Button variant="outlined" component="label" size="small">
-                    파일
+                  <Button variant="outlined" component="label" size="small" sx={{ height: 40, flexShrink: 0 }}>
+                    파일 선택
                     <input type="file" hidden onChange={(e) => e.target.files?.[0] && handleFileChange(p, e.target.files[0])} />
                   </Button>
                   
-                  {/* 파일이 있을 때만 Box를 렌더링 */}
                   {hasFile && (
-                    <Box sx={{ width: 50, height: 50, border: '1px solid #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                      {log.preview ? (
-                        <img src={log.preview} alt="prev" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Box 
+                      onClick={() => handleDownload(log)}
+                      sx={{ 
+                        width: 80, height: 60, border: '1px solid #ddd', borderRadius: 1, 
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                        justifyContent: 'center', overflow: 'hidden', bgcolor: '#f9f9f9', p: 0.5,
+                        cursor: log.mainFilePath && !log.file ? 'pointer' : 'default',
+                        '&:hover': { bgcolor: log.mainFilePath && !log.file ? '#f0f0f0' : '#f9f9f9' }
+                      }}
+                    >
+                      {(log.preview || (log.mainFilePath && log.mainFilePath.match(/\.(jpeg|jpg|png|gif)$/i))) ? (
+                        <img 
+                          src={log.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(log.mainFilePath)}`} 
+                          alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
                       ) : (
-                        <Typography variant="caption" sx={{ fontSize: '9px', textAlign: 'center', px: 0.5 }}>
-                          {log.file ? log.file.name : '파일 있음'}
-                        </Typography>
+                        <>
+                          <InsertDriveFileIcon color="primary" />
+                          <Typography sx={{ fontSize: '10px', textAlign: 'center', width: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {log.file ? log.file.name : (log.mainFilePath?.split('/').pop() || '파일')}
+                          </Typography>
+                        </>
                       )}
                     </Box>
                   )}
                 </Box>
               );
             })}
-            <Button variant="contained" onClick={handleSave} fullWidth sx={{ mt: 2 }}>저장하기</Button>
+            <Button variant="contained" onClick={handleSave} fullWidth sx={{ mt: 2, height: 50 }}>저장하기</Button>
           </>
         )}
       </DialogContent>
