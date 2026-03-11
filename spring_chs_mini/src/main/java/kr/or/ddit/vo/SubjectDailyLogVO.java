@@ -21,7 +21,7 @@ public class SubjectDailyLogVO {
     private String content;
     private String status;
     private String regId;
-    private LocalDateTime regDate;
+    private String regDate;
     private String updateId;
     private LocalDateTime updateDate;
 
