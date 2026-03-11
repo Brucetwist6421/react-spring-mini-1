@@ -23,7 +23,7 @@ public class SubjectDailyLogVO {
     private String regId;
     private String regDate;
     private String updateId;
-    private LocalDateTime updateDate;
+    private String updateDate;
 
     private String mainFilePath; // 첨부파일 경로
 
