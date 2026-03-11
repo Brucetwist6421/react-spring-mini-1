@@ -22,7 +22,8 @@
         DO UPDATE SET 
             content = EXCLUDED.content,
             status = EXCLUDED.status,
-            main_file_path = EXCLUDED.main_file_path,
+            -- 파일이 전송되지 않아 null일 경우 기존 값을 유지 (COALESCE 사용)
+            main_file_path = COALESCE(EXCLUDED.main_file_path, lms.tb_subject_daily_log.main_file_path),
             update_id = #{regId},
             update_date = CURRENT_TIMESTAMP
     </insert>

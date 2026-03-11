@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import kr.or.ddit.mapper.SubjectDailyLogMapper;
 import kr.or.ddit.service.FileService;
@@ -32,25 +33,27 @@ public class SubjectDailyLogServiceImpl implements SubjectDailyLogService {
 
     @Override
     @Transactional
-    public void saveDailyLogs(List<SubjectDailyLogVO> logs, MultipartFile attachFile) {
-        String filePath = null;
-        
+    public void saveDailyLogs(List<SubjectDailyLogVO> logs, MultipartHttpServletRequest request) {
         try {
-        // 1. 파일이 존재할 경우 파일 서비스 호출 (기존에 작성하신 파일 처리 로직 활용)
-        if (attachFile != null && !attachFile.isEmpty()) {
-            filePath = fileService.saveMainImage(attachFile);
-        }
+            Map<String, MultipartFile> fileMap = request.getFileMap();
 
-        // 2. 각 로그 데이터에 공통 파일 경로 세팅 및 DB Upsert
-        for (SubjectDailyLogVO log : logs) {
-            if (filePath != null) {
-                log.setMainFilePath(filePath);
+            for (SubjectDailyLogVO log : logs) {
+                String fileKey = "file_" + log.getPeriod();
+                MultipartFile file = fileMap.get(fileKey);
+
+                if (file != null && !file.isEmpty()) {
+                    // 새 파일이 업로드된 경우 저장하고 경로 업데이트
+                    String filePath = fileService.saveMainImage(file);
+                    log.setMainFilePath(filePath);
+                }
+                // ★ 중요: 파일이 없는 경우, 기존 DB에 저장된 값을 그대로 쓰거나 null 유지
+                // MyBatis의 upsert 쿼리에서 main_file_path가 null이면 업데이트하지 않도록
+                // 쿼리를 수정하거나, 여기서 로직을 제어합니다.
+                
+                mapper.upsertDailyLog(log);
             }
-            // regId는 시큐리티 세션 등에서 가져와 설정하는 것이 좋습니다.
-            mapper.upsertDailyLog(log);
-        }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save daily logs", e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
