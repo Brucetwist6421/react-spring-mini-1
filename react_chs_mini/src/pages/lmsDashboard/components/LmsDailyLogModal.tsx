@@ -9,7 +9,7 @@ import api from "../../../api/axiosInstance";
 import { fileListDownload } from "../../../api/fileListDownload";
 import RandomSpinner from "../../../components/RandomSpinner";
 
-const LmsDailyLogModal = ({ open, onClose, curSeq }: any) => {
+const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
   const [logDate, setLogDate] = useState<string>("");
   const [subjects, setSubjects] = useState<any[]>([]);
   const [dailyLogs, setDailyLogs] = useState<Record<number, any>>({});
@@ -95,7 +95,15 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: any) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
-      <DialogTitle sx={{ bgcolor: '#f8f9fa', borderBottom: '1px solid #e0e0e0' }}>훈련일지 관리</DialogTitle>
+      <DialogTitle sx={{ bgcolor: '#f8f9fa', borderBottom: '1px solid #e0e0e0' }}>
+        <Box>
+          훈련일지 관리 - {curData.curName} - {curData.className}호 ({curData.term}기)
+        </Box>
+
+        <Typography variant="caption" sx={{ color: "#666", fontSize: "1rem" }}>
+          훈련 기간 : {curData.period}
+        </Typography>
+      </DialogTitle>
       <DialogContent sx={{ bgcolor: '#f9f9f9', pt: 2 }}>
         {!isReady ? <RandomSpinner /> : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -157,7 +165,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: any) => {
                         error={(!!log.content || !!log.file) && !log.subSeq}
                       >
                         <MenuItem value=""><em>과정 선택</em></MenuItem>
-                        {subjects.map((s) => <MenuItem key={s.subSeq} value={s.subSeq}>{s.subName}</MenuItem>)}
+                        {subjects.map((s) => <MenuItem key={s.subSeq} value={s.subSeq}>{s.subName}({s.teacherName})</MenuItem>)}
                       </TextField>
                     </Grid>
                     

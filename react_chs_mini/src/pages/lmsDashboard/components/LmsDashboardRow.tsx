@@ -291,10 +291,12 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         onUpdate={onRefresh} // 수정 성공 시 부모 리스트 갱신
       />
 
+      {/* 훈련 일지 등록 모달 */}
       <LmsDailyLogModal 
         open={isLogModalOpen}
         onClose={() => setIsLogModalOpen(false)}
         curSeq={row.curSeq} // 과정 시퀀스 전달
+        curData={row} // 필요 시 과정 데이터 전체 전달
       />
 
       {/* 확장 영역 (Collapse) */}
