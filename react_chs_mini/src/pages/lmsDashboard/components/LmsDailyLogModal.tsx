@@ -168,7 +168,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq }: any) => {
                         multiline
                         minRows={1}
                         maxRows={4}
-                        label="수업 내용"
+                        label="훈련 내용"
                         size="small"
                         value={log.content || ""}
                         onChange={(e) => handleLogChange(p, 'content', e.target.value)}

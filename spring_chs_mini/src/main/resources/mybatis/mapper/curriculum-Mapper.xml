@@ -65,19 +65,22 @@
 
     <select id="selectSubjectListByCurSeq" parameterType="int" resultType="kr.or.ddit.vo.SubjectVO">
         SELECT 
-            sub_seq, 
-            cur_seq, 
-            sub_name, 
-            start_date, 
-            end_date,
-            status,
-            reg_id,
-            reg_date,
-            update_id,
-            update_date
-        FROM lms.tb_subject
-        WHERE cur_seq = #{curSeq}
-        ORDER BY sub_seq ASC
+            s.sub_seq, 
+            s.cur_seq, 
+            s.account_seq,
+            a.account_name AS teacherName,
+            s.sub_name, 
+            s.start_date, 
+            s.end_date,
+            s.status,
+            s.reg_id,
+            s.reg_date,
+            s.update_id,
+            s.update_date
+        FROM lms.tb_subject s
+        LEFT JOIN lms.tb_account a ON s.account_seq = a.account_seq
+        WHERE s.cur_seq = #{curSeq}
+        ORDER BY s.sub_name ASC
     </select>
 
 </mapper>

@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 public class SubjectVO {
     private Integer subSeq;
     private Integer curSeq;
+    private Integer accountSeq;
+    private String teacherName;
     private String subName;
     private LocalDate startDate;
     private LocalDate endDate;
