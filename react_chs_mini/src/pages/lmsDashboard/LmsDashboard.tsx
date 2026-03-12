@@ -241,10 +241,10 @@ const LmsDashboard: React.FC = () => {
             <TableRow>
               <TableCell width="50px" sx={{ bgcolor: "#f8fafc" }} />
               <TableCell width="20%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 명 (기수)</TableCell>
-              <TableCell width="10%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>담당 교수</TableCell>
-              <TableCell width="15%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>현재 인원 / 시작 인원</TableCell>
-              <TableCell width="30%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 이행률</TableCell>
-              <TableCell width="30%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>기능</TableCell>
+              <TableCell width="7%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>담당 교수</TableCell>
+              <TableCell width="12%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>현재 인원 / 시작 인원</TableCell>
+              <TableCell width="25%" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>과정 이행률</TableCell>
+              <TableCell width="35%" align="center" sx={{ bgcolor: "#f8fafc", fontWeight: "bold" }}>기능</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
