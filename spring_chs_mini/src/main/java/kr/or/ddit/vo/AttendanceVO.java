@@ -13,6 +13,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AttendanceVO {
+    private Integer attendanceSeq;
+    private Integer curSeq;
+    private String attendanceDate;
+    private String status;
+    private String startTime;
+    private String endTime;
+    private String remark;
+    private String regId;
+    private String regDate;
+
     private int accountSeq;
     private String accountName;
     private String curName;
@@ -34,4 +44,5 @@ public class AttendanceVO {
     // --- 추가: 상세 특이사항 목록을 담을 필드 ---
     private String monthlyData; // JSON 문자열 (쿼리의 json_agg 결과)
     private List<Map<String, Object>> attList; // 특이사항 목록 (날짜, 유형, 사유 등)
+
 }

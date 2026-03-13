@@ -15,4 +15,6 @@ public interface AttendanceMapper {
 
     // 상세 특이사항(Remark가 있거나 지각/결석 등) 목록 조회
     List<Map<String, Object>> selectAttendanceDetailList(@Param("accountSeq") int accountSeq);
+
+    int upsertAttendance(AttendanceVO attendanceVO);
 }

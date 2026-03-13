@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.or.ddit.mapper.AttendanceMapper;
 import kr.or.ddit.service.AttendanceService;
@@ -54,6 +55,13 @@ public class AttendanceServiceImpl implements AttendanceService {
         status.setAttList(attList);
         
         return status;
+    }
+
+    @Override
+    @Transactional
+    public int insertAttendance(AttendanceVO attendanceVO) {
+        // 필요 시 등록 시간 설정
+        return attendanceMapper.upsertAttendance(attendanceVO);
     }
     
 }
