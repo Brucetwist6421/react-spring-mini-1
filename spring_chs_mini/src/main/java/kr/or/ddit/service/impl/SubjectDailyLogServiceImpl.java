@@ -45,7 +45,7 @@ public class SubjectDailyLogServiceImpl implements SubjectDailyLogService {
                     String filePath = fileService.saveMainImage(file);
                     log.setMainFilePath(filePath);
                 } 
-                else if (log.isFileDeleted()) { 
+                else if (log.getFileDeleted()) { 
                     // 케이스 2: 사용자가 명시적으로 '삭제'를 누름 -> null로 업데이트
                     log.setMainFilePath(null);
                 }
