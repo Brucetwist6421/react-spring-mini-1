@@ -54,12 +54,18 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
   // 파일 삭제 핸들러
   const handleFileDelete = (period: number) => {
     setDailyLogs(prev => {
-      const newLog = { ...prev[period] };
-      delete newLog.file;
-      delete newLog.preview;
-      // mainFilePath는 그대로 두거나 필요없다면 지우되, 
-      // 삭제되었다는 '의도'를 백엔드에 전달합니다.
-      return { ...prev, [period]: { ...newLog, fileDeleted: true, mainFilePath: null } };
+      const updated = {
+        ...prev,
+        [period]: {
+          ...prev[period],
+          file: null,          // 파일 객체 제거
+          preview: null,       // 미리보기 제거
+          mainFilePath: null,  // 경로 제거
+          fileDeleted: true    // 삭제 플래그 활성화
+        }
+      };
+      console.log("삭제 후 로그 상태:", updated[period]); // <--- 여기서 확인하세요!
+      return updated;
     });
   };
 
@@ -74,6 +80,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
     const formData = new FormData();
     const logsPayload: any[] = [];
 
+    // 1. 유효성 검사 로직은 그대로 유지
     const logEntries = Object.entries(dailyLogs);
     for (const [period, data] of logEntries) {
       const hasContent = !!data.content?.trim();
@@ -84,10 +91,25 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
       }
     }
 
+    // 2. 데이터 구성 로직 수정
     Object.entries(dailyLogs).forEach(([period, data]: any) => {
-      if (data.subSeq && (data.content || data.file || data.mainFilePath)) {
-        const { file, preview, ...logData } = data;
+      // 삭제 요청(fileDeleted: true)이 있거나, 내용/파일이 존재하는 경우에만 전송
+      if (data.subSeq && (data.content || data.file || data.mainFilePath || data.fileDeleted)) {
+        
+        // file, preview를 제외한 나머지 데이터를 복사
+        const { file, preview, ...rest } = data;
+        
+        // 삭제 요청이 있다면 mainFilePath를 null로 확실하게 설정
+        const logData = {
+          ...rest,
+          mainFilePath: data.fileDeleted ? null : data.mainFilePath,
+          fileDeleted: !!data.fileDeleted // 명시적으로 포함
+        };
+
+        console.log("전송할 payload 항목:", logData);
         logsPayload.push({ ...logData, logDate, regId: userInfo.accId, status: "A" });
+        
+        // 실제 파일이 새로 선택된 경우만 formData에 append
         if (file) formData.append(`file_${period}`, file);
       }
     });
