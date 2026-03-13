@@ -25,7 +25,7 @@ public class SubjectDailyLogVO {
 
     private String mainFilePath; // 첨부파일 경로
 
-    private Boolean fileDeleted; // 프론트에서 '삭제' 여부를 boolean으로 받음
+    private boolean fileDeleted; // 프론트에서 '삭제' 여부를 boolean으로 받음
 
     // 조인 조회 시 추가 활용 필드
     private String subName;
