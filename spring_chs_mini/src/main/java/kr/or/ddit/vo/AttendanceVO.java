@@ -20,6 +20,7 @@ public class AttendanceVO {
     private String startTime;
     private String endTime;
     private String remark;
+    private String mainFilePath; // 첨부파일 경로
     private String regId;
     private String regDate;
 
@@ -44,5 +45,7 @@ public class AttendanceVO {
     // --- 추가: 상세 특이사항 목록을 담을 필드 ---
     private String monthlyData; // JSON 문자열 (쿼리의 json_agg 결과)
     private List<Map<String, Object>> attList; // 특이사항 목록 (날짜, 유형, 사유 등)
+
+    private boolean fileDeleted; // 프론트에서 '삭제' 여부를 boolean으로 받음
 
 }

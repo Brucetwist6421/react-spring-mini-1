@@ -1,9 +1,13 @@
 package kr.or.ddit.service;
 
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
 import kr.or.ddit.vo.AttendanceVO;
 
 public interface AttendanceService {
     AttendanceVO getStudentAttendanceRate(int accountSeq);
 
-    int insertAttendance(AttendanceVO attendanceVO);
+    void insertAttendance(List<AttendanceVO> attendanceVO, MultipartHttpServletRequest request);
 }

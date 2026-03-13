@@ -5,9 +5,12 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import kr.or.ddit.mapper.AttendanceMapper;
 import kr.or.ddit.service.AttendanceService;
+import kr.or.ddit.service.FileService;
 import kr.or.ddit.vo.AttendanceVO;
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceMapper attendanceMapper;
+    private final FileService fileService; // 공통 파일 업로드 서비스 의존성 주입
 
     @Override
     public AttendanceVO getStudentAttendanceRate(int accountSeq) {
@@ -59,9 +63,33 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     @Transactional
-    public int insertAttendance(AttendanceVO attendanceVO) {
-        // 필요 시 등록 시간 설정
-        return attendanceMapper.upsertAttendance(attendanceVO);
+    public void insertAttendance(List<AttendanceVO> attendanceList, MultipartHttpServletRequest request) {
+        try {
+            Map<String, MultipartFile> fileMap = request.getFileMap();
+
+            for (int i = 0; i < attendanceList.size(); i++) {
+                AttendanceVO att = attendanceList.get(i);
+                
+                // 키 생성 규칙: file_카테고리명_인덱스 (프론트에서 보낸 키와 일치해야 함)
+                String fileKey = "file_" + att.getStatus() + "_" + i;
+                MultipartFile file = fileMap.get(fileKey);
+
+                if (file != null && !file.isEmpty()) {
+                    // 케이스 1: 새 파일 업로드
+                    String filePath = fileService.saveMainImage(file);
+                    att.setMainFilePath(filePath);
+                } 
+                else if (att.isFileDeleted()) {
+                    // 케이스 2: 기존 파일 삭제 처리
+                    att.setMainFilePath(null);
+                }
+                // 케이스 3: 아무것도 하지 않으면 기존 DB 경로 유지 (자동)
+
+                attendanceMapper.upsertAttendance(att);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("출석 정보 저장 중 오류 발생", e);
+        }
     }
     
 }

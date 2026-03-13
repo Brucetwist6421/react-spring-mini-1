@@ -103,16 +103,17 @@
     <insert id="upsertAttendance" parameterType="AttendanceVO">
         INSERT INTO lms.tb_attendance (
             account_seq, cur_seq, attendance_date, status, 
-            start_time, end_time, remark, reg_id, reg_date
+            start_time, end_time, remark, main_image_path, reg_id, reg_date
         ) VALUES (
             #{accountSeq}, #{curSeq}, #{attendanceDate}::date, #{status}, 
-            #{startTime}::timestamp, #{endTime}::timestamp, #{remark}, #{regId}, CURRENT_TIMESTAMP
+            #{startTime}::timestamp, #{endTime}::timestamp, #{remark}, #{mainImagePath}, #{regId}, CURRENT_TIMESTAMP
         )
         ON CONFLICT (account_seq, cur_seq, attendance_date, status) 
         DO UPDATE SET 
             start_time = EXCLUDED.start_time,
             end_time = EXCLUDED.end_time,
             remark = EXCLUDED.remark,
+            main_image_path = EXCLUDED.main_image_path, 
             update_id = #{regId},
             update_date = CURRENT_TIMESTAMP
     </insert>
