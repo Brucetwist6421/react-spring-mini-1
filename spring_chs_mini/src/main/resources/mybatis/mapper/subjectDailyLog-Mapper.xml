@@ -22,8 +22,14 @@
         DO UPDATE SET 
             content = EXCLUDED.content,
             status = EXCLUDED.status,
-            -- 파일이 전송되지 않아 null일 경우 기존 값을 유지 (COALESCE 사용)
-            main_file_path = COALESCE(EXCLUDED.main_file_path, lms.tb_subject_daily_log.main_file_path),
+            -- [수정] 파일 삭제 요청(fileDeleted=true)이면 null 적용, 
+            -- 아니면 EXCLUDED.main_file_path(새파일) 사용, 
+            -- 그것도 없으면 기존값 유지
+            main_file_path = CASE 
+                WHEN #{fileDeleted} = true THEN NULL 
+                WHEN EXCLUDED.main_file_path IS NOT NULL THEN EXCLUDED.main_file_path
+                ELSE lms.tb_subject_daily_log.main_file_path
+            END,
             update_id = #{regId},
             update_date = CURRENT_TIMESTAMP
     </insert>

@@ -2,8 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel'; // 삭제 아이콘 추가
 import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, MenuItem, Paper, TextField, Tooltip, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid"; // Grid v6 사용
+import Grid from "@mui/material/Grid";
 import { useEffect, useRef, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { fileListDownload } from "../../../api/fileListDownload";
@@ -50,6 +51,18 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
     });
   };
 
+  // 파일 삭제 핸들러
+  const handleFileDelete = (period: number) => {
+    setDailyLogs(prev => {
+      const newLog = { ...prev[period] };
+      delete newLog.file;
+      delete newLog.preview;
+      // mainFilePath는 그대로 두거나 필요없다면 지우되, 
+      // 삭제되었다는 '의도'를 백엔드에 전달합니다.
+      return { ...prev, [period]: { ...newLog, fileDeleted: true, mainFilePath: null } };
+    });
+  };
+
   const handleDownload = (log: any) => {
     if (log.mainFilePath && !log.file) {
       fileListDownload({ url: `http://168.107.51.143:8080/upload/${encodeURIComponent(log.mainFilePath.trim())}` });
@@ -61,13 +74,10 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
     const formData = new FormData();
     const logsPayload: any[] = [];
 
-    // --- 유효성 검사 로직 추가 ---
     const logEntries = Object.entries(dailyLogs);
     for (const [period, data] of logEntries) {
       const hasContent = !!data.content?.trim();
       const hasFile = !!(data.file || data.mainFilePath);
-      
-      // 내용이나 파일이 있는데 과목이 선택되지 않은 경우
       if ((hasContent || hasFile) && !data.subSeq) {
         alert(`${period}교시 과목을 선택해주세요.`);
         return;
@@ -96,63 +106,34 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
       <DialogTitle sx={{ bgcolor: '#f8f9fa', borderBottom: '1px solid #e0e0e0' }}>
-        <Box>
-          훈련일지 관리 - {curData.curName} - {curData.className}호 ({curData.term}기)
-        </Box>
-
+        <Box>훈련일지 관리 - {curData?.curName} - {curData?.className}호 ({curData?.term}기)</Box>
         <Typography variant="caption" sx={{ color: "#666", fontSize: "1rem" }}>
-          훈련 기간 : {curData.period}
+          훈련 기간 : {curData?.period}
         </Typography>
       </DialogTitle>
       <DialogContent sx={{ bgcolor: '#f9f9f9', pt: 2 }}>
         {!isReady ? <RandomSpinner /> : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {/* 날짜 선택 영역 */}
             <Paper sx={{ p: 2 }}>
-              <Box
-                sx={{ width: 220, cursor: "pointer" }}
-                onClick={() => dateRef.current?.click()}
-              >
+              <Box sx={{ width: 220, cursor: "pointer" }} onClick={() => dateRef.current?.click()}>
                 <TextField
-                  fullWidth
-                  type="date"
-                  label="조회 날짜"
-                  value={logDate}
-                  size="small"
-                  onChange={(e) => setLogDate(e.target.value)}
-                  inputRef={dateRef}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    htmlInput: { style: { cursor: "pointer" } }
-                  }}
+                  fullWidth type="date" label="조회 날짜" value={logDate} size="small"
+                  onChange={(e) => setLogDate(e.target.value)} inputRef={dateRef}
+                  slotProps={{ inputLabel: { shrink: true }, htmlInput: { style: { cursor: "pointer" } } }}
                 />
               </Box>
             </Paper>
 
-            <Paper
-              sx={{
-                px: 2,
-                py: 1,
-                bgcolor: "#f5f7fa",
-                border: "1px dashed #d0d7de"
-              }}
-            >
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "#555",
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                📎 첨부된 파일 아이콘 또는 이미지를 클릭하면 다운로드됩니다.
+            <Paper sx={{ px: 2, py: 1, bgcolor: "#f5f7fa", border: "1px dashed #d0d7de" }}>
+              <Typography variant="caption" sx={{ color: "#555", display: "flex", alignItems: "center" }}>
+                📎 첨부된 파일 아이콘 또는 이미지를 클릭하면 다운로드됩니다. (X 버튼 클릭 시 삭제)
               </Typography>
             </Paper>
 
-            {/* 훈련 내용 입력 영역 */}
             {[...Array(8)].map((_, i) => {
               const p = i + 1;
               const log = dailyLogs[p] || {};
+              const hasAnyFile = !!(log.file || log.mainFilePath);
               const fileName = log.file ? log.file.name : (log.mainFilePath?.split('_').slice(1).join('_') || '');
               
               return (
@@ -162,83 +143,45 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
                       <TextField 
                         select fullWidth label={`${p}교시`} size="small" value={log.subSeq || ""} 
                         onChange={(e) => handleLogChange(p, 'subSeq', e.target.value)}
-                        error={(!!log.content || !!log.file) && !log.subSeq}
+                        error={(!!log.content || hasAnyFile) && !log.subSeq}
                       >
                         <MenuItem value=""><em>과정 선택</em></MenuItem>
                         {subjects.map((s) => <MenuItem key={s.subSeq} value={s.subSeq}>{s.subName}({s.teacherName})</MenuItem>)}
                       </TextField>
                     </Grid>
                     
-                    {/* 텍스트 필드: multiline + maxRows로 실시간 확장 */}
-                    <Grid size={{ xs: 12, md: 8 }}>
+                    <Grid size={{ xs: 12, md: 7.5 }}>
                       <TextField 
-                        fullWidth
-                        multiline
-                        minRows={1}
-                        maxRows={4}
-                        label="훈련 내용"
-                        size="small"
-                        value={log.content || ""}
-                        onChange={(e) => handleLogChange(p, 'content', e.target.value)}
+                        fullWidth multiline minRows={1} maxRows={4} label="훈련 내용" size="small" 
+                        value={log.content || ""} onChange={(e) => handleLogChange(p, 'content', e.target.value)} 
                       />
                     </Grid>
 
-                    <Grid 
-                      size={{ xs: 12, md: 2 }}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        gap: 1
-                      }}
-                    >
-                      <Button
-                        variant="outlined"
-                        component="label"
-                        size="small"
-                        sx={{
-                          whiteSpace: "nowrap",
-                          minWidth: 90
-                        }}
-                      >
-                        파일 선택
-                        <input
-                          type="file"
-                          hidden
-                          onChange={(e) =>
-                            e.target.files?.[0] && handleFileChange(p, e.target.files[0])
-                          }
-                        />
+                    <Grid size={{ xs: 12, md: 2.5 }} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                      <Button variant="outlined" component="label" size="small" sx={{ whiteSpace: "nowrap", minWidth: 80 }}>
+                        파일 선택 <input type="file" hidden onChange={(e) => e.target.files?.[0] && handleFileChange(p, e.target.files[0])} />
                       </Button>
-
-                      {(log.file || log.mainFilePath) && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      
+                      {hasAnyFile && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, position: 'relative', border: '1px solid #eee', p: 0.5, borderRadius: 1 }}>
                           <IconButton size="small" onClick={() => handleDownload(log)}>
-                            {log.preview || (log.mainFilePath && /\.(jpg|png|gif)$/i.test(log.mainFilePath))
-                              ? (
-                                <img
-                                  src={log.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(log.mainFilePath)}`}
-                                  style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 4 }}
-                                  alt="thumb"
-                                />
-                              )
-                              : <InsertDriveFileIcon color="primary" sx={{ fontSize: 28 }} />
-                            }
+                            {log.preview || (log.mainFilePath && /\.(jpg|png|gif)$/i.test(log.mainFilePath)) 
+                              ? <img src={log.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(log.mainFilePath)}`} style={{ width: 35, height: 35, objectFit: 'cover', borderRadius: 4 }} alt="thumb" /> 
+                              : <InsertDriveFileIcon color="primary" sx={{ fontSize: 24 }} />}
                           </IconButton>
-
                           <Tooltip title={fileName}>
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                maxWidth: 120
-                              }}
-                            >
+                            <Typography variant="caption" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 60 }}>
                               {fileName}
                             </Typography>
                           </Tooltip>
+                          {/* 파일 삭제 버튼 */}
+                          <IconButton 
+                            size="small" 
+                            onClick={() => handleFileDelete(p)}
+                            sx={{ p: 0, color: '#d32f2f' }}
+                          >
+                            <CancelIcon sx={{ fontSize: 18 }} />
+                          </IconButton>
                         </Box>
                       )}
                     </Grid>

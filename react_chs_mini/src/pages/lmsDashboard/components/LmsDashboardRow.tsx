@@ -159,6 +159,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
               variant="outlined"
               size="small"
               color="info"
+              disabled={row.activeAccounts === 0}
               startIcon={<LibraryBooksIcon />}
               onClick={(e) => {
                 e.stopPropagation();

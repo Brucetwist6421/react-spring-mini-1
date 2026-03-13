@@ -41,13 +41,19 @@ public class SubjectDailyLogServiceImpl implements SubjectDailyLogService {
                 MultipartFile file = fileMap.get(fileKey);
 
                 if (file != null && !file.isEmpty()) {
-                    // 새 파일이 업로드된 경우 저장하고 경로 업데이트
+                    // 케이스 1: 새 파일이 업로드 됨 -> 새 경로로 업데이트
                     String filePath = fileService.saveMainImage(file);
                     log.setMainFilePath(filePath);
+                } 
+                else if (log.isFileDeleted()) { 
+                    // 케이스 2: 사용자가 명시적으로 '삭제'를 누름 -> null로 업데이트
+                    log.setMainFilePath(null);
                 }
-                // ★ 중요: 파일이 없는 경우, 기존 DB에 저장된 값을 그대로 쓰거나 null 유지
-                // MyBatis의 upsert 쿼리에서 main_file_path가 null이면 업데이트하지 않도록
-                // 쿼리를 수정하거나, 여기서 로직을 제어합니다.
+                else {
+                    // 케이스 3: 새 파일도 없고 삭제도 안 함 -> 기존 경로 유지
+                    // 이 경우 log.getMainFilePath()에 기존 값이 들어있어야 합니다.
+                    // 만약 VO에 값이 없다면 MyBatis 쿼리에서 null일 때 업데이트를 제외해야 합니다.
+                }
                 
                 mapper.upsertDailyLog(log);
             }
