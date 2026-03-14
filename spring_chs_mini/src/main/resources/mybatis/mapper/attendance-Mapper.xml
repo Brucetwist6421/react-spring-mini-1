@@ -110,11 +110,15 @@
             #{attendanceDate}::date, 
             #{status}, 
             <choose>
-                <when test="startTime != null and startTime != ''">#{startTime}::time</when>
+                <when test="startTime != null and startTime != ''">
+                    concat(#{attendanceDate}, ' ', #{startTime})::timestamp
+                </when>
                 <otherwise>NULL</otherwise>
             </choose>,
             <choose>
-                <when test="endTime != null and endTime != ''">#{endTime}::time</when>
+                <when test="endTime != null and endTime != ''">
+                    concat(#{attendanceDate}, ' ', #{endTime})::timestamp
+                </when>
                 <otherwise>NULL</otherwise>
             </choose>,
             #{remark}, 
