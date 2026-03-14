@@ -109,8 +109,14 @@
             #{curSeq}::integer, 
             #{attendanceDate}::date, 
             #{status}, 
-            #{startTime}::timestamp, 
-            #{endTime}::timestamp, 
+            <choose>
+                <when test="startTime != null and startTime != ''">#{startTime}::time</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            <choose>
+                <when test="endTime != null and endTime != ''">#{endTime}::time</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
             #{remark}, 
             #{mainFilePath}, 
             #{regId}, 

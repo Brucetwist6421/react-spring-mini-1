@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Box, Paper, TextField, MenuItem, IconButton, Typography, Button } from "@mui/material";
-import Grid from "@mui/material/Grid"; 
+import Grid from "@mui/material/Grid"; // Grid2로 수정
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { useState } from "react";
 import api from "../../../api/axiosInstance";
 
-// 서버의 status 코드와 매핑되는 객체 (한글 카테고리를 DB 코드값으로 변환)
 const STATUS_MAP: Record<string, string> = {
   "지각자": "LATE",
   "결석자": "ABSENT",
@@ -17,7 +16,14 @@ const STATUS_MAP: Record<string, string> = {
   "외출": "OUTING"
 };
 
-const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string }) => {
+// Props에 curSeq 추가하여 데이터 누락 방지
+interface AttendanceTabProps {
+  students: any[];
+  logDate: string;
+  curSeq: number | string; 
+}
+
+const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
   const categories = Object.keys(STATUS_MAP);
   const [data, setData] = useState<Record<string, any[]>>({});
 
@@ -32,7 +38,7 @@ const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string
   const addRow = (cat: string) => {
     setData(prev => ({
       ...prev,
-      [cat]: [...(prev[cat] || []), { accountSeq: "", startTime: "", endTime: "", remark: "", file: null }]
+      [cat]: [...(prev[cat] || []), { accountSeq: "", startTime: "", endTime: "", remark: "", file: null, curSeq: curSeq }]
     }));
   };
 
@@ -43,18 +49,18 @@ const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string
     }));
   };
 
-  const handleFileChange = (cat: string, index: number, file: File) => {
-    updateRow(cat, index, 'file', file);
-  };
-
   const prepareAttendancePayload = () => {
     const payload: any[] = [];
     Object.entries(data).forEach(([cat, rows]) => {
       rows.forEach((row: any) => {
         if (row.accountSeq) {
           const { file: _file, ...rest } = row; 
-          // 서버 VO 필드명에 맞게 매핑 (status는 코드값, attendanceDate는 logDate)
-          payload.push({ ...rest, status: STATUS_MAP[cat], attendanceDate: logDate });
+          payload.push({ 
+            ...rest, 
+            status: STATUS_MAP[cat], 
+            attendanceDate: logDate,
+            curSeq: Number(curSeq) // 서버에서 정수형으로 인식하도록 강제 변환
+          });
         }
       });
     });
@@ -71,7 +77,6 @@ const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string
     Object.entries(data).forEach(([cat, rows]) => {
       rows.forEach((row: any, idx: number) => {
         if (row.file) {
-          // 서버 서비스의 fileKey 규칙 (file_코드값_인덱스)과 일치시킴
           formData.append(`file_${STATUS_MAP[cat]}_${idx}`, row.file); 
         }
       });
@@ -118,13 +123,8 @@ const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string
               <Grid size={{ xs: 12, md: 2 }} display="flex" alignItems="center" gap={1}>
                 <Button component="label" size="small" variant="outlined" startIcon={<InsertDriveFileIcon />}>
                   {row.file ? "변경" : "파일"}
-                  <input type="file" hidden onChange={(e) => e.target.files?.[0] && handleFileChange(cat, idx, e.target.files[0])} />
+                  <input type="file" hidden onChange={(e) => e.target.files?.[0] && updateRow(cat, idx, 'file', e.target.files[0])} />
                 </Button>
-                {row.file && (
-                  <Typography variant="caption" noWrap sx={{ maxWidth: 60 }}>
-                    {row.file.name}
-                  </Typography>
-                )}
                 <IconButton color="error" onClick={() => removeRow(cat, idx)}><RemoveCircleOutlineIcon /></IconButton>
               </Grid>
             </Grid>
