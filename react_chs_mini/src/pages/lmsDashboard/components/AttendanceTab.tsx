@@ -8,8 +8,17 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { useState } from "react";
 import api from "../../../api/axiosInstance";
 
+// 서버의 status 코드와 매핑되는 객체 (한글 카테고리를 DB 코드값으로 변환)
+const STATUS_MAP: Record<string, string> = {
+  "지각자": "LATE",
+  "결석자": "ABSENT",
+  "조퇴자": "EARLY",
+  "공결": "OFFICIAL",
+  "외출": "OUTING"
+};
+
 const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string }) => {
-  const categories = ["지각자", "결석자", "조퇴자", "공결", "외출"];
+  const categories = Object.keys(STATUS_MAP);
   const [data, setData] = useState<Record<string, any[]>>({});
 
   const updateRow = (cat: string, index: number, field: string, value: any) => {
@@ -20,27 +29,11 @@ const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string
     });
   };
 
-  // 1. 초기값 설정 수정 (addRow)
   const addRow = (cat: string) => {
     setData(prev => ({
       ...prev,
       [cat]: [...(prev[cat] || []), { accountSeq: "", startTime: "", endTime: "", remark: "", file: null }]
     }));
-  };
-
-  // 2. 페이로드 생성 수정 (prepareAttendancePayload)
-  const prepareAttendancePayload = () => {
-    const payload: any[] = [];
-    Object.entries(data).forEach(([statusType, rows]) => {
-      rows.forEach((row: any) => {
-        // accSeq -> accountSeq로 수정
-        if (row.accountSeq) { 
-          const { file: _file, ...rest } = row; 
-          payload.push({ ...rest, status: statusType, attendanceDate: logDate });
-        }
-      });
-    });
-    return payload;
   };
 
   const removeRow = (cat: string, index: number) => {
@@ -54,6 +47,20 @@ const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string
     updateRow(cat, index, 'file', file);
   };
 
+  const prepareAttendancePayload = () => {
+    const payload: any[] = [];
+    Object.entries(data).forEach(([cat, rows]) => {
+      rows.forEach((row: any) => {
+        if (row.accountSeq) {
+          const { file: _file, ...rest } = row; 
+          // 서버 VO 필드명에 맞게 매핑 (status는 코드값, attendanceDate는 logDate)
+          payload.push({ ...rest, status: STATUS_MAP[cat], attendanceDate: logDate });
+        }
+      });
+    });
+    return payload;
+  };
+
   const handleSaveAttendance = async () => {
     const payload = prepareAttendancePayload();
     if (payload.length === 0) return alert("저장할 내용이 없습니다.");
@@ -64,8 +71,8 @@ const AttendanceTab = ({ students, logDate }: { students: any[], logDate: string
     Object.entries(data).forEach(([cat, rows]) => {
       rows.forEach((row: any, idx: number) => {
         if (row.file) {
-          // 키 생성: 서버의 fileMap.get("file_" + att.getStatus() + "_" + i) 와 일치하게 구성
-          formData.append(`file_${cat}_${idx}`, row.file); 
+          // 서버 서비스의 fileKey 규칙 (file_코드값_인덱스)과 일치시킴
+          formData.append(`file_${STATUS_MAP[cat]}_${idx}`, row.file); 
         }
       });
     });

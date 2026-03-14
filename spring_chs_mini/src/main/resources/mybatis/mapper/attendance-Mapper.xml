@@ -105,8 +105,16 @@
             account_seq, cur_seq, attendance_date, status, 
             start_time, end_time, remark, main_file_path, reg_id, reg_date
         ) VALUES (
-            #{accountSeq}, #{curSeq}, #{attendanceDate}::date, #{status}, 
-            #{startTime}::timestamp, #{endTime}::timestamp, #{remark}, #{mainFilePath}, #{regId}, CURRENT_TIMESTAMP
+            #{accountSeq}::integer, 
+            #{curSeq}::integer, 
+            #{attendanceDate}::date, 
+            #{status}, 
+            #{startTime}::timestamp, 
+            #{endTime}::timestamp, 
+            #{remark}, 
+            #{mainFilePath}, 
+            #{regId}, 
+            CURRENT_TIMESTAMP
         )
         ON CONFLICT (account_seq, cur_seq, attendance_date, status) 
         DO UPDATE SET 
