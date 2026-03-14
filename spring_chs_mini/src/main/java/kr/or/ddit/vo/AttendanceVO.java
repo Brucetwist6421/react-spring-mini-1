@@ -24,7 +24,7 @@ public class AttendanceVO {
     private String regId;
     private String regDate;
 
-    private int accountSeq;
+    private Integer accountSeq;
     private String accountName;
     private String curName;
     private String startDate;
