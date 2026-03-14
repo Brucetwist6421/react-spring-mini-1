@@ -49,6 +49,7 @@ public class AttendanceController {
             attendanceService.insertAttendance(attendanceVO, request);
             return ResponseEntity.ok("Success");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
         }
     }

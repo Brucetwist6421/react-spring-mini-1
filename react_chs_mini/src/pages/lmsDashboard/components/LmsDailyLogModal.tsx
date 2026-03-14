@@ -228,7 +228,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
             </Box>
           )
         ) : (
-          <AttendanceTab students={students} />
+          <AttendanceTab students={students} logDate={logDate} />
         )}
       </DialogContent>
     </Dialog>
