@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Box, Paper, TextField, MenuItem, IconButton, Typography, Button } from "@mui/material";
-import Grid from "@mui/material/Grid"; // Grid2로 수정
+import Grid from "@mui/material/Grid"; 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -16,7 +16,6 @@ const STATUS_MAP: Record<string, string> = {
   "외출": "OUTING"
 };
 
-// Props에 curSeq 추가하여 데이터 누락 방지
 interface AttendanceTabProps {
   students: any[];
   logDate: string;
@@ -49,7 +48,8 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
     }));
   };
 
-  const prepareAttendancePayload = () => {
+  // 로그인 ID를 인자로 받아 payload에 포함
+  const prepareAttendancePayload = (regId: string) => {
     const payload: any[] = [];
     Object.entries(data).forEach(([cat, rows]) => {
       rows.forEach((row: any) => {
@@ -59,7 +59,8 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
             ...rest, 
             status: STATUS_MAP[cat], 
             attendanceDate: logDate,
-            curSeq: Number(curSeq) // 서버에서 정수형으로 인식하도록 강제 변환
+            curSeq: Number(curSeq),
+            regId: regId // 필수: DB NOT NULL 제약조건 해결
           });
         }
       });
@@ -68,7 +69,17 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
   };
 
   const handleSaveAttendance = async () => {
-    const payload = prepareAttendancePayload();
+    // localStorage에서 로그인 ID 추출
+    const userInfoStr = localStorage.getItem("userInfo");
+    const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+    const loginId = userInfo?.accId;
+
+    if (!loginId) {
+      alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
+      return;
+    }
+
+    const payload = prepareAttendancePayload(loginId);
     if (payload.length === 0) return alert("저장할 내용이 없습니다.");
 
     const formData = new FormData();
