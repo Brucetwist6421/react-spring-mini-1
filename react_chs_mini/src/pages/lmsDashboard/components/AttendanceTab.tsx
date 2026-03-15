@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Box, Paper, TextField, MenuItem, IconButton, Typography, Button } from "@mui/material";
+import { Box, Paper, TextField, MenuItem, IconButton, Typography, Button, Avatar } from "@mui/material";
 import Grid from "@mui/material/Grid"; 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -116,9 +116,32 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
           {(data[cat] || []).map((row, idx) => (
             <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
               <Grid size={{ xs: 12, md: 3 }}>
-                <TextField select fullWidth label="학생" size="small" value={row.accountSeq}
-                  onChange={(e) => updateRow(cat, idx, 'accountSeq', e.target.value)}>
-                  {students.map(s => <MenuItem key={s.accountSeq} value={s.accountSeq}>{s.accountName}</MenuItem>)}
+                <TextField 
+                  select 
+                  fullWidth 
+                  label="학생" 
+                  size="small" 
+                  value={row.accountSeq}
+                  onChange={(e) => updateRow(cat, idx, 'accountSeq', e.target.value)}
+                  // Select 내부의 선택된 텍스트 정렬을 위한 스타일
+                  SelectProps={{
+                    renderValue: (selected: any) => {
+                      const student = students.find(s => s.accountSeq === selected);
+                      return student ? student.accountName : "";
+                    }
+                  }}
+                >
+                  {students.map(s => (
+                    <MenuItem key={s.accountSeq} value={s.accountSeq} sx={{ gap: 1.5 }}>
+                      <Avatar 
+                        src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : ""} 
+                        sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
+                      >
+                        {s.accountName.charAt(0)}
+                      </Avatar>
+                      <Typography variant="body2">{s.accountName}</Typography>
+                    </MenuItem>
+                  ))}
                 </TextField>
               </Grid>
               <Grid size={{ xs: 12, md: 5 }} display="flex" gap={1}>
