@@ -5,7 +5,7 @@ import Grid from "@mui/material/Grid";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 
 const STATUS_MAP: Record<string, string> = {
@@ -103,6 +103,35 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
       alert("출석 저장 실패");
     }
   };
+
+  // [추가] 서버에서 해당 날짜의 출석 데이터를 불러와 카테고리별로 분류
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        const res = await api.get(`/api/attendance/list/${curSeq}`, {
+          params: { logDate }
+        });
+        
+        // 서버에서 받아온 List<AttendanceVO>를 STATUS별로 그룹화
+        const grouped = res.data.reduce((acc: any, cur: any) => {
+          if (!cur.status) return acc; // 출석 정보가 없는 학생은 제외(혹은 미등록 섹션으로)
+          
+          // STATUS_MAP의 Value(LATE 등)를 Key(지각자 등)로 역매핑
+          const catName = Object.keys(STATUS_MAP).find(key => STATUS_MAP[key] === cur.status);
+          if (catName) {
+            acc[catName] = [...(acc[catName] || []), cur];
+          }
+          return acc;
+        }, {});
+
+        setData(grouped);
+      } catch (e) {
+        console.error("출석 데이터 로드 실패", e);
+      }
+    };
+
+    if (curSeq && logDate) fetchAttendance();
+  }, [curSeq, logDate]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

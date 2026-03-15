@@ -156,11 +156,7 @@
                                     AND B.cur_seq = #{curSeq} 
                                     AND B.attendance_date = CAST(#{attendanceDate} AS DATE))
         WHERE 
-            A.account_seq IN (
-                SELECT account_seq 
-                FROM lms.tb_student_list 
-                WHERE cur_seq = #{curSeq}
-            )
+            A.cur_seq = #{curSeq}
         ORDER BY A.account_name ASC
     </select>
 </mapper>
