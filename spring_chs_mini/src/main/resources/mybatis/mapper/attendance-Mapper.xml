@@ -135,4 +135,32 @@
             update_id = #{regId},
             update_date = CURRENT_TIMESTAMP
     </insert>
+
+    <select id="getDailyAttendanceList" resultType="kr.or.ddit.vo.AttendanceVO">
+        SELECT 
+            A.account_seq,
+            A.account_name,
+            A.main_image_path,
+            B.attendance_seq,
+            B.cur_seq,
+            COALESCE(B.attendance_date, CAST(#{attendanceDate} AS DATE)) as attendance_date,
+            B.status,
+            TO_CHAR(B.start_time, 'HH24:MI') as start_time,
+            TO_CHAR(B.end_time, 'HH24:MI') as end_time,
+            B.remark,
+            B.main_file_path
+        FROM 
+            lms.tb_account A
+        LEFT OUTER JOIN 
+            lms.tb_attendance B ON (A.account_seq = B.account_seq 
+                                    AND B.cur_seq = #{curSeq} 
+                                    AND B.attendance_date = CAST(#{attendanceDate} AS DATE))
+        WHERE 
+            A.account_seq IN (
+                SELECT account_seq 
+                FROM lms.tb_student_list 
+                WHERE cur_seq = #{curSeq}
+            )
+        ORDER BY A.account_name ASC
+    </select>
 </mapper>

@@ -10,4 +10,6 @@ public interface AttendanceService {
     AttendanceVO getStudentAttendanceRate(int accountSeq);
 
     void insertAttendance(List<AttendanceVO> attendanceVO, MultipartHttpServletRequest request);
+
+    List<AttendanceVO> getDailyAttendanceList(int curSeq, String attendanceDate);
 }

@@ -91,5 +91,10 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new RuntimeException("출석 정보 저장 중 오류 발생", e);
         }
     }
+
+    @Override
+    public List<AttendanceVO> getDailyAttendanceList(int curSeq, String attendanceDate) {
+        return attendanceMapper.getDailyAttendanceList(curSeq, attendanceDate);
+    }
     
 }

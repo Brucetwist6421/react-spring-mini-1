@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -52,5 +53,13 @@ public class AttendanceController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
         }
+    }
+
+    @Operation(summary = "과정별 일자별 출석 목록 조회", description = "특정 과정의 특정 날짜 출석 현황을 조회합니다.")
+    @GetMapping("/list/{curSeq}")
+    public ResponseEntity<List<AttendanceVO>> getDailyAttendanceList(
+            @PathVariable int curSeq,
+            @RequestParam String logDate) { // YYYY-MM-DD 형식
+        return ResponseEntity.ok(attendanceService.getDailyAttendanceList(curSeq, logDate));
     }
 }

@@ -17,4 +17,9 @@ public interface AttendanceMapper {
     List<Map<String, Object>> selectAttendanceDetailList(@Param("accountSeq") int accountSeq);
 
     int upsertAttendance(AttendanceVO attendanceVO);
+
+    List<AttendanceVO> getDailyAttendanceList(
+        @Param("curSeq") int curSeq, 
+        @Param("attendanceDate") String attendanceDate
+    );
 }
