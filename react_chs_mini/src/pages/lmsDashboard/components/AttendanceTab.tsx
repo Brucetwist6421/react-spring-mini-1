@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Box, Paper, TextField, MenuItem, IconButton, Typography, Button, Avatar } from "@mui/material";
-import Grid from "@mui/material/Grid"; 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import CancelIcon from '@mui/icons-material/Cancel';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import { Avatar, Box, Button, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import { useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
+import { fileListDownload } from "../../../api/fileListDownload";
 
 const STATUS_MAP: Record<string, string> = {
   "지각자": "LATE",
@@ -29,15 +31,40 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
   const updateRow = (cat: string, index: number, field: string, value: any) => {
     setData(prev => {
       const newCatData = [...(prev[cat] || [])];
-      newCatData[index] = { ...newCatData[index], [field]: value };
+      if (field === 'file') {
+        if (newCatData[index].preview) URL.revokeObjectURL(newCatData[index].preview);
+        newCatData[index] = { 
+          ...newCatData[index], 
+          [field]: value, 
+          preview: value.type.startsWith('image/') ? URL.createObjectURL(value) : null 
+        };
+      } else {
+        newCatData[index] = { ...newCatData[index], [field]: value };
+      }
       return { ...prev, [cat]: newCatData };
     });
+  };
+
+  const removeFile = (cat: string, index: number) => {
+    setData(prev => {
+      const newCatData = [...(prev[cat] || [])];
+      const row = newCatData[index];
+      if (row.preview) URL.revokeObjectURL(row.preview);
+      newCatData[index] = { ...row, file: null, preview: null, mainFilePath: null, fileDeleted: true };
+      return { ...prev, [cat]: newCatData };
+    });
+  };
+
+  const handleDownload = (row: any) => {
+    if (row.mainFilePath && !row.file) {
+      fileListDownload({ url: `http://168.107.51.143:8080/upload/${encodeURIComponent(row.mainFilePath.trim())}` });
+    }
   };
 
   const addRow = (cat: string) => {
     setData(prev => ({
       ...prev,
-      [cat]: [...(prev[cat] || []), { accountSeq: "", startTime: "", endTime: "", remark: "", file: null, curSeq: curSeq }]
+      [cat]: [...(prev[cat] || []), { accountSeq: "", startTime: "", endTime: "", remark: "", file: null, preview: null, curSeq: curSeq }]
     }));
   };
 
@@ -48,88 +75,40 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
     }));
   };
 
-  // 로그인 ID를 인자로 받아 payload에 포함
-  const prepareAttendancePayload = (regId: string) => {
-    const payload: any[] = [];
-    Object.entries(data).forEach(([cat, rows]) => {
-      rows.forEach((row: any) => {
-        if (row.accountSeq) {
-          const { file: _file, ...rest } = row; 
-          payload.push({ 
-            ...rest, 
-            status: STATUS_MAP[cat], 
-            attendanceDate: logDate,
-            curSeq: Number(curSeq),
-            regId: regId // 필수: DB NOT NULL 제약조건 해결
-          });
-        }
-      });
-    });
-    return payload;
-  };
-
   const handleSaveAttendance = async () => {
-    // localStorage에서 로그인 ID 추출
-    const userInfoStr = localStorage.getItem("userInfo");
-    const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
-    const loginId = userInfo?.accId;
-
-    if (!loginId) {
-      alert("로그인 정보가 없습니다. 다시 로그인해주세요.");
-      return;
-    }
-
-    const payload = prepareAttendancePayload(loginId);
-    if (payload.length === 0) return alert("저장할 내용이 없습니다.");
-
+    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    const payload: any[] = [];
     const formData = new FormData();
-    formData.append("attendance", new Blob([JSON.stringify(payload)], { type: 'application/json' }));
 
     Object.entries(data).forEach(([cat, rows]) => {
       rows.forEach((row: any, idx: number) => {
-        if (row.file) {
-          formData.append(`file_${STATUS_MAP[cat]}_${idx}`, row.file); 
+        if (row.accountSeq) {
+          const { file, preview, ...rest } = row;
+          payload.push({ ...rest, status: STATUS_MAP[cat], attendanceDate: logDate, curSeq: Number(curSeq), regId: userInfo.accId, fileDeleted: !!row.fileDeleted });
+          if (file) formData.append(`file_${STATUS_MAP[cat]}_${idx}`, file);
         }
       });
     });
-    
+
+    formData.append("attendance", new Blob([JSON.stringify(payload)], { type: 'application/json' }));
     try {
-      await api.post("/api/attendance/insert", formData, { 
-        headers: { 'Content-Type': 'multipart/form-data' } 
-      });
-      alert("출석 정보가 저장되었습니다.");
-    } catch (e) {
-      console.error("출석 저장 실패:", e);
-      alert("출석 저장 실패");
-    }
+      await api.post("/api/attendance/insert", formData, { headers: { 'Content-Type': undefined } });
+      alert("저장되었습니다.");
+    } catch { alert("저장 실패"); }
   };
 
-  // [추가] 서버에서 해당 날짜의 출석 데이터를 불러와 카테고리별로 분류
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const res = await api.get(`/api/attendance/list/${curSeq}`, {
-          params: { logDate }
-        });
-        
-        // 서버에서 받아온 List<AttendanceVO>를 STATUS별로 그룹화
+        const res = await api.get(`/api/attendance/list/${curSeq}`, { params: { logDate } });
         const grouped = res.data.reduce((acc: any, cur: any) => {
-          if (!cur.status) return acc; // 출석 정보가 없는 학생은 제외(혹은 미등록 섹션으로)
-          
-          // STATUS_MAP의 Value(LATE 등)를 Key(지각자 등)로 역매핑
           const catName = Object.keys(STATUS_MAP).find(key => STATUS_MAP[key] === cur.status);
-          if (catName) {
-            acc[catName] = [...(acc[catName] || []), cur];
-          }
+          if (catName) acc[catName] = [...(acc[catName] || []), { ...cur, preview: null }];
           return acc;
         }, {});
-
         setData(grouped);
-      } catch (e) {
-        console.error("출석 데이터 로드 실패", e);
-      }
+      } catch (e) { console.error(e); }
     };
-
     if (curSeq && logDate) fetchAttendance();
   }, [curSeq, logDate]);
 
@@ -141,63 +120,58 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
             <Typography variant="subtitle1" fontWeight="bold">{cat}</Typography>
             <IconButton color="secondary" onClick={() => addRow(cat)}><AddCircleOutlineIcon /></IconButton>
           </Box>
-          
-          {(data[cat] || []).map((row, idx) => (
-            <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
-              <Grid size={{ xs: 12, md: 3 }}>
-                <TextField 
-                  select 
-                  fullWidth 
-                  label="학생" 
-                  size="small" 
-                  value={row.accountSeq}
-                  onChange={(e) => updateRow(cat, idx, 'accountSeq', e.target.value)}
-                  // Select 내부의 선택된 텍스트 정렬을 위한 스타일
-                  SelectProps={{
-                    renderValue: (selected: any) => {
-                      const student = students.find(s => s.accountSeq === selected);
-                      return student ? student.accountName : "";
-                    }
-                  }}
-                >
-                  {students.map(s => (
-                    <MenuItem key={s.accountSeq} value={s.accountSeq} sx={{ gap: 1.5 }}>
-                      <Avatar 
-                        src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : ""} 
-                        sx={{ width: 24, height: 24, fontSize: '0.75rem' }}
-                      >
-                        {s.accountName.charAt(0)}
-                      </Avatar>
-                      <Typography variant="body2">{s.accountName}</Typography>
-                    </MenuItem>
-                  ))}
-                </TextField>
+          {(data[cat] || []).map((row, idx) => {
+            const fileName = row.file ? row.file.name : (row.mainFilePath?.split('_').slice(1).join('_') || '');
+            const hasFile = !!(row.file || row.mainFilePath);
+            return (
+              <Grid container spacing={1} alignItems="center" key={idx} sx={{ mb: 1 }}>
+                <Grid size={{ xs: 12, md: 3 }}>
+                  <TextField select fullWidth label="학생" size="small" value={row.accountSeq} onChange={(e) => updateRow(cat, idx, 'accountSeq', e.target.value)}
+                    sx={{ '& .MuiInputBase-root': { height: '60px' } }}
+                    slotProps={{
+                      select: {
+                        renderValue: (selected: any) => {
+                          const s = students.find(x => x.accountSeq === selected);
+                          return s ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                              <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 40, height: 40 }} />
+                              <Typography>{s.accountName}</Typography>
+                            </Box>
+                          ) : "";
+                        }
+                      }
+                    }}>
+                    {students.map(s => (
+                      <MenuItem key={s.accountSeq} value={s.accountSeq} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
+                        <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 40, height: 40 }} />
+                        <Typography>{s.accountName}</Typography>
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid size={{ xs: 12, md: 5 }} display="flex" gap={1}>
+                  <TextField type="time" size="small" fullWidth label="시작" value={row.startTime} onChange={(e) => updateRow(cat, idx, 'startTime', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+                  <TextField type="time" size="small" fullWidth label="종료" value={row.endTime} onChange={(e) => updateRow(cat, idx, 'endTime', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }} display="flex" alignItems="center" gap={1}>
+                  <Button component="label" size="small" variant="outlined">파일<input type="file" hidden onChange={(e) => e.target.files?.[0] && updateRow(cat, idx, 'file', e.target.files[0])} /></Button>
+                  {hasFile && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #eee', p: 0.5, borderRadius: 1 }}>
+                      <IconButton size="small" onClick={() => handleDownload(row)}>
+                        {row.preview || (row.mainFilePath && /\.(jpg|png|gif)$/i.test(row.mainFilePath)) 
+                          ? <img src={row.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(row.mainFilePath)}`} style={{ width: 35, height: 35, objectFit: 'cover' }} /> 
+                          : <InsertDriveFileIcon color="primary" />}
+                      </IconButton>
+                      <Typography variant="caption" sx={{ maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName}</Typography>
+                      <IconButton size="small" onClick={() => removeFile(cat, idx)}><CancelIcon color="error" fontSize="small" /></IconButton>
+                    </Box>
+                  )}
+                  <IconButton color="error" onClick={() => removeRow(cat, idx)}><RemoveCircleOutlineIcon /></IconButton>
+                </Grid>
               </Grid>
-              <Grid size={{ xs: 12, md: 5 }} display="flex" gap={1}>
-                <TextField type="time" size="small" fullWidth slotProps={{ inputLabel: { shrink: true } }} label="시작" 
-                  value={row.startTime} onChange={(e) => updateRow(cat, idx, 'startTime', e.target.value)} />
-                <TextField type="time" size="small" fullWidth slotProps={{ inputLabel: { shrink: true } }} label="종료" 
-                  value={row.endTime} onChange={(e) => updateRow(cat, idx, 'endTime', e.target.value)} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 2 }}>
-                <TextField fullWidth placeholder="사유" size="small" value={row.remark}
-                  onChange={(e) => updateRow(cat, idx, 'remark', e.target.value)} />
-              </Grid>
-              <Grid size={{ xs: 12, md: 2 }} display="flex" alignItems="center" gap={1}>
-                <Button component="label" size="small" variant="outlined" startIcon={<InsertDriveFileIcon />}>
-                  {row.file ? "변경" : "파일"}
-                  <input type="file" hidden onChange={(e) => e.target.files?.[0] && updateRow(cat, idx, 'file', e.target.files[0])} />
-                </Button>
-                <IconButton color="error" onClick={() => removeRow(cat, idx)}><RemoveCircleOutlineIcon /></IconButton>
-              </Grid>
-            </Grid>
-          ))}
-          
-          {(data[cat] || []).length > 0 && (
-            <Button variant="contained" color="secondary" onClick={handleSaveAttendance} sx={{ mt: 1 }}>
-              {cat} 저장
-            </Button>
-          )}
+            );
+          })}
+          {(data[cat] || []).length > 0 && <Button variant="contained" color="secondary" onClick={handleSaveAttendance} sx={{ mt: 1 }}>{cat} 저장</Button>}
         </Paper>
       ))}
     </Box>
