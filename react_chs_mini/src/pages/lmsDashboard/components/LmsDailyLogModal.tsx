@@ -5,7 +5,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel'; // 삭제 아이콘 추가
 import { Box, Button, Dialog, DialogContent, DialogTitle, IconButton, MenuItem, Paper, Tab, Tabs, TextField, Tooltip, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { fileListDownload } from "../../../api/fileListDownload";
 import RandomSpinner from "../../../components/RandomSpinner";
@@ -20,30 +20,36 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
   const [activeTab, setActiveTab] = useState(0);
   const [students, setStudents] = useState<any[]>([]);
 
+  // 데이터 조회 함수 분리
+  const fetchLogs = useCallback(async () => {
+    if (!open || !logDate || !curSeq) return;
+    setIsReady(false);
+    try {
+      const [subRes, logRes, stuRes] = await Promise.all([
+        api.get(`/api/curriculum/subjects/${curSeq}`),
+        api.get(`/api/daily-log/curriculum/${curSeq}`, { params: { logDate } }),
+        api.get(`/api/account/${curSeq}/students`)
+      ]);
+      setSubjects(subRes.data);
+      const logMap = (logRes.data || []).reduce((acc: any, cur: any) => ({ ...acc, [cur.period]: { ...cur } }), {});
+      setDailyLogs(logMap);
+      setStudents(stuRes.data);
+      setIsReady(true);
+    } catch (e) {
+      console.error(e);
+      setIsReady(true);
+    }
+  }, [open, curSeq, logDate]);
+
   useEffect(() => {
     if (open) {
       setLogDate(new Date().toISOString().split('T')[0]);
-      setIsReady(false);
     }
   }, [open]);
 
   useEffect(() => {
-    if (open && logDate) {
-      Promise.all([
-        api.get(`/api/curriculum/subjects/${curSeq}`),
-        api.get(`/api/daily-log/curriculum/${curSeq}`, { params: { logDate } }),
-        api.get(`/api/account/${curSeq}/students`)
-      ])
-      .then(([subRes, logRes, stuRes]) => {
-        setSubjects(subRes.data);
-        const logMap = (logRes.data || []).reduce((acc: any, cur: any) => ({ ...acc, [cur.period]: { ...cur } }), {});
-        setDailyLogs(logMap);
-        setStudents(stuRes.data);
-        setIsReady(true);
-      })
-      .catch(() => setIsReady(true));
-    }
-  }, [open, curSeq, logDate]);
+    fetchLogs();
+  }, [fetchLogs]);
 
   const handleLogChange = (period: number, field: string, value: any) => {
     setDailyLogs(prev => ({ ...prev, [period]: { ...prev[period], [field]: value, period } }));
@@ -56,22 +62,17 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
     });
   };
 
-  // 파일 삭제 핸들러
   const handleFileDelete = (period: number) => {
-    setDailyLogs(prev => {
-      const updated = {
-        ...prev,
-        [period]: {
-          ...prev[period],
-          file: null,          // 파일 객체 제거
-          preview: null,       // 미리보기 제거
-          mainFilePath: null,  // 경로 제거
-          fileDeleted: true    // 삭제 플래그 활성화
-        }
-      };
-      console.log("삭제 후 로그 상태:", updated[period]); // <--- 여기서 확인하세요!
-      return updated;
-    });
+    setDailyLogs(prev => ({
+      ...prev,
+      [period]: {
+        ...prev[period],
+        file: null,
+        preview: null,
+        mainFilePath: null,
+        fileDeleted: true
+      }
+    }));
   };
 
   const handleDownload = (log: any) => {
@@ -85,36 +86,33 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
     const formData = new FormData();
     const logsPayload: any[] = [];
 
-    // 1. 유효성 검사 로직은 그대로 유지
-    const logEntries = Object.entries(dailyLogs);
-    for (const [period, data] of logEntries) {
-      const hasContent = !!data.content?.trim();
-      const hasFile = !!(data.file || data.mainFilePath);
-      if ((hasContent || hasFile) && !data.subSeq) {
-        alert(`${period}교시 과목을 선택해주세요.`);
-        return;
+    // 1. 유효성 검사 로직: 과목 미선택 시 저장 차단
+    for (const [period, data] of Object.entries(dailyLogs)) {
+      const logData = data as any;
+      const hasContent = !!logData.content?.trim();
+      const hasFile = !!(logData.file || logData.mainFilePath);
+      
+      // 내용이나 파일이 있는데 과목이 선택되지 않은 경우
+      if ((hasContent || hasFile) && !logData.subSeq) {
+        alert(`${period}교시: 훈련 내용 또는 파일이 첨부되었습니다. 과목을 선택해주세요.`);
+        return; // 저장 중단
       }
     }
 
-    // 2. 데이터 구성 로직 수정
+    // 2. 데이터 구성 로직
     Object.entries(dailyLogs).forEach(([period, data]: any) => {
-      // 삭제 요청(fileDeleted: true)이 있거나, 내용/파일이 존재하는 경우에만 전송
-      if (data.subSeq && (data.content || data.file || data.mainFilePath || data.fileDeleted)) {
-        
-        // file, preview를 제외한 나머지 데이터를 복사
+      // subSeq가 있는 경우에만 유효한 로그로 간주하여 전송
+      if (data.subSeq) {
         const { file, preview, ...rest } = data;
         
-        // 삭제 요청이 있다면 mainFilePath를 null로 확실하게 설정
-        const logData = {
-          ...rest,
-          mainFilePath: data.fileDeleted ? null : data.mainFilePath,
-          fileDeleted: !!data.fileDeleted // 명시적으로 포함
+        const logData = { 
+          ...rest, 
+          mainFilePath: data.fileDeleted ? null : data.mainFilePath, 
+          fileDeleted: !!data.fileDeleted 
         };
 
-        console.log("전송할 payload 항목:", logData);
         logsPayload.push({ ...logData, logDate, regId: userInfo.accId, status: "A" });
         
-        // 실제 파일이 새로 선택된 경우만 formData에 append
         if (file) formData.append(`file_${period}`, file);
       }
     });
@@ -126,8 +124,11 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
     try {
       await api.post("/api/daily-log/save", formData, { headers: { 'Content-Type': undefined } });
       alert("저장되었습니다.");
-      onClose();
-    } catch { alert("저장에 실패했습니다."); }
+      fetchLogs(); // 저장 후 데이터 재조회
+    } catch (e) {
+      console.error(e);
+      alert("저장에 실패했습니다."); 
+    }
   };
 
   return (
@@ -201,7 +202,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, position: 'relative', border: '1px solid #eee', p: 0.5, borderRadius: 1 }}>
                             <IconButton size="small" onClick={() => handleDownload(log)}>
                               {log.preview || (log.mainFilePath && /\.(jpg|png|gif)$/i.test(log.mainFilePath)) 
-                                ? <img src={log.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(log.mainFilePath)}`} style={{ width: 35, height: 35, objectFit: 'cover', borderRadius: 4 }} alt="thumb" /> 
+                                ? <img src={log.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(log.mainFilePath)}`} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }} alt="thumb" /> 
                                 : <InsertDriveFileIcon color="primary" sx={{ fontSize: 24 }} />}
                             </IconButton>
                             <Tooltip title={fileName}>

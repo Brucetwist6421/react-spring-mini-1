@@ -6,7 +6,7 @@ import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { Avatar, Box, Button, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { fileListDownload } from "../../../api/fileListDownload";
 
@@ -24,9 +24,12 @@ interface AttendanceTabProps {
   curSeq: number | string; 
 }
 
-const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
+const AttendanceTab = ({ students, curSeq }: AttendanceTabProps) => {
   const categories = Object.keys(STATUS_MAP);
   const [data, setData] = useState<Record<string, any[]>>({});
+
+  const [logDate, setLogDate] = useState(new Date().toISOString().split("T")[0]);
+  const dateRef = useRef<HTMLInputElement>(null);
 
   const updateRow = (cat: string, index: number, field: string, value: any) => {
     setData(prev => {
@@ -79,26 +82,49 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     const payload: any[] = [];
     const formData = new FormData();
+    let hasError = false; // 유효성 검사 플래그
 
-    Object.entries(data).forEach(([cat, rows]) => {
-      rows.forEach((row: any, idx: number) => {
+    // 1. 데이터 검증 루프
+    for (const [cat, rows] of Object.entries(data)) {
+      for (const [idx, row] of (rows as any[]).entries()) {
         if (row.accountSeq) {
           const { file, preview, ...rest } = row;
-          payload.push({ ...rest, status: STATUS_MAP[cat], attendanceDate: logDate, curSeq: Number(curSeq), regId: userInfo.accId, fileDeleted: !!row.fileDeleted });
+          payload.push({ 
+            ...rest, 
+            status: STATUS_MAP[cat], 
+            attendanceDate: logDate, 
+            curSeq: Number(curSeq), 
+            regId: userInfo.accId, 
+            fileDeleted: !!row.fileDeleted 
+          });
           if (file) formData.append(`file_${STATUS_MAP[cat]}_${idx}`, file);
+        } else if (Object.keys(row).some(key => key !== 'preview' && row[key])) {
+          // 학생은 선택 안 했는데 시간이나 사유를 적은 경우
+          alert(`[${cat}] ${idx + 1}번째 행의 학생을 선택해주세요.`);
+          hasError = true;
+          break;
         }
-      });
-    });
+      }
+      if (hasError) break;
+    }
 
+    if (hasError) return; // 검증 실패 시 중단
+    if (payload.length === 0) return alert("저장할 내용이 없습니다.");
+
+    // 2. 저장 API 호출
     formData.append("attendance", new Blob([JSON.stringify(payload)], { type: 'application/json' }));
     try {
       await api.post("/api/attendance/insert", formData, { headers: { 'Content-Type': undefined } });
       alert("저장되었습니다.");
-    } catch { alert("저장 실패"); }
+    } catch (e) {
+      console.error(e);
+      alert("저장 실패");
+    }
   };
 
   useEffect(() => {
     const fetchAttendance = async () => {
+      if (!logDate || !curSeq) return;
       try {
         const res = await api.get(`/api/attendance/list/${curSeq}`, { params: { logDate } });
         const grouped = res.data.reduce((acc: any, cur: any) => {
@@ -109,11 +135,25 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
         setData(grouped);
       } catch (e) { console.error(e); }
     };
-    if (curSeq && logDate) fetchAttendance();
-  }, [curSeq, logDate]);
+    fetchAttendance();
+  }, [logDate, curSeq]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* 훈련 내용 등록과 동일한 날짜 선택 컴포넌트 */}
+      <Paper sx={{ p: 2, width: 'fit-content' }}>
+        <Box sx={{ width: 220, cursor: "pointer" }} onClick={() => dateRef.current?.click()}>
+          <TextField
+            fullWidth type="date" label="조회 날짜" value={logDate} size="small"
+            onChange={(e) => setLogDate(e.target.value)} inputRef={dateRef}
+            slotProps={{ 
+              inputLabel: { shrink: true }, 
+              htmlInput: { style: { cursor: "pointer" } } 
+            }}
+          />
+        </Box>
+      </Paper>
+
       {categories.map((cat) => (
         <Paper key={cat} sx={{ p: 2, borderLeft: '6px solid #e91e63' }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
@@ -134,7 +174,7 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
                           const s = students.find(x => x.accountSeq === selected);
                           return s ? (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
-                              <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 40, height: 40 }} />
+                              <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 50, height: 50 }} />
                               <Typography>{s.accountName}</Typography>
                             </Box>
                           ) : "";
@@ -143,7 +183,7 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
                     }}>
                     {students.map(s => (
                       <MenuItem key={s.accountSeq} value={s.accountSeq} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
-                        <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 40, height: 40 }} />
+                        <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 50, height: 50 }} />
                         <Typography>{s.accountName}</Typography>
                       </MenuItem>
                     ))}
@@ -159,7 +199,7 @@ const AttendanceTab = ({ students, logDate, curSeq }: AttendanceTabProps) => {
                     <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #eee', p: 0.5, borderRadius: 1 }}>
                       <IconButton size="small" onClick={() => handleDownload(row)}>
                         {row.preview || (row.mainFilePath && /\.(jpg|png|gif)$/i.test(row.mainFilePath)) 
-                          ? <img src={row.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(row.mainFilePath)}`} style={{ width: 35, height: 35, objectFit: 'cover' }} /> 
+                          ? <img src={row.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(row.mainFilePath)}`} style={{ width: 50, height: 50, objectFit: 'cover' }} /> 
                           : <InsertDriveFileIcon color="primary" />}
                       </IconButton>
                       <Typography variant="caption" sx={{ maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName}</Typography>
