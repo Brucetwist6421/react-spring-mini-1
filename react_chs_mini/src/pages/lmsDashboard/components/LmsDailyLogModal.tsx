@@ -11,7 +11,7 @@ import { fileListDownload } from "../../../api/fileListDownload";
 import RandomSpinner from "../../../components/RandomSpinner";
 import AttendanceTab from './AttendanceTab';
 
-const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
+const LmsDailyLogModal = ({ open, onClose, curSeq, curData, startDate, endDate }: any) => {
   const [logDate, setLogDate] = useState<string>("");
   const [subjects, setSubjects] = useState<any[]>([]);
   const [dailyLogs, setDailyLogs] = useState<Record<number, any>>({});
@@ -136,7 +136,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData }: any) => {
       <DialogTitle sx={{ bgcolor: '#f8f9fa', borderBottom: '1px solid #e0e0e0' }}>
         <Box>훈련일지 관리 - {curData?.curName} - {curData?.className}호 ({curData?.term}기)</Box>
         <Typography variant="caption" sx={{ color: "#666", fontSize: "1rem" }}>
-          훈련 기간 : {curData?.period}
+          훈련 기간 : {curData.period? `${curData.period}` : `${startDate} ~ ${endDate}`}
         </Typography>
       </DialogTitle>
       <DialogTitle>

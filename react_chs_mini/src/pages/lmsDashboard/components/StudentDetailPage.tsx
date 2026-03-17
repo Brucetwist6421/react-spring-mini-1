@@ -38,7 +38,7 @@ import AttendanceStatusView from './AttendanceStatusView';
 import React from 'react';
 import EditStudentModal from './EditStudentModal';
 
-const StudentDetailPage = ({ onUpdateSuccess }: { onUpdateSuccess: () => void }) => {
+const StudentDetailPage = ({ onUpdateSuccess, curSeq, curData }: { onUpdateSuccess: () => void; curSeq: string|undefined; curData: any }) => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
   const [student, setStudent] = useState<any>(null);
   const [attendance, setAttendance] = useState<any>(null);
@@ -301,7 +301,7 @@ const StudentDetailPage = ({ onUpdateSuccess }: { onUpdateSuccess: () => void })
             </Tabs>
 
             <Box sx={{ p: 5 }}>
-              {tabValue === 0 && <AttendanceStatusView accountSeq={student.accountSeq} />}
+              {tabValue === 0 && <AttendanceStatusView accountSeq={student.accountSeq} curSeq={curSeq} curData={curData} startDate={student?.startDate} endDate={student?.endDate} />}
               {tabValue === 2 && (
                 <Box>
                   <Typography sx={{ fontSize: '1.4rem', fontWeight: 900, mb: 3 }}>경력 기술 상세</Typography>

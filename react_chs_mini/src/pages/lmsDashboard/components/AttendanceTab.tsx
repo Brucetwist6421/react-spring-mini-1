@@ -24,11 +24,11 @@ interface AttendanceTabProps {
   curSeq: number | string; 
 }
 
-const AttendanceTab = ({ students, curSeq }: AttendanceTabProps) => {
+const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabProps) => {
   const categories = Object.keys(STATUS_MAP);
   const [data, setData] = useState<Record<string, any[]>>({});
 
-  const [logDate, setLogDate] = useState(new Date().toISOString().split("T")[0]);
+  const [logDate, setLogDate] = useState(parentDate || new Date().toISOString().split('T')[0]);
   const dateRef = useRef<HTMLInputElement>(null);
 
   const updateRow = (cat: string, index: number, field: string, value: any) => {

@@ -40,6 +40,7 @@ const LmsStudentManagement = () => {
               room: classData.room || '미정',
             });
           }
+          console.log("학생 데이터 로드 성공:", res.data);
         })
         .catch(err => console.error("데이터 로딩 실패:", err));
     }
@@ -177,7 +178,7 @@ const LmsStudentManagement = () => {
 
         {/* 오른쪽: 상세 정보 (생략 - 기존 유지) */}
         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-          {accountSeq ? <StudentDetailPage onUpdateSuccess={fetchStudents}/> : (
+          {accountSeq ? <StudentDetailPage onUpdateSuccess={fetchStudents} curSeq={curSeq} curData={courseInfo} /> : (
              <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 3, border: '1px dashed #cbd5e1', bgcolor: '#fbfcfd' }} elevation={0}>
                <SchoolIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
                <Typography color="text.secondary" fontWeight={500}>학생을 선택하면 상세 관리 화면이 나타납니다.</Typography>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Alert, Box, CircularProgress, Divider, Paper, Stack, Typography, Chip } from '@mui/material';
+import { Alert, Box, CircularProgress, Divider, Paper, Stack, Typography, Chip, Button } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import MonthlyAttendanceChart from './MonthlyAttendanceList';
+import LmsDailyLogModal from './LmsDailyLogModal';
 
 interface AttendanceData {
   totalWorkingDays: number;
@@ -33,9 +34,10 @@ interface AttendanceData {
   }>;
 }
 
-const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
+const AttendanceStatusView = ({ accountSeq, curSeq, curData, startDate, endDate }: { accountSeq: number; curSeq: string | undefined; curData: any; startDate?: string; endDate?: string }) => {
   const [data, setData] = useState<AttendanceData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (accountSeq) {
@@ -150,14 +152,27 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
       </Box>
 
       <Box sx={{ mt: 5, mb: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
-          <Typography sx={{ fontSize: '1.2rem', fontWeight: 900 }}>출석 특이사항 목록</Typography>
-          <Chip 
-            label={data.attList?.length || 0} 
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2.5 }}>
+          {/* 좌측 타이틀 영역 */}
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Typography sx={{ fontSize: '1.2rem', fontWeight: 900 }}>출석 특이사항 목록</Typography>
+            <Chip 
+              label={data.attList?.length || 0} 
+              size="small" 
+              color="primary" 
+              sx={{ fontWeight: 800, height: 24, fontSize: '0.85rem' }} 
+            />
+          </Stack>
+
+          {/* 우측 버튼 영역 */}
+          <Button 
+            variant="contained" 
             size="small" 
-            color="primary" 
-            sx={{ fontWeight: 800, height: 24, fontSize: '0.85rem' }} 
-          />
+            onClick={() => setIsModalOpen(true)}
+            sx={{ fontWeight: 700 }}
+          >
+            훈련일지 관리
+          </Button>
         </Stack>
 
         {data.attList && data.attList.length > 0 ? (
@@ -236,7 +251,17 @@ const AttendanceStatusView = ({ accountSeq }: { accountSeq: number }) => {
           </Paper>
         )}
       </Box>
+
+      <LmsDailyLogModal 
+        open={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        curSeq={curSeq} // 필요한 props 전달
+        curData={curData} 
+        startDate={startDate}
+        endDate={endDate}
+      />
     </Box>
+    
   );
 };
 
