@@ -5,10 +5,11 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { Avatar, Box, Button, IconButton, MenuItem, Paper, TextField, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid"; 
 import { useEffect, useRef, useState } from "react";
 import api from "../../../api/axiosInstance";
 import { fileListDownload } from "../../../api/fileListDownload";
+import RandomSpinner from '../../../components/RandomSpinner';
 
 const STATUS_MAP: Record<string, string> = {
   "지각자": "LATE",
@@ -20,17 +21,18 @@ const STATUS_MAP: Record<string, string> = {
 
 interface AttendanceTabProps {
   students: any[];
-  logDate: string;
+  logDate: string;       // 부모(모달)의 상태
+  setLogDate: (date: string) => void; // 부모 상태 변경 함수
   curSeq: number | string; 
 }
 
-const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabProps) => {
+const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabProps) => {
   const categories = Object.keys(STATUS_MAP);
   const [data, setData] = useState<Record<string, any[]>>({});
-
-  const [logDate, setLogDate] = useState(parentDate || new Date().toISOString().split('T')[0]);
+  const[loading, setLoading] = useState(false);
   const dateRef = useRef<HTMLInputElement>(null);
 
+  // 행 데이터 업데이트 (파일 프리뷰 포함)
   const updateRow = (cat: string, index: number, field: string, value: any) => {
     setData(prev => {
       const newCatData = [...(prev[cat] || [])];
@@ -48,6 +50,7 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
     });
   };
 
+  // 파일 삭제 처리
   const removeFile = (cat: string, index: number) => {
     setData(prev => {
       const newCatData = [...(prev[cat] || [])];
@@ -58,12 +61,14 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
     });
   };
 
+  // 파일 다운로드
   const handleDownload = (row: any) => {
     if (row.mainFilePath && !row.file) {
       fileListDownload({ url: `http://168.107.51.143:8080/upload/${encodeURIComponent(row.mainFilePath.trim())}` });
     }
   };
 
+  // 행 추가
   const addRow = (cat: string) => {
     setData(prev => ({
       ...prev,
@@ -71,6 +76,7 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
     }));
   };
 
+  // 행 삭제
   const removeRow = (cat: string, index: number) => {
     setData(prev => ({
       ...prev,
@@ -78,13 +84,13 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
     }));
   };
 
+  // 저장 로직 (부모의 logDate 사용)
   const handleSaveAttendance = async () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     const payload: any[] = [];
     const formData = new FormData();
-    let hasError = false; // 유효성 검사 플래그
+    let hasError = false;
 
-    // 1. 데이터 검증 루프
     for (const [cat, rows] of Object.entries(data)) {
       for (const [idx, row] of (rows as any[]).entries()) {
         if (row.accountSeq) {
@@ -92,14 +98,13 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
           payload.push({ 
             ...rest, 
             status: STATUS_MAP[cat], 
-            attendanceDate: logDate, 
+            attendanceDate: logDate, // 공통 logDate 사용
             curSeq: Number(curSeq), 
             regId: userInfo.accId, 
             fileDeleted: !!row.fileDeleted 
           });
           if (file) formData.append(`file_${STATUS_MAP[cat]}_${idx}`, file);
         } else if (Object.keys(row).some(key => key !== 'preview' && row[key])) {
-          // 학생은 선택 안 했는데 시간이나 사유를 적은 경우
           alert(`[${cat}] ${idx + 1}번째 행의 학생을 선택해주세요.`);
           hasError = true;
           break;
@@ -108,10 +113,9 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
       if (hasError) break;
     }
 
-    if (hasError) return; // 검증 실패 시 중단
+    if (hasError) return;
     if (payload.length === 0) return alert("저장할 내용이 없습니다.");
 
-    // 2. 저장 API 호출
     formData.append("attendance", new Blob([JSON.stringify(payload)], { type: 'application/json' }));
     try {
       await api.post("/api/attendance/insert", formData, { headers: { 'Content-Type': undefined } });
@@ -122,9 +126,11 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
     }
   };
 
+  // logDate가 변경될 때마다 데이터 새로고침
   useEffect(() => {
     const fetchAttendance = async () => {
       if (!logDate || !curSeq) return;
+      setLoading(true);
       try {
         const res = await api.get(`/api/attendance/list/${curSeq}`, { params: { logDate } });
         const grouped = res.data.reduce((acc: any, cur: any) => {
@@ -133,25 +139,42 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
           return acc;
         }, {});
         setData(grouped);
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error(e); 
+      } finally {
+        setLoading(false);
+      }
     };
     fetchAttendance();
   }, [logDate, curSeq]);
 
+  if(loading) {
+    return (
+      <RandomSpinner />
+    );
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {/* 훈련 내용 등록과 동일한 날짜 선택 컴포넌트 */}
+      {/* 부모의 상태를 제어하는 날짜 선택기 */}
       <Paper sx={{ p: 2, width: 'fit-content' }}>
         <Box sx={{ width: 220, cursor: "pointer" }} onClick={() => dateRef.current?.click()}>
           <TextField
-            fullWidth type="date" label="조회 날짜" value={logDate} size="small"
-            onChange={(e) => setLogDate(e.target.value)} inputRef={dateRef}
+            fullWidth type="date" label="출석 조회 날짜" value={logDate} size="small"
+            onChange={(e) => setLogDate(e.target.value)} // 부모 상태 업데이트
+            inputRef={dateRef}
             slotProps={{ 
               inputLabel: { shrink: true }, 
               htmlInput: { style: { cursor: "pointer" } } 
             }}
           />
         </Box>
+      </Paper>
+
+      <Paper sx={{ px: 2, py: 1, bgcolor: "#f5f7fa", border: "1px dashed #d0d7de" }}>
+        <Typography variant="caption" sx={{ color: "#555", display: "flex", alignItems: "center" }}>
+          📎 첨부된 파일 아이콘 또는 이미지를 클릭하면 다운로드됩니다. (X 버튼 클릭 시 삭제)
+        </Typography>
       </Paper>
 
       {categories.map((cat) => (
@@ -174,7 +197,7 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
                           const s = students.find(x => x.accountSeq === selected);
                           return s ? (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
-                              <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 50, height: 50 }} />
+                              <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 45, height: 45 }} />
                               <Typography>{s.accountName}</Typography>
                             </Box>
                           ) : "";
@@ -183,15 +206,15 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
                     }}>
                     {students.map(s => (
                       <MenuItem key={s.accountSeq} value={s.accountSeq} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
-                        <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 50, height: 50 }} />
+                        <Avatar src={s.mainImagePath ? `http://168.107.51.143:8080/upload/${s.mainImagePath}` : undefined} sx={{ width: 45, height: 45 }} />
                         <Typography>{s.accountName}</Typography>
                       </MenuItem>
                     ))}
                   </TextField>
                 </Grid>
                 <Grid size={{ xs: 12, md: 5 }} display="flex" gap={1}>
-                  <TextField type="time" size="small" fullWidth label="시작" value={row.startTime} onChange={(e) => updateRow(cat, idx, 'startTime', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
-                  <TextField type="time" size="small" fullWidth label="종료" value={row.endTime} onChange={(e) => updateRow(cat, idx, 'endTime', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+                  <TextField type="time" size="small" fullWidth label="시작" value={row.startTime || ""} onChange={(e) => updateRow(cat, idx, 'startTime', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
+                  <TextField type="time" size="small" fullWidth label="종료" value={row.endTime || ""} onChange={(e) => updateRow(cat, idx, 'endTime', e.target.value)} slotProps={{ inputLabel: { shrink: true } }} />
                 </Grid>
                 <Grid size={{ xs: 12, md: 4 }} display="flex" alignItems="center" gap={1}>
                   <Button component="label" size="small" variant="outlined">파일<input type="file" hidden onChange={(e) => e.target.files?.[0] && updateRow(cat, idx, 'file', e.target.files[0])} /></Button>
@@ -199,10 +222,10 @@ const AttendanceTab = ({ students, curSeq, logDate: parentDate }: AttendanceTabP
                     <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #eee', p: 0.5, borderRadius: 1 }}>
                       <IconButton size="small" onClick={() => handleDownload(row)}>
                         {row.preview || (row.mainFilePath && /\.(jpg|png|gif)$/i.test(row.mainFilePath)) 
-                          ? <img src={row.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(row.mainFilePath)}`} style={{ width: 50, height: 50, objectFit: 'cover' }} /> 
+                          ? <img src={row.preview || `http://168.107.51.143:8080/upload/${encodeURIComponent(row.mainFilePath)}`} style={{ width: 45, height: 45, objectFit: 'cover' }} /> 
                           : <InsertDriveFileIcon color="primary" />}
                       </IconButton>
-                      <Typography variant="caption" sx={{ maxWidth: 60, overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName}</Typography>
+                      <Typography variant="caption" sx={{ maxWidth: 50, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{fileName}</Typography>
                       <IconButton size="small" onClick={() => removeFile(cat, idx)}><CancelIcon color="error" fontSize="small" /></IconButton>
                     </Box>
                   )}
