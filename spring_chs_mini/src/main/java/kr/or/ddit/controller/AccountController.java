@@ -86,4 +86,18 @@ public class AccountController {
     public ResponseEntity<List<AccountVO>> getTeacherList() {
         return ResponseEntity.ok(accountService.getTeacherList());
     }
+
+    // 아이디 중복 체크
+    @Operation(summary = "아이디 중복 체크", description = "입력된 아이디의 사용 가능 여부를 확인합니다.")
+    @GetMapping("/check-id/{accountId}")
+    public ResponseEntity<java.util.Map<String, Boolean>> checkIdDuplicate(
+            @Parameter(description = "체크할 아이디") @PathVariable String accountId) {
+        
+        boolean isDuplicate = accountService.checkIdDuplicate(accountId);
+        
+        java.util.Map<String, Boolean> response = new java.util.HashMap<>();
+        response.put("isDuplicate", isDuplicate);
+        
+        return ResponseEntity.ok(response);
+    }
 }

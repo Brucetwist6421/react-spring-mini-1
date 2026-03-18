@@ -195,4 +195,10 @@
         WHERE teacher_yn = 'Y'
         ORDER BY account_name ASC
     </select>
+
+    <select id="checkIdDuplicate" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM lms.tb_account
+        WHERE account_id = #{accountId}
+    </select>
 </mapper>

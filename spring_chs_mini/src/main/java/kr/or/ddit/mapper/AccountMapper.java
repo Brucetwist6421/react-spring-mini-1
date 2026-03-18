@@ -33,4 +33,6 @@ public interface AccountMapper {
     int insertAccount(AccountVO accountVO);
 
     List<AccountVO> selectTeacherList();
+
+    int checkIdDuplicate(String accountId);
 }

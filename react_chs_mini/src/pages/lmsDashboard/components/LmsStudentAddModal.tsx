@@ -4,9 +4,11 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import SaveIcon from '@mui/icons-material/Save';
 import {
     Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
-    Divider, IconButton, MenuItem, TextField, Typography
+    Divider, IconButton,
+    InputAdornment,
+    MenuItem, TextField, Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid'; // Grid2 사용 권장 사양 반영
+import Grid from '@mui/material/Grid'; // Grid2 사양 반영
 import React, { useRef, useState } from 'react';
 import api from '../../../api/axiosInstance';
 
@@ -48,6 +50,10 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
     const [formData, setFormData] = useState<any>(initialForm);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>('');
+    
+    // 중복 체크 관련 상태
+    const [isIdChecked, setIsIdChecked] = useState<boolean>(false);
+    const [isIdValid, setIsIdValid] = useState<boolean>(false);
 
     // 필수 항목 Ref
     const inputRefs: any = {
@@ -61,9 +67,15 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev: any) => ({ ...prev, [name]: value }));
+        
+        // 아이디 변경 시 중복 체크 상태 초기화
+        if (name === 'accountId') {
+            setIsIdChecked(false);
+            setIsIdValid(false);
+        }
     };
 
-    // 이미지 파일 선택 핸들러
+    // 이미지 핸들러
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -74,14 +86,38 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
         }
     };
 
-    // 이미지 삭제 핸들러 (추가된 기능)
     const handleRemoveImage = () => {
         setImageFile(null);
         setPreviewUrl('');
     };
 
+    // 아이디 중복 체크 API 호출
+    const handleCheckIdDuplicate = async () => {
+        if (!formData.accountId.trim()) {
+            alert('아이디를 입력해주세요.');
+            inputRefs.accountId.current?.focus();
+            return;
+        }
+
+        try {
+            // 서버 API 엔드포인트에 맞춰 수정 필요
+            const response = await api.get(`/api/account/check-id/${formData.accountId}`);
+            if (response.data.isDuplicate) {
+                alert('이미 사용 중인 아이디입니다.');
+                setIsIdValid(false);
+            } else {
+                alert('사용 가능한 아이디입니다.');
+                setIsIdValid(true);
+            }
+            setIsIdChecked(true);
+        } catch (err) {
+            console.error('중복 체크 실패:', err);
+            alert('중복 체크 중 오류가 발생했습니다.');
+        }
+    };
+
     const handleSave = async () => {
-        // 1. 필수 항목 유효성 검사 (기존 로직 동일)
+        // 1. 필수 유효성 검사
         const requiredFields = [
             { key: 'accountId', label: '접속 아이디', ref: inputRefs.accountId },
             { key: 'accountPasswd', label: '접속 비밀번호', ref: inputRefs.accountPasswd },
@@ -98,21 +134,28 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
             }
         }
 
-        try {
-            // 2. localStorage에서 로그인한 사용자의 accId 가져오기
-            const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-            const loginAccId = userInfo.accId; // localStorage의 accId 추출
+        // 2. 중복 체크 확인
+        if (!isIdChecked) {
+            alert('아이디 중복 확인이 필요합니다.');
+            return;
+        }
+        if (!isIdValid) {
+            alert('중복된 아이디입니다. 다른 아이디를 입력해주세요.');
+            return;
+        }
 
-            // 3. 전송할 데이터 조립 (기존 formData + regId 추가)
+        try {
+            // 3. localStorage에서 작성자 정보 추출
+            const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+            const loginAccId = userInfo.accId;
+
             const sendData = {
                 ...formData,
-                regId: loginAccId // 서버의 reg_id 컬럼과 매핑될 값
+                regId: loginAccId // DB의 reg_id 컬럼으로 매핑
             };
 
             const data = new FormData();
             if (imageFile) data.append('mainImage', imageFile);
-            
-            // formData 대신 regId가 포함된 sendData를 전송
             data.append('accountData', new Blob([JSON.stringify(sendData)], { type: 'application/json' }));
 
             await api.post('/api/account/register', data, {
@@ -121,14 +164,20 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
 
             alert('신규 훈련생이 성공적으로 등록되었습니다.');
             onSuccess();
-            setFormData(initialForm);
-            setPreviewUrl('');
-            setImageFile(null);
+            resetModal();
             onClose();
         } catch (err) {
             console.error('등록 실패:', err);
             alert('등록 중 오류가 발생했습니다.');
         }
+    };
+
+    const resetModal = () => {
+        setFormData(initialForm);
+        setPreviewUrl('');
+        setImageFile(null);
+        setIsIdChecked(false);
+        setIsIdValid(false);
     };
 
     return (
@@ -147,34 +196,39 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
                                 <Avatar src={previewUrl} sx={{ width: 130, height: 130, border: '4px solid #f1f5f9', bgcolor: '#e2e8f0' }}>
                                     {!previewUrl && <PhotoCameraIcon sx={{ fontSize: '3rem', color: '#94a3b8' }} />}
                                 </Avatar>
-                                
-                                {/* 이미지 업로드 버튼 */}
                                 <IconButton component="label" sx={{ position: 'absolute', bottom: 4, right: 4, bgcolor: 'success.main', color: 'white', '&:hover': { bgcolor: 'success.dark' }, width: 38, height: 38, border: '3px solid white' }}>
                                     <input hidden accept="image/*" type="file" onChange={handleImageChange} />
                                     <PhotoCameraIcon sx={{ fontSize: '1.2rem' }} />
                                 </IconButton>
-
-                                {/* 이미지 삭제 버튼 (추가) */}
                                 {previewUrl && (
-                                    <IconButton 
-                                        onClick={handleRemoveImage}
-                                        sx={{ position: 'absolute', top: -4, right: -4, bgcolor: 'error.main', color: 'white', '&:hover': { bgcolor: 'error.dark' }, width: 30, height: 30, border: '2px solid white', boxShadow: 2 }}
-                                    >
+                                    <IconButton onClick={handleRemoveImage} sx={{ position: 'absolute', top: -4, right: -4, bgcolor: 'error.main', color: 'white', '&:hover': { bgcolor: 'error.dark' }, width: 30, height: 30, border: '2px solid white' }}>
                                         <CloseIcon sx={{ fontSize: '1rem' }} />
                                     </IconButton>
                                 )}
                             </Box>
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                                {previewUrl ? '사진 변경 또는 삭제' : '프로필 사진 등록'}
-                            </Typography>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>프로필 사진</Typography>
                         </Box>
                     </Grid>
 
-                    {/* 이하 계정 및 신상 정보 입력 폼 레이아웃 유지 */}
+                    {/* 1. 계정 정보 */}
                     <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>계정 정보 (필수)</Typography></Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField fullWidth label="접속 아이디" name="accountId" value={formData.accountId} onChange={handleChange} required inputRef={inputRefs.accountId} 
-                            slotProps={{ htmlInput: { autoComplete: 'off' } }}
+                        <TextField 
+                            fullWidth label="접속 아이디" name="accountId" value={formData.accountId} onChange={handleChange} required inputRef={inputRefs.accountId}
+                            error={isIdChecked && !isIdValid}
+                            helperText={isIdChecked ? (isIdValid ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.") : "중복 확인이 필요합니다."}
+                            slotProps={{
+                                htmlInput: { autoComplete: 'off' },
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <Button variant="contained" size="small" onClick={handleCheckIdDuplicate} color={isIdChecked && isIdValid ? "success" : "primary"}>
+                                                {isIdChecked && isIdValid ? "확인됨" : "중복 확인"}
+                                            </Button>
+                                        </InputAdornment>
+                                    )
+                                }
+                            }}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
@@ -183,6 +237,7 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
                         />
                     </Grid>
 
+                    {/* 2. 기본 신상 정보 */}
                     <Grid size={12} sx={{ mt: 1 }}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>기본 신상 정보</Typography></Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField fullWidth label="이름" name="accountName" value={formData.accountName} onChange={handleChange} required inputRef={inputRefs.accountName} />
@@ -202,16 +257,11 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField fullWidth label="연락처" name="tel" value={formData.tel} onChange={handleChange} required inputRef={inputRefs.tel} placeholder="010-0000-0000" />
                     </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField fullWidth label="비상연락처" name="emergencyTel" value={formData.emergencyTel} onChange={handleChange} />
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField fullWidth label="이메일" name="accountEmail" value={formData.accountEmail} onChange={handleChange} />
-                    </Grid>
-                    <Grid size={12}>
+                    <Grid size={{ xs: 12, sm: 12 }}>
                         <TextField fullWidth label="거주 주소" name="address" value={formData.address} onChange={handleChange} required inputRef={inputRefs.address} />
                     </Grid>
 
+                    {/* 3. 학력 및 병역 */}
                     <Grid size={12} sx={{ mt: 2 }}><Divider /></Grid>
                     <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>학력 및 병역</Typography></Grid>
                     <Grid size={{ xs: 12, sm: 4 }}>
@@ -238,6 +288,7 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
                         </TextField>
                     </Grid>
 
+                    {/* 4. 이력 및 기타 */}
                     <Grid size={12} sx={{ mt: 2 }}><Divider /></Grid>
                     <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>이력 및 기타</Typography></Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>

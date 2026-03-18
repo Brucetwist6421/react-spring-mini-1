@@ -111,4 +111,10 @@ public class AccountServiceImpl implements AccountService {
     public List<AccountVO> getTeacherList() {
         return accountMapper.selectTeacherList();
     }
+
+    @Override
+    public boolean checkIdDuplicate(String accountId) {
+        // 결과가 0보다 크면 중복(true)
+        return accountMapper.checkIdDuplicate(accountId) > 0;
+    }
 }

@@ -16,4 +16,6 @@ public interface AccountService {
     public void registerStudent(AccountVO accountVO, MultipartFile mainImage);
 
     public List<AccountVO> getTeacherList();
+
+    boolean checkIdDuplicate(String accountId);
 }
