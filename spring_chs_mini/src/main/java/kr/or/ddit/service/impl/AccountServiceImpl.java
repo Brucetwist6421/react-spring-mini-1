@@ -49,29 +49,38 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void updateAccount(AccountVO accountVO, MultipartFile mainImage) {
         try {
-            // 1. 비밀번호 초기화 처리 (추가)
-            // 프론트에서 '1234'를 보냈다면 암호화해서 VO에 다시 세팅
+            // 1. 비밀번호 처리 (기존과 동일)
             if (accountVO.getAccountPasswd() != null && !accountVO.getAccountPasswd().isEmpty()) {
                 String encodedPassword = passwordEncoder.encode(accountVO.getAccountPasswd());
                 accountVO.setAccountPasswd(encodedPassword);
-                log.info("비밀번호 암호화 완료 (대상: {})", accountVO.getAccountSeq());
             }
 
-            // 2. 메인 이미지가 변경 된 경우에만 실행
+            // 2. 이미지 처리 로직 (보완)
             if (mainImage != null && !mainImage.isEmpty()) {
+                // [Case A] 새 이미지 업로드
                 String mainImagePath = fileService.saveMainImage(mainImage);
                 accountVO.setMainImagePath(mainImagePath);
+            } else {
+                // 새 파일이 들어오지 않은 경우
+                if (accountVO.getMainImagePath() == null || accountVO.getMainImagePath().isEmpty()) {
+                    // [Case B] 삭제 버튼을 눌러서 null이 온 경우
+                    // XML에서 main_image_path = #{mainImagePath} 로 되어있으므로 DB에 NULL이 저장됨
+                    accountVO.setMainImagePath(null); 
+                    log.info("기존 이미지 삭제 처리");
+                } else {
+                    // [Case C] 기존 이미지 유지
+                    // 프론트에서 넘어온 기존 경로(studentData.mainImagePath)를 그대로 유지함.
+                    // 만약 프론트에서 경로를 보내지 않는 구조라면, 여기서 DB 조회를 통해 
+                    // 기존 경로를 다시 세팅해줘야 데이터가 유실되지 않습니다.
+                    log.info("기존 이미지 유지: {}", accountVO.getMainImagePath());
+                }
             }
 
-            // 3. 학생 정보 업데이트 (Mapper 호출)
-            accountVO.setUpdateId(accountVO.getUpdateId()); // 수정자ID 업데이트 
-            accountVO.setUpdateDate(LocalDateTime.now());// 수정일시 업데이트
+            // 3. 업데이트 실행
+            accountVO.setUpdateDate(LocalDateTime.now());
             int result = accountMapper.updateAccount(accountVO);
             
-            if (result > 0) {
-                log.info("회원 정보 수정 완료: {}", accountVO.getAccountSeq());
-            } else {
-                // 업데이트 실패 시 예외를 던져야 Transactional이 롤백됩니다.
+            if (result <= 0) {
                 throw new RuntimeException("회원 정보 업데이트에 실패했습니다.");
             }
 

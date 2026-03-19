@@ -119,38 +119,36 @@
 	</select>
 
     <update id="updateAccount" parameterType="kr.or.ddit.vo.AccountVO">
-    UPDATE lms.tb_account
-        <set>
-            account_name = #{accountName},
-            birth = #{birth, jdbcType=DATE},
-            gender = #{gender},
-            tel = #{tel},
-            edu = #{edu},
-            major = #{major},
-            grad_type = #{gradType},
-            career = #{career},
-            account_email = #{accountEmail, jdbcType=VARCHAR},
-            ident_number = #{identNumber},
-            emergency_tel = #{emergencyTel},
-            address = #{address},
-            marital_status = #{maritalStatus},
-            status = #{status},
-            licenses = #{licenses},
-            military_status = #{militaryStatus},
-            prev_company = #{prevCompany},
-            quit_date = #{quitDate, jdbcType=DATE},
-            update_id = #{updateId},
-            update_date = CURRENT_TIMESTAMP,
-            
-            <if test="mainImagePath != null and mainImagePath != ''">
-                main_image_path = #{mainImagePath},
-            </if>
-            
-            <if test="accountPasswd != null and accountPasswd != ''">
-                account_passwd = #{accountPasswd}
-            </if>
-        </set>
-        WHERE account_seq = #{accountSeq}
+        UPDATE lms.tb_account
+            <set>
+                account_name = #{accountName},
+                birth = #{birth, jdbcType=DATE},
+                gender = #{gender},
+                tel = #{tel},
+                edu = #{edu},
+                major = #{major},
+                grad_type = #{gradType},
+                career = #{career},
+                account_email = #{accountEmail, jdbcType=VARCHAR},
+                ident_number = #{identNumber},
+                emergency_tel = #{emergencyTel},
+                address = #{address},
+                marital_status = #{maritalStatus},
+                status = #{status},
+                licenses = #{licenses},
+                military_status = #{militaryStatus},
+                prev_company = #{prevCompany},
+                quit_date = #{quitDate, jdbcType=DATE},
+                update_id = #{updateId},
+                update_date = CURRENT_TIMESTAMP,
+                
+                main_image_path = #{mainImagePath, jdbcType=VARCHAR},
+                
+                <if test="accountPasswd != null and accountPasswd != ''">
+                    account_passwd = #{accountPasswd}
+                </if>
+            </set>
+            WHERE account_seq = #{accountSeq}
     </update>
 
     <insert id="insertAccount" parameterType="kr.or.ddit.vo.AccountVO">

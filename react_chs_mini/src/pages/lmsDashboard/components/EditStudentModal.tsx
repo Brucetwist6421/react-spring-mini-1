@@ -4,18 +4,8 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import SaveIcon from '@mui/icons-material/Save';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import {
-  Avatar,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  MenuItem,
-  TextField,
-  Typography
+  Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
+  Divider, IconButton, MenuItem, TextField, Typography
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import React, { useEffect, useState } from 'react';
@@ -41,13 +31,16 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isPwReset, setIsPwReset] = useState(false);
+  // 기존 이미지 삭제 여부 상태 추가
+  const [isImageDeleted, setIsImageDeleted] = useState(false);
 
   useEffect(() => {
     if (open && studentData) {
-      // 1. 모달이 열릴 때: 원본 데이터로 덮어쓰기
+      // 모달이 열릴 때 상태 초기화
       setFormData({ ...studentData });
       setIsPwReset(false);
-      setImageFile(null); // 선택했던 이미지 파일 초기화
+      setImageFile(null); 
+      setIsImageDeleted(false); // 삭제 상태 초기화
       
       if (studentData.mainImagePath) {
         setPreviewUrl(`http://168.107.51.143:8080/upload/${encodeURIComponent(studentData.mainImagePath)}`);
@@ -55,14 +48,13 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
         setPreviewUrl('');
       }
     } else if (!open) {
-      // 2. 모달이 닫힐 때: 내부 상태 청소 (Optional)
       setFormData({});
       setPreviewUrl('');
       setImageFile(null);
     }
-  }, [open, studentData]); // [open]을 의존성 배열에 추가하여 열고 닫힐 때마다 실행
+  }, [open, studentData]);
 
-  // 1. 비밀번호 초기화 핸들러
+  // 비밀번호 초기화 핸들러
   const handlePasswordReset = () => {
     if (window.confirm("비밀번호를 '1234'로 초기화하시겠습니까? 저장 버튼을 눌러야 최종 반영됩니다.")) {
       setFormData((prev: any) => ({ ...prev, accountPasswd: '1234' }));
@@ -79,6 +71,7 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
+      setIsImageDeleted(false); // 새 파일을 선택하면 삭제 상태 해제
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
@@ -87,15 +80,23 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
     }
   };
 
+  // 첨부된 파일(이미지) 삭제 핸들러 추가
+  const handleRemoveImage = () => {
+    if (window.confirm("현재 등록된 프로필 사진을 삭제하시겠습니까?")) {
+      setImageFile(null);
+      setPreviewUrl('');
+      setIsImageDeleted(true); // 삭제 모드 활성화
+    }
+  };
+
   const handleSave = async () => {
     try {
       const data = new FormData();
       if (imageFile) data.append('mainImage', imageFile);
 
-      // 1. localStorage에서 userInfo 가져오기 및 updateId 설정
+      // updateId 설정 로직 (기존과 동일)
       const userInfoString = localStorage.getItem('userInfo');
       let updateId = '';
-      
       if (userInfoString) {
         try {
           const userInfo = JSON.parse(userInfoString);
@@ -107,12 +108,12 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
 
       const finalData = { ...formData };
       
-      // 초기화 버튼을 누르지 않았다면 비밀번호 필드 제외
+      // 비밀번호 처리
       if (!isPwReset) {
         delete finalData.accountPasswd;
       }
 
-      // 2. 데이터 정제 및 updateId 세팅
+      // 데이터 정제
       const refinedData = Object.fromEntries(
         Object.entries(finalData).map(([key, value]) => [
           key,
@@ -120,8 +121,11 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
         ])
       );
 
-      // 수정자 ID 추가
+      // 수정자 ID 및 기존 이미지 삭제 처리 (중요)
       refinedData.updateId = updateId;
+      if (isImageDeleted) {
+        refinedData.mainImagePath = null; // 서버에 null을 보내 기존 파일 경로 삭제
+      }
 
       data.append('accountData', new Blob([JSON.stringify(refinedData)], { type: 'application/json' }));
 
@@ -145,32 +149,48 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
       <DialogContent sx={{ p: 4 }}>
         <Grid container spacing={2.5}>
           
-          {/* 썸네일 섹션 */}
+          {/* 썸네일 섹션 - 삭제 기능 추가 */}
           <Grid size={12}>
              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3, gap: 2 }}>
                <Box sx={{ position: 'relative' }}>
                  <Avatar src={previewUrl} sx={{ width: 130, height: 130, border: '4px solid #f1f5f9', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', bgcolor: '#e2e8f0' }}>
                    {formData.accountName?.[0]}
                  </Avatar>
-                 <IconButton component="label" sx={{ position: 'absolute', bottom: 4, right: 4, bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, width: 38, height: 38, border: '3px solid white' }}>
+                 
+                 {/* 사진 변경(업로드) 버튼 */}
+                 <IconButton component="label" sx={{ position: 'absolute', bottom: 4, right: 4, bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' }, width: 38, height: 38, border: '3px solid white', zIndex: 2 }}>
                    <input hidden accept="image/*" type="file" onChange={handleImageChange} />
                    <PhotoCameraIcon sx={{ fontSize: '1.2rem' }} />
                  </IconButton>
+
+                 {/* 사진 삭제 버튼 추가 - 기존 이미지가 있거나 새로 선택한 이미지가 있을 때 표시 */}
+                 {(previewUrl) && (
+                   <IconButton 
+                     onClick={handleRemoveImage}
+                     sx={{ 
+                       position: 'absolute', 
+                       top: 4, 
+                       right: 4, 
+                       bgcolor: 'error.main', 
+                       color: 'white', 
+                       '&:hover': { bgcolor: 'error.dark' }, 
+                       width: 30, 
+                       height: 30, 
+                       border: '2px solid white',
+                       zIndex: 2
+                     }}
+                   >
+                     <CloseIcon sx={{ fontSize: '1rem' }} />
+                   </IconButton>
+                 )}
                </Box>
-               <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    fontSize: 16,
-                    fontWeight: 700, 
-                    color: 'text.secondary',
-                    letterSpacing: -0.5 
-                  }}
-                >
-                  프로필 사진 변경
-                </Typography>
+               <Typography variant="caption" sx={{ fontSize: 16, fontWeight: 700, color: 'text.secondary', letterSpacing: -0.5 }}>
+                 {studentData?.mainImagePath && !isImageDeleted ? "프로필 사진 변경/삭제" : "프로필 사진 등록"}
+               </Typography>
              </Box>
           </Grid>
 
+          {/* 이하 코드 동일 */}
           <Grid size={12} sx={{ mt: -2 }}><Divider /></Grid>
           <Grid size={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -178,7 +198,6 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
                 계정 보안 설정
               </Typography>
               
-              {/* 3. 비밀번호 초기화 버튼 */}
               <Button
                 variant={isPwReset ? "contained" : "outlined"}
                 color={isPwReset ? "error" : "primary"}
@@ -194,7 +213,6 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
 
           <Grid size={12}><Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main' }}>학적 상태 및 기본 정보</Typography></Grid>
           
-          {/*  3. 학적 상태 선택 필드 추가 */}
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
               fullWidth
@@ -225,7 +243,6 @@ const EditStudentModal = ({ open, onClose, studentData, onUpdate }: EditProps) =
             </TextField>
           </Grid>
 
-          {/* 이하 생략 (기존 TextField 코드와 동일) */}
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField fullWidth label="생년월일" name="birth" type="date" InputLabelProps={{ shrink: true }} value={formData.birth || ''} onChange={handleChange} />
           </Grid>
