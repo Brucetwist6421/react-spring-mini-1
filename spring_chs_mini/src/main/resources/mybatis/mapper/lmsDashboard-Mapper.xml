@@ -30,17 +30,19 @@
                 COUNT(*) FILTER (WHERE STATUS = 'EARLYOUT') AS earlyout_count,
                 COUNT(*) FILTER (WHERE STATUS = 'GRADUATED') AS graduated_count
             FROM lms.TB_ACCOUNT
+            WHERE DEL_YN = 'N' -- 1. 전체 학적 통계에서 삭제된 계정 제외
             GROUP BY CUR_SEQ
         ),
         TestStats AS (
-            /* 현재 재학중인 학생의 시험 제출 수만 집계 */
+            /* 현재 삭제되지 않고 재학 중인 학생의 시험 제출 수만 집계 */
             SELECT 
                 t.SUB_SEQ,
                 COUNT(r.RESULT_SEQ) AS submitted_count
             FROM lms.TB_TEST t
             LEFT JOIN lms.TB_TEST_RESULT r ON t.TEST_SEQ = r.TEST_SEQ
             LEFT JOIN lms.TB_ACCOUNT acc ON r.account_seq = acc.account_seq
-            WHERE (acc.STATUS = 'ENROLLED' OR r.RESULT_SEQ IS NULL)
+            WHERE acc.DEL_YN = 'N' -- 2. 삭제된 학생의 제출 기록은 통계에서 제외
+            AND (acc.STATUS = 'ENROLLED' OR r.RESULT_SEQ IS NULL)
             GROUP BY t.SUB_SEQ
         )
         SELECT 
@@ -49,8 +51,8 @@
             c.ROOM AS class_name,
             c.TERM AS term,
             c.START_DATE || ' ~ ' || c.END_DATE AS period,
-            c.ACCOUNT_SEQ AS account_seq,              -- 담임 교수 시퀀스
-            t.ACCOUNT_NAME AS teacher_name,            --  담임 교수명 추가
+            c.ACCOUNT_SEQ AS account_seq,
+            t.ACCOUNT_NAME AS teacher_name,
             COALESCE(ast.total_enrolled, 0) AS total_enrolled,
             COALESCE(ast.active_accounts, 0) AS active_accounts,
             COALESCE(ast.dropout_count, 0) AS dropout_count,
@@ -77,7 +79,8 @@
                 '[]'::JSONB
             ) AS subjects
         FROM lms.TB_CURRICULUM c
-        LEFT JOIN lms.TB_ACCOUNT t ON c.ACCOUNT_SEQ = t.ACCOUNT_SEQ --  교수 정보 조인
+        LEFT JOIN lms.TB_ACCOUNT t ON c.ACCOUNT_SEQ = t.ACCOUNT_SEQ 
+                                AND t.DEL_YN = 'N' -- 3. 담임 교수 정보 조회 시에도 삭제 여부 확인
         LEFT JOIN AccountStats ast ON c.CUR_SEQ = ast.CUR_SEQ
         LEFT JOIN lms.TB_SUBJECT s ON c.CUR_SEQ = s.CUR_SEQ
         LEFT JOIN TestStats tst ON s.SUB_SEQ = tst.SUB_SEQ
@@ -112,12 +115,17 @@
 
     <select id="selectStudentScoresByCurriculum" resultMap="studentScoreMap">
         WITH StudentBase AS (
-            SELECT account_seq, account_name 
+            SELECT 
+                account_seq, 
+                account_name 
             FROM lms.tb_account 
-            WHERE cur_seq = #{curSeq} AND status = 'ENROLLED'
-        ),
+            WHERE cur_seq = #{curSeq} 
+              AND status = 'ENROLLED'
+              AND del_yn = 'N' ),
         SubjectBase AS (
-            SELECT sub_seq, sub_name 
+            SELECT 
+                sub_seq, 
+                sub_name 
             FROM lms.tb_subject 
             WHERE cur_seq = #{curSeq}
         ),
@@ -130,7 +138,10 @@
             FROM StudentBase sb
             CROSS JOIN SubjectBase sj
             LEFT JOIN lms.tb_test t ON sj.sub_seq = t.sub_seq
-            LEFT JOIN lms.tb_test_result tr ON t.test_seq = tr.test_seq AND sb.account_seq = tr.account_seq
+            -- 2. 이미 StudentBase에서 del_yn을 걸러냈으므로, 
+            --    test_result와의 조인에서는 account_seq 일치 여부만 확인하면 됩니다.
+            LEFT JOIN lms.tb_test_result tr ON t.test_seq = tr.test_seq 
+                                          AND sb.account_seq = tr.account_seq
         )
         SELECT 
             account_seq,

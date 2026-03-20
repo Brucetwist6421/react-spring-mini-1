@@ -104,6 +104,8 @@ public class AccountServiceImpl implements AccountService {
 			accountVO.setMainImagePath(mainImagePath);
             
 			// 2. Account insert
+            // 삭제 여부 N 삽입
+            accountVO.setDelYn("N");
 			accountMapper.insertAccount(accountVO);
 			// Long accountId = accountVO.getAccountSeq(); // insert 후 생성된 ID
 
