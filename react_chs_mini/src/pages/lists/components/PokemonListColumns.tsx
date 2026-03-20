@@ -90,6 +90,7 @@ export const getPokemonColumns = (
   },
   {
     field: "isFavorite",
+    type: "boolean",
     headerName: "즐겨찾기",
     headerAlign: "center",
     align: "center",

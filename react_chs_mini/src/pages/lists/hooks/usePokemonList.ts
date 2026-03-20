@@ -18,18 +18,20 @@ export function usePokemonList() {
       try {
         const koNameMap = new Map(POKEMON_OPTIONS.map((item) => [item.name, item.koName]));
         
-        console.log("1. API 호출 시작");
+        // console.log("1. API 호출 시작");
         const [pokemonRes, favoriteRes] = await Promise.all([
           api.get("https://pokeapi.co/api/v2/pokemon?limit=1350"), 
           api.get(`/pokemon/favoriteList?userId=${userId}`)
         ]);
-        console.log("2. 기본 데이터 수신 성공", { pokemonRes, favoriteRes });
+        // console.log("2. 기본 데이터 수신 성공", { pokemonRes, favoriteRes });
 
         const baseList = pokemonRes.data.results;
         const favoriteList = Array.isArray(favoriteRes.data) ? favoriteRes.data : [];
+        console.log("서버에서 온 즐겨찾기 데이터:", favoriteList);
+        console.log("서버에서 온 즐겨찾기 데이터:", favoriteRes.data);
         const favoriteIds = new Set(favoriteList.map((f: any) => Number(f.pokemonId)));
         // console.log("서버에서 온 즐겨찾기 원본:", favoriteList);
-        console.log("3. 상세 정보 병렬 요청 시작 (1350건)");
+        // console.log("3. 상세 정보 병렬 요청 시작 (1350건)");
         const detailedList = await Promise.all(
           baseList.map(async (pokemon: any) => {
             // 여기서 개별 요청 에러가 나는지 확인하기 위해 한번 더 감쌀 수 있습니다.
@@ -48,7 +50,7 @@ export function usePokemonList() {
             };
           })
         );
-        console.log("4. 전체 데이터 가공 완료");
+        // console.log("4. 전체 데이터 가공 완료");
         return detailedList;
 
       } catch (err: any) {
