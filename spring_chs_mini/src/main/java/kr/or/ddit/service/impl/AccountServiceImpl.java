@@ -126,4 +126,11 @@ public class AccountServiceImpl implements AccountService {
         // 결과가 0보다 크면 중복(true)
         return accountMapper.checkIdDuplicate(accountId) > 0;
     }
+
+    @Override
+    @Transactional
+    public int deleteAccount(Integer accountSeq) {
+        log.info("학생 정보 논리 삭제 시작 - accountSeq: {}", accountSeq);
+        return accountMapper.deleteAccount(accountSeq);
+    }
 }

@@ -56,7 +56,9 @@
         FROM lms.tb_account a
         LEFT JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
         WHERE a.cur_seq = #{curSeq}
-          AND a.account_type = 'STU'  ORDER BY a.account_name ASC
+          AND a.account_type = 'STU'  
+          AND a.del_yn = 'N'
+        ORDER BY a.account_name ASC
     </select>
 
     <select id="selectAccountDetail" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
@@ -199,4 +201,12 @@
         FROM lms.tb_account
         WHERE account_id = #{accountId}
     </select>
+
+    <update id="deleteAccount" parameterType="int">
+        UPDATE lms.tb_account
+           SET del_yn = 'Y',
+               update_date = CURRENT_TIMESTAMP
+         WHERE account_seq = #{accountSeq}
+           AND del_yn = 'N' 
+    </update>
 </mapper>

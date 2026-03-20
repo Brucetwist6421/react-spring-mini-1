@@ -35,4 +35,6 @@ public interface AccountMapper {
     List<AccountVO> selectTeacherList();
 
     int checkIdDuplicate(String accountId);
+
+    int deleteAccount(Integer accountSeq);
 }

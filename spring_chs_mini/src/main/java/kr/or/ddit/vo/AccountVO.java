@@ -39,6 +39,7 @@ public class AccountVO {
     private String mainImagePath;   // 프로필 이미지 경로 (추가)
     private LocalDate dropoutDate;   // 중도탈락/수강철회 날짜 (추가)
     private String regId;         // 등록자ID
+    private String delYn;           //삭제여부(Y/N)
     
     // 2. 학력 및 경력 정보
     private String edu;             // 최종학력
