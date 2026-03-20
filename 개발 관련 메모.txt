@@ -207,3 +207,96 @@ create table lms.tb_curriculum (
 
 과목 별 훈련 내용 테이블 생성
 -> 시퀀스,과목 시퀀스 외래키, 내용, 비고, 일지 작성 일자, 상태, 등록 ID, 등록일자, 수정 ID, 수정일시
+
+일자 별로 각 과정 별 
+1. 수업 별 훈련 내용 입력
+2. 지각, 결석, 조퇴, 공결, 외출, 제적, 탈락 시 학생 입력
+3. 첨부파일 및 사유 입력 
+을 구현해야 합니다. 필요한 테이블을 구현해주세요.
+
+현재 있는 테이블 및 스키마 : 
+create table lms.tb_account (
+  account_seq serial not null,
+  cur_seq integer null,
+  account_id character varying(50) not null,
+  account_name character varying(50) not null,
+  birth date null,
+  gender character varying(1) null,
+  tel character varying(20) null,
+  edu character varying(50) null,
+  major character varying(50) null,
+  grad_type character varying(20) null,
+  career text null,
+  dropout_info text null,
+  status character varying(20) null default 'ENROLLED'::character varying,
+  account_email character varying(100) null,
+  account_passwd character varying(255) null,
+  account_type character varying(20) null default 'STU'::character varying,
+  reg_date timestamp without time zone null default CURRENT_TIMESTAMP,
+  update_id character varying(50) null,
+  update_date timestamp without time zone null default CURRENT_TIMESTAMP,
+  current_token text null,
+  teacher_yn character varying null default 'N'::character varying,
+  ident_number character varying(255) null,
+  emergency_tel character varying(20) null,
+  address text null,
+  marital_status character varying(1) null,
+  licenses text null,
+  military_status character varying(20) null,
+  prev_company character varying(100) null,
+  quit_date date null,
+  main_image_path character varying null,
+  dropout_date date null,
+  constraint tb_student_pkey primary key (account_seq),
+  constraint tb_student_user_id_key unique (account_id),
+  constraint fk_account_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq)
+) TABLESPACE pg_default;
+
+create table lms.tb_attendance (
+  attendance_seq serial not null,
+  account_seq integer not null,
+  cur_seq integer not null,
+  attendance_date date not null default CURRENT_DATE,
+  status character varying(20) not null,
+  start_time timestamp without time zone null,
+  end_time timestamp without time zone null,
+  remark text null,
+  reg_id character varying(50) not null,
+  reg_date timestamp without time zone not null default CURRENT_TIMESTAMP,
+  update_id character varying(50) null,
+  update_date timestamp without time zone null,
+  constraint tb_attendance_pkey primary key (attendance_seq),
+  constraint unique_attendance_exception unique (account_seq, cur_seq, attendance_date, status),
+  constraint fk_attendance_account foreign KEY (account_seq) references lms.tb_account (account_seq) on delete CASCADE,
+  constraint fk_attendance_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq) on delete CASCADE
+) TABLESPACE pg_default;
+
+create table lms.tb_curriculum (
+  cur_seq serial not null,
+  room character varying(50) null,
+  term integer null,
+  man_count integer null,
+  start_date date not null,
+  end_date date not null,
+  cur_name character varying null,
+  account_seq integer null,
+  business_name character varying(255) null,
+  reg_id character varying(100) null,
+  reg_date timestamp without time zone null default CURRENT_TIMESTAMP,
+  update_id character varying(100) null,
+  update_date timestamp without time zone null,
+  status character varying null,
+  constraint tb_curriculum_pkey primary key (cur_seq)
+) TABLESPACE pg_default;
+
+create table lms.tb_subject (
+  sub_seq serial not null,
+  cur_seq integer not null,
+  sub_name character varying(100) not null,
+  start_date date null,
+  end_date date null,
+  constraint tb_subject_pkey primary key (sub_seq),
+  constraint fk_subject_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq) on delete CASCADE
+) TABLESPACE pg_default;
+
+출석탭도 일자 별로 조회될 수 있도록 구현 필요

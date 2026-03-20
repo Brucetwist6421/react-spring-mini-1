@@ -15,42 +15,49 @@ export function usePokemonList() {
   const query = useQuery({
     queryKey: ["pokemonList", userId],
     queryFn: async () => {
-      // 1. 기초 데이터 준비 (한글명 맵 & 즐겨찾기 목록 병렬 호출)
-      const koNameMap = new Map(POKEMON_OPTIONS.map((item) => [item.name, item.koName]));
-      
-      // 백엔드 API 호출: 사용자의 즐겨찾기 리스트 가져오기
-      const [pokemonRes, favoriteRes] = await Promise.all([
-        api.get("https://pokeapi.co/api/v2/pokemon?limit=1500"), 
-        api.get(`/pokemon/favoriteList?userId=${userId}`)
-      ]);
+      try {
+        const koNameMap = new Map(POKEMON_OPTIONS.map((item) => [item.name, item.koName]));
+        
+        console.log("1. API 호출 시작");
+        const [pokemonRes, favoriteRes] = await Promise.all([
+          api.get("https://pokeapi.co/api/v2/pokemon?limit=1350"), 
+          api.get(`/pokemon/favoriteList?userId=${userId}`)
+        ]);
+        console.log("2. 기본 데이터 수신 성공", { pokemonRes, favoriteRes });
 
-      const baseList = pokemonRes.data.results;
-      const favoriteList = favoriteRes.data; // List<FavoriteVO>
+        const baseList = pokemonRes.data.results;
+        const favoriteList = Array.isArray(favoriteRes.data) ? favoriteRes.data : [];
+        const favoriteIds = new Set(favoriteList.map((f: any) => Number(f.pokemonId)));
+        // console.log("서버에서 온 즐겨찾기 원본:", favoriteList);
+        console.log("3. 상세 정보 병렬 요청 시작 (1350건)");
+        const detailedList = await Promise.all(
+          baseList.map(async (pokemon: any) => {
+            // 여기서 개별 요청 에러가 나는지 확인하기 위해 한번 더 감쌀 수 있습니다.
+            const detailRes = await api.get(pokemon.url);
+            const pId = detailRes.data.id;
+            const koreanName = koNameMap.get(pokemon.name) || pokemon.name;
 
-      // 즐겨찾기된 포켓몬 ID들만 모아서 Set 생성 (빠른 비교를 위해)
-      const favoriteIds = new Set(favoriteList.map((f: any) => f.pokemonId));
+            return {
+              id: pId,
+              name: pokemon.name,
+              koName: koreanName,
+              url: pokemon.url,
+              image: detailRes.data.sprites.front_default,
+              types: detailRes.data.types.map((t: any) => t.type.name),
+              isFavorite: favoriteIds.has(Number(pId)),
+            };
+          })
+        );
+        console.log("4. 전체 데이터 가공 완료");
+        return detailedList;
 
-      // 2. 상세 정보 병렬 요청 및 데이터 가공
-      const detailedList = await Promise.all(
-        baseList.map(async (pokemon: any) => {
-          const detailRes = await api.get(pokemon.url);
-          const pId = detailRes.data.id;
-          const koreanName = koNameMap.get(pokemon.name) || pokemon.name;
-
-          return {
-            id: pId,
-            name: pokemon.name,
-            koName: koreanName,
-            url: pokemon.url,
-            image: detailRes.data.sprites.front_default,
-            types: detailRes.data.types.map((t: any) => t.type.name),
-            // 즐겨찾기 목록에 포함되어 있는지 확인하여 속성 추가
-            isFavorite: favoriteIds.has(pId), 
-          };
-        })
-      );
-
-      return detailedList;
+      } catch (err: any) {
+        // 서버 로그에서 보였던 Invalid character나 NoResourceFound 에러가 여기서 잡힐 것입니다.
+        console.error("캐치된 에러 상세 정보:", err);
+        console.error("에러 메시지:", err.message);
+        console.error("응답 데이터:", err.response?.data);
+        throw err; // 에러를 다시 던져야 useQuery의 error 객체에 담깁니다.
+      }
     },
     retry: false,
   });
