@@ -300,3 +300,5 @@ create table lms.tb_subject (
 ) TABLESPACE pg_default;
 
 출석탭도 일자 별로 조회될 수 있도록 구현 필요
+
+일 별 통계 대시보드에 추가 필요
