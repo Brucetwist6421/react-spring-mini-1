@@ -8,12 +8,15 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from '../../../api/axiosInstance';
 import StudentDetailPage from "./StudentDetailPage";
+import CelebrationIcon from '@mui/icons-material/Celebration';
+import ConfirmModal from './ConfirmModal';
 
 const LmsStudentManagement = () => {
   const { curSeq, accountSeq } = useParams<{ curSeq: string; accountSeq: string }>();
   const navigate = useNavigate();
   const [students, setStudents] = useState<any[]>([]);
   const [courseInfo, setCourseInfo] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 1. 학생 상태 헬퍼 함수
   const getStatusConfig = (status: string) => {
@@ -49,6 +52,21 @@ const LmsStudentManagement = () => {
   useEffect(() => {
     fetchStudents(); // 최초 로드 시 실행
   }, [curSeq]);
+
+  // 일괄 수료 처리 핸들러 추가
+  const handleBatchGraduate = async () => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      await api.put(`/api/account/curriculum/${curSeq}/graduate`, null, {
+        params: { updateId: userInfo.accId }
+      });
+      alert("수료 처리가 완료되었습니다.");
+      fetchStudents();
+    } catch (err) {
+      alert("오류가 발생했습니다.");
+      console.error(`일괄 수료 에러 발생 ${err}`);
+    }
+  };
 
   // useEffect(() => {
   //   if (curSeq) {
@@ -101,9 +119,41 @@ const LmsStudentManagement = () => {
         
         {/* 왼쪽: 학생 리스트 (UX 개선 버전) */}
         <Paper sx={{ width: 320, display: 'flex', flexDirection: 'column', borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }} elevation={0}>
-          <Box sx={{ p: 2, bgcolor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography fontSize={16} fontWeight="800" color="#334155">수강생 명단</Typography>
-            <Chip label={`${students.length}명`} size="small" sx={{ fontWeight: 700, bgcolor: '#e2e8f0' }} />
+          <Box sx={{ 
+            p: 2, 
+            bgcolor: '#f8fafc', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            borderBottom: '1px solid #e2e8f0' // 경계선 추가로 구분감 확보
+          }}>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography fontSize={16} fontWeight="800" color="#334155">수강생 명단</Typography>
+              <Chip label={`${students.length}명`} size="small" sx={{ fontWeight: 700, bgcolor: '#e2e8f0' }} />
+            </Stack>
+
+            {/* 눈에 띄게 개선된 일괄 수료 버튼 */}
+            <Button 
+              variant="contained" // 채워진 버튼 형태
+              size="small"
+              color="primary" // 파란색 테마 (수료는 긍정적 의미이므로)
+              startIcon={<CelebrationIcon />} // 아이콘을 넣어 주목도 향상
+              onClick={() => setIsModalOpen(true)}
+              sx={{ 
+                fontWeight: 800, 
+                borderRadius: 2, // 둥근 모서리로 세련된 느낌
+                px: 1.5,
+                py: 0.5,
+                fontSize: '0.75rem',
+                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)', // 살짝 떠 있는 효과
+                '&:hover': {
+                  bgcolor: '#2563eb', // 호버 시 더 짙은 파란색
+                  boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)'
+                }
+              }}
+            >
+              수료 처리
+            </Button>
           </Box>
           <Divider />
           
@@ -178,7 +228,16 @@ const LmsStudentManagement = () => {
 
         {/* 오른쪽: 상세 정보 (생략 - 기존 유지) */}
         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-          {accountSeq ? <StudentDetailPage onUpdateSuccess={fetchStudents} curSeq={curSeq} curData={courseInfo} /> : (
+          {accountSeq ? 
+            <StudentDetailPage 
+              // 현재 선택된 학생의 status를 key에 포함시킵니다.
+              // 수료 처리가 완료되어 status가 변하면 상세 페이지가 완전히 새로 렌더링되면서 데이터를 다시 불러옵니다.
+              key={`${accountSeq}-${students.find(s => s.accountSeq === Number(accountSeq))?.status || ''}`}
+              onUpdateSuccess={fetchStudents} 
+              curSeq={curSeq} 
+              curData={courseInfo} 
+            />
+            : (
              <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: 3, border: '1px dashed #cbd5e1', bgcolor: '#fbfcfd' }} elevation={0}>
                <SchoolIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1, opacity: 0.5 }} />
                <Typography color="text.secondary" fontWeight={500}>학생을 선택하면 상세 관리 화면이 나타납니다.</Typography>
@@ -186,6 +245,18 @@ const LmsStudentManagement = () => {
           )}
         </Box>
       </Box>
+
+      {/* 일괄 수료 모달 영역 */}
+      <ConfirmModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleBatchGraduate}
+        title="일괄 수료 확정"
+        content="현재 과정의 모든 재학생을 수료 처리하시겠습니까?"
+        subContent="이 작업은 해당 과정(반) 전체 학생의 상태를 'GRADUATED'로 변경하며, 되돌릴 수 없습니다."
+        confirmText="수료 확정"
+        confirmColor="primary" // 삭제가 아니므로 primary 사용 가능
+      />
     </Box>
   );
 };
