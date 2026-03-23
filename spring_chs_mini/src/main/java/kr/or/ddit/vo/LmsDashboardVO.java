@@ -16,6 +16,7 @@ public class LmsDashboardVO {
     private int dropoutCount;
     private int earlyoutCount;
     private int graduatedCount;
+    private int activeAndGraduated; //수료생과 재학생 수 count(유효 학생 수)
     private double totalAvgRatio;
     private List<SubjectStatVO> subjects; // JSON 내역 매핑
     private Integer accountSeq; // 담임 교수 시퀀스
