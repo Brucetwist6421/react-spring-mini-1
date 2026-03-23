@@ -28,7 +28,9 @@
                 COUNT(*) FILTER (WHERE STATUS = 'ENROLLED') AS active_accounts,
                 COUNT(*) FILTER (WHERE STATUS = 'DROPOUT') AS dropout_count,
                 COUNT(*) FILTER (WHERE STATUS = 'EARLYOUT') AS earlyout_count,
-                COUNT(*) FILTER (WHERE STATUS = 'GRADUATED') AS graduated_count
+                COUNT(*) FILTER (WHERE STATUS = 'GRADUATED') AS graduated_count,
+                -- 수료 학생까지 포함하여 '통계 대상 인원' 산출
+                COUNT(*) FILTER (WHERE STATUS IN ('ENROLLED', 'GRADUATED')) AS active_and_graduated,
             FROM lms.TB_ACCOUNT
             WHERE DEL_YN = 'N' -- 1. 전체 학적 통계에서 삭제된 계정 제외
             GROUP BY CUR_SEQ
@@ -42,7 +44,8 @@
             LEFT JOIN lms.TB_TEST_RESULT r ON t.TEST_SEQ = r.TEST_SEQ
             LEFT JOIN lms.TB_ACCOUNT acc ON r.account_seq = acc.account_seq
             WHERE acc.DEL_YN = 'N' -- 2. 삭제된 학생의 제출 기록은 통계에서 제외
-            AND (acc.STATUS = 'ENROLLED' OR r.RESULT_SEQ IS NULL)
+            -- 수료 상태인 학생의 제출 기록도 통계에 포함되도록 조건 수정
+            AND (acc.STATUS IN ('ENROLLED', 'GRADUATED') OR r.RESULT_SEQ IS NULL)
             GROUP BY t.SUB_SEQ
         )
         SELECT 
@@ -58,10 +61,11 @@
             COALESCE(ast.dropout_count, 0) AS dropout_count,
             COALESCE(ast.earlyout_count, 0) AS earlyout_count,
             COALESCE(ast.graduated_count, 0) AS graduated_count,
+            -- 분모를 active_and_graduated로 변경하여 수료생 포함 비율 계산
             ROUND(AVG(
                 CASE 
-                    WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
-                    ELSE (COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100)
+                    WHEN COALESCE(ast.active_and_graduated, 0) = 0 THEN 0 
+                    ELSE (COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_and_graduated, 0) * 100)
                 END
             ), 1) AS total_avg_ratio,
             
@@ -71,8 +75,8 @@
                         'subjectName', s.SUB_NAME,
                         'submittedCount', COALESCE(tst.submitted_count, 0),
                         'ratio', CASE 
-                                    WHEN COALESCE(ast.active_accounts, 0) = 0 THEN 0 
-                                    ELSE ROUND(COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_accounts, 0) * 100, 1)
+                                    WHEN COALESCE(ast.active_and_graduated, 0) = 0 THEN 0 
+                                    ELSE ROUND(COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_and_graduated, 0) * 100, 1)
                                 END
                     ) ORDER BY s.SUB_SEQ
                 ) FILTER (WHERE s.SUB_SEQ IS NOT NULL), 
@@ -120,7 +124,8 @@
                 account_name 
             FROM lms.tb_account 
             WHERE cur_seq = #{curSeq} 
-              AND status = 'ENROLLED'
+              -- 핵심 수정: 재학 중(ENROLLED)과 수료(GRADUATED) 상태 모두 포함
+              AND status IN ('ENROLLED', 'GRADUATED')
               AND del_yn = 'N' ),
         SubjectBase AS (
             SELECT 
