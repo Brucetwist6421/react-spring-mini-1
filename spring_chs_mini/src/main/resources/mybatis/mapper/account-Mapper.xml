@@ -159,7 +159,7 @@
             ident_number, tel, emergency_tel, account_email, address, 
             edu, major, grad_type, military_status, marital_status, 
             prev_company, quit_date, licenses, career, 
-            main_image_path, status, cur_seq, reg_id
+            main_image_path, status, cur_seq, reg_id, del_yn
         ) VALUES (
             #{accountId, jdbcType=VARCHAR}, 
             #{accountPasswd, jdbcType=VARCHAR},
@@ -182,7 +182,8 @@
             #{mainImagePath, jdbcType=VARCHAR}, 
             #{status, jdbcType=VARCHAR}, 
             #{curSeq, jdbcType=INTEGER},
-            #{regId, jdbcType=VARCHAR}
+            #{regId, jdbcType=VARCHAR},
+            #{delYn, jdbcType=VARCHAR}
         )
     </insert>
 
