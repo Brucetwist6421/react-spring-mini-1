@@ -209,4 +209,16 @@
          WHERE account_seq = #{accountSeq}
            AND del_yn = 'N' 
     </update>
+
+    <update id="updateStatusToGraduated">
+        UPDATE lms.tb_account
+        SET 
+            status = 'GRADUATED',
+            update_id = #{updateId},
+            update_date = CURRENT_TIMESTAMP
+        WHERE 
+            cur_seq = #{curSeq}
+            AND status = 'ENROLLED'
+            AND del_yn = 'N'
+    </update>
 </mapper>

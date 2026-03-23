@@ -37,4 +37,7 @@ public interface AccountMapper {
     int checkIdDuplicate(String accountId);
 
     int deleteAccount(Integer accountSeq);
+
+    // 상태 일괄 업데이트
+    int updateStatusToGraduated(@Param("curSeq") Integer curSeq, @Param("updateId") String updateId);
 }

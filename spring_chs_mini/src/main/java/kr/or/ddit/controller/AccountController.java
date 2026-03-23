@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -116,6 +117,22 @@ public class AccountController {
         } catch (Exception e) {
             log.error("학생 삭제 중 오류 발생: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 처리 중 오류가 발생했습니다.");
+        }
+    }
+
+    @Operation(summary = "과정별 학생 일괄 수료 처리", description = "특정 과정의 재학 중인 학생들을 모두 수료(GRADUATED) 상태로 변경합니다.")
+    @PutMapping("/curriculum/{curSeq}/graduate")
+    public ResponseEntity<String> graduateStudentsByCurriculum(
+            @Parameter(description = "과정 시퀀스") @PathVariable Integer curSeq,
+            @Parameter(description = "수정자 ID") @RequestParam String updateId) {
+        
+        try {
+            int updatedCount = accountService.graduateStudentsByCurriculum(curSeq, updateId);
+            log.info("과정 {}번: {}명의 학생이 수료 처리되었습니다.", curSeq, updatedCount);
+            return ResponseEntity.ok("Success: " + updatedCount + " students graduated.");
+        } catch (Exception e) {
+            log.error("일괄 수료 처리 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
         }
     }
 }

@@ -135,4 +135,11 @@ public class AccountServiceImpl implements AccountService {
         log.info("학생 정보 논리 삭제 시작 - accountSeq: {}", accountSeq);
         return accountMapper.deleteAccount(accountSeq);
     }
+
+    @Override
+    @Transactional
+    public int graduateStudentsByCurriculum(Integer curSeq, String updateId) {
+        // 별도의 DTO를 만들지 않고 Map이나 파라미터 직접 전달 방식을 사용합니다.
+        return accountMapper.updateStatusToGraduated(curSeq, updateId);
+    }
 }

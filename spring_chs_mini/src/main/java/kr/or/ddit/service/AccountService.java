@@ -25,4 +25,7 @@ public interface AccountService {
      * @return 반영된 행의 수
      */
     int deleteAccount(Integer accountSeq);
+
+    // 특정 과정 학생 일괄 수료 처리
+    int graduateStudentsByCurriculum(Integer curSeq, String updateId);
 }
