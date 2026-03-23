@@ -30,7 +30,7 @@
                 COUNT(*) FILTER (WHERE STATUS = 'EARLYOUT') AS earlyout_count,
                 COUNT(*) FILTER (WHERE STATUS = 'GRADUATED') AS graduated_count,
                 -- 수료 학생까지 포함하여 '통계 대상 인원' 산출
-                COUNT(*) FILTER (WHERE STATUS IN ('ENROLLED', 'GRADUATED')) AS active_and_graduated,
+                COUNT(*) FILTER (WHERE STATUS IN ('ENROLLED', 'GRADUATED')) AS active_and_graduated
             FROM lms.TB_ACCOUNT
             WHERE DEL_YN = 'N' -- 1. 전체 학적 통계에서 삭제된 계정 제외
             GROUP BY CUR_SEQ
@@ -101,7 +101,7 @@
         </where>
         GROUP BY 
             c.CUR_SEQ, c.CUR_NAME, c.ROOM, c.TERM, c.START_DATE, c.END_DATE, c.ACCOUNT_SEQ, t.ACCOUNT_NAME,
-            ast.total_enrolled, ast.active_accounts, ast.dropout_count, ast.earlyout_count, ast.graduated_count
+            ast.total_enrolled, ast.active_accounts, ast.dropout_count, ast.earlyout_count, ast.graduated_count, ast.active_and_graduated
         ORDER BY c.START_DATE DESC
     </select>
 
