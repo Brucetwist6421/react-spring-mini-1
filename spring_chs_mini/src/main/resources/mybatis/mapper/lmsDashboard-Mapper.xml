@@ -62,6 +62,7 @@
             COALESCE(ast.dropout_count, 0) AS dropout_count,
             COALESCE(ast.earlyout_count, 0) AS earlyout_count,
             COALESCE(ast.graduated_count, 0) AS graduated_count,
+            COALESCE(ast.active_and_graduated, 0) AS active_and_graduated,
             -- 분모를 active_and_graduated로 변경하여 수료생 포함 비율 계산
             ROUND(AVG(
                 CASE 
