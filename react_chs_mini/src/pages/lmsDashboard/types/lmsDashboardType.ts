@@ -12,6 +12,7 @@ export interface LmsDashboardData {
   period: string;
   totalEnrolled: number;
   activeAccounts: number;
+  activeAndGraduated: number;
   dropoutCount: number;
   totalAvgRatio: number;
   earlyoutCount: number;

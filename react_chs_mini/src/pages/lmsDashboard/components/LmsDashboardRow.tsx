@@ -30,7 +30,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
   const navigate = useNavigate();
 
   // 인원 확인 변수 (가독성을 위해 추출)
-  const isEmpty = row.activeAccounts === 0;
+  const isEmpty = row.activeAndGraduated === 0;
 
   // 삭제 처리 함수
   const handleDelete = async () => {
@@ -118,7 +118,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         {/* 3. 인원 현황 */}
         <TableCell align="left" width="12%">
           <Typography sx={{ fontSize: "1rem", fontWeight: 500 }}>
-            {row.activeAccounts} / {row.totalEnrolled} 명
+            {row.activeAndGraduated} / {row.totalEnrolled} 명
           </Typography>
         </TableCell>
 
@@ -159,7 +159,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
               variant="outlined"
               size="small"
               color="info"
-              disabled={row.activeAccounts === 0}
+              disabled={row.activeAndGraduated === 0}
               startIcon={<LibraryBooksIcon />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -174,7 +174,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
             <Button
               variant="outlined"
               size="small"
-              disabled={row.activeAccounts === 0}
+              disabled={row.activeAndGraduated === 0}
               startIcon={<AssessmentIcon />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -186,7 +186,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
             </Button>
 
             <Tooltip 
-              title={row.activeAccounts === 0 ? "등록된 학생이 없습니다" : ""} 
+              title={row.activeAndGraduated === 0 ? "등록된 학생이 없습니다" : ""} 
               arrow 
               placement="top"
             >
@@ -195,7 +195,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
                   variant="contained"
                   size="small"
                   color="primary"
-                  disabled={row.activeAccounts === 0} // 인원이 0이면 비활성화
+                  disabled={row.activeAndGraduated === 0} // 인원이 0이면 비활성화
                   startIcon={<SettingsIcon />}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -242,7 +242,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
             {!isEmpty && (
               <Box sx={{ mt: 2, p: 1.5, bgcolor: '#fff7ed', borderRadius: 1, border: '1px solid #ffedd5' }}>
                 <Typography variant="caption" color="#9a3412" sx={{ fontWeight: 'bold' }}>
-                  ⚠️ 경고: 현재 이 과정에 등록된 학생이 {row.activeAccounts}명 존재합니다.
+                  ⚠️ 경고: 현재 이 과정에 등록된 학생이 {row.activeAndGraduated}명 존재합니다.
                 </Typography>
               </Box>
             )}
@@ -324,7 +324,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                         <Typography sx={{ fontSize: "0.9rem", fontWeight: 600 }}>{sub.ratio}%</Typography>
                         <Typography sx={{ fontSize: "0.85rem", color: "text.secondary" }}>
-                          {row.activeAccounts}명 중 {sub.submittedCount}명 완료
+                          {row.activeAndGraduated}명 중 {sub.submittedCount}명 완료
                         </Typography>
                       </Box>
                       <LinearProgress variant="determinate" value={sub.ratio} sx={{ mt: 1.5, height: 6, borderRadius: 3 }} />
