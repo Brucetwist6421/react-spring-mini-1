@@ -27,7 +27,7 @@ public class LmsDashboardServiceImpl implements LmsDashboardService{
     }
 
     @Override
-    public LmsAttendanceStatsVO getDailyAttendanceStats() {
-        return dashboardMapper.selectDailyAttendanceStats();
+    public LmsAttendanceStatsVO getDailyAttendanceStats(String date) {
+        return dashboardMapper.selectDailyAttendanceStats(date);
     }
 }

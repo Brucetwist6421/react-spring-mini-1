@@ -16,5 +16,5 @@ public interface LmsDashboardMapper {
     List<LmsStudentScoreVO> selectStudentScoresByCurriculum(@Param("curSeq") Integer curSeq);
 
     // 오늘 전체 출석 통계 조회 
-    LmsAttendanceStatsVO selectDailyAttendanceStats();
+    LmsAttendanceStatsVO selectDailyAttendanceStats(@Param("date") String date);
 }

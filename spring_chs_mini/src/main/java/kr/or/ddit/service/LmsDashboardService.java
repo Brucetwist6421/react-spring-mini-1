@@ -11,5 +11,5 @@ public interface LmsDashboardService {
 
     List<LmsStudentScoreVO> getStudentScoresByCurriculum(Integer curSeq);
 
-    LmsAttendanceStatsVO getDailyAttendanceStats();
+    LmsAttendanceStatsVO getDailyAttendanceStats(String date);
 }

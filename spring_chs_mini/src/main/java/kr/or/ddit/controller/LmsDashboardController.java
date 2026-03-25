@@ -43,7 +43,8 @@ public class LmsDashboardController {
 
     @Operation(summary = "오늘 전체 출석 통계 조회", description = "시스템 전체 과정의 오늘자 출석 현황을 통합 조회합니다.")
     @GetMapping("/attendance-today")
-    public ResponseEntity<LmsAttendanceStatsVO> getAttendanceStats() {
-        return ResponseEntity.ok(dashboardService.getDailyAttendanceStats());
+    public ResponseEntity<LmsAttendanceStatsVO> getAttendanceStats(
+            @RequestParam(required = false) String date) {
+        return ResponseEntity.ok(dashboardService.getDailyAttendanceStats(date));
     }
 }

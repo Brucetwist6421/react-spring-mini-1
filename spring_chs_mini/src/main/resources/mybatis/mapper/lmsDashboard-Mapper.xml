@@ -170,7 +170,7 @@
                 account_seq,
                 status
             FROM lms.tb_attendance
-            WHERE attendance_date = CURRENT_DATE
+            WHERE attendance_date = COALESCE(#{date}::DATE, CURRENT_DATE)
         ),
         TargetStudents AS (
             /* 현재 재학 중인 모든 학생 */
