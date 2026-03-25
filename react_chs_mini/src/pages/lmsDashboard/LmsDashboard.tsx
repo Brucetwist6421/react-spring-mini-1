@@ -142,10 +142,6 @@ const LmsDashboard: React.FC = () => {
         </Box>
       </Box>
 
-      <Box sx={{ mb: 3 }}>
-        <AttendanceTodayCard />
-      </Box>
-
       {/* 요약 통계 카드 섹션 */}
       <Grid container spacing={2} sx={{ mb: 4 }}>
         {/* 1. 전체 누적 학생 수 */}
@@ -211,6 +207,10 @@ const LmsDashboard: React.FC = () => {
             선택된 연도 전체 학생 LMS 시험 이행률 평균: <span style={{ color: '#f59e0b', fontSize: '1.2rem' }}>{avgRatio}%</span>
          </Typography>
       </Paper>
+
+      <Box sx={{ mb: 3 }}>
+        <AttendanceTodayCard />
+      </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 1.5, px: 0.5 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, color: '#334155' }}>

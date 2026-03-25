@@ -59,9 +59,9 @@ const AttendanceTodayCard: React.FC = () => {
     }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 3 }}>
         <Typography sx={{ fontSize: '1.35rem', fontWeight: 800, color: "#1e293b", lineHeight: 1.2 }}>
-          오늘의 실시간 출석 현황 
-          <Box component="span" sx={{ fontWeight: 600, fontSize: '1rem', color: '#64748b', ml: 2 }}>
-            {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+            실시간 출석 현황 -
+          <Box component="span" sx={{ fontWeight: 600, fontSize: '1.2rem', color: '#64748b', ml: 1 }}>
+            {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })}
           </Box>
         </Typography>
         <Typography sx={{ fontSize: '1.1rem', fontWeight: 700, color: "#475569" }}>
