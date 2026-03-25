@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.ddit.service.LmsDashboardService;
+import kr.or.ddit.vo.LmsAttendanceStatsVO;
 import kr.or.ddit.vo.LmsDashboardVO;
 import kr.or.ddit.vo.LmsStudentScoreVO;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,11 @@ public class LmsDashboardController {
     @GetMapping("/student-stats/{curSeq}")
     public ResponseEntity<List<LmsStudentScoreVO>> getStudentStats(@Parameter(description = "교육과정 시퀀스") @PathVariable Integer curSeq) {
         return ResponseEntity.ok(dashboardService.getStudentScoresByCurriculum(curSeq));
+    }
+
+    @Operation(summary = "오늘 전체 출석 통계 조회", description = "시스템 전체 과정의 오늘자 출석 현황을 통합 조회합니다.")
+    @GetMapping("/attendance-today")
+    public ResponseEntity<LmsAttendanceStatsVO> getAttendanceStats() {
+        return ResponseEntity.ok(dashboardService.getDailyAttendanceStats());
     }
 }

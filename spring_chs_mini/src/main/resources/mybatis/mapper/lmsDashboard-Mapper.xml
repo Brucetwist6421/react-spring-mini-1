@@ -160,4 +160,34 @@
         FROM ScoreMatrix
         ORDER BY account_name ASC, sub_name ASC
     </select>
+
+    <select id="selectDailyAttendanceStats" resultType="kr.or.ddit.vo.LmsAttendanceStatsVO">
+    WITH TodayAttendance AS (
+        /* 오늘 기록된 모든 출석 데이터 */
+        SELECT 
+            account_seq,
+            status
+        FROM lms.tb_attendance
+        WHERE attendance_date = CURRENT_DATE
+    ),
+    TargetStudents AS (
+        /* 현재 재학 중이거나 수료 상태인 모든 학생 (삭제 제외) */
+        SELECT account_seq 
+        FROM lms.tb_account 
+        WHERE status IN ('ENROLLED', 'GRADUATED')
+          AND del_yn = 'N'
+    )
+    SELECT 
+        COUNT(ts.account_seq) AS total_students,
+        COUNT(ta.account_seq) FILTER (WHERE ta.status = 'PRESENT') AS present_count,
+        COUNT(ta.account_seq) FILTER (WHERE ta.status = 'LATE') AS late_count,
+        COUNT(ta.account_seq) FILTER (WHERE ta.status = 'ABSENT') AS absent_count,
+        COUNT(ta.account_seq) FILTER (WHERE ta.status = 'EARLY') AS early_count,
+        COUNT(ta.account_seq) FILTER (WHERE ta.status = 'OUTING') AS outing_count,
+        COUNT(ta.account_seq) FILTER (WHERE ta.status = 'OFFICIAL') AS official_count,
+        -- 전체 대상자 중 아직 출석 체크(태그)를 하지 않은 인원
+        (COUNT(ts.account_seq) - COUNT(ta.account_seq)) AS yet_to_arrive_count
+    FROM TargetStudents ts
+    LEFT JOIN TodayAttendance ta ON ts.account_seq = ta.account_seq
+</select>
 </mapper>

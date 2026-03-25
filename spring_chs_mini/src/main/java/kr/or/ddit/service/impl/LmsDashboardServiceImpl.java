@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import kr.or.ddit.mapper.LmsDashboardMapper;
 import kr.or.ddit.service.LmsDashboardService;
+import kr.or.ddit.vo.LmsAttendanceStatsVO;
 import kr.or.ddit.vo.LmsDashboardVO;
 import kr.or.ddit.vo.LmsStudentScoreVO;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,10 @@ public class LmsDashboardServiceImpl implements LmsDashboardService{
     @Override
     public List<LmsStudentScoreVO> getStudentScoresByCurriculum(Integer curSeq) {
         return dashboardMapper.selectStudentScoresByCurriculum(curSeq);
+    }
+
+    @Override
+    public LmsAttendanceStatsVO getDailyAttendanceStats() {
+        return dashboardMapper.selectDailyAttendanceStats();
     }
 }
