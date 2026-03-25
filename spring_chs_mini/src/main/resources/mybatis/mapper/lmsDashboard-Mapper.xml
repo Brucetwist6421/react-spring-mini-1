@@ -165,7 +165,7 @@
 
     <select id="selectDailyAttendanceStats" resultType="kr.or.ddit.vo.LmsAttendanceStatsVO">
         WITH TodayAttendance AS (
-            /* 오늘 기록된 모든 출석 데이터 */
+            /* 오늘 기록된 특이사항(지각, 결석 등) 데이터 */
             SELECT 
                 account_seq,
                 status
@@ -173,7 +173,7 @@
             WHERE attendance_date = CURRENT_DATE
         ),
         TargetStudents AS (
-            /* 현재 재학 중이거나 수료 상태인 모든 학생 (삭제 제외) */
+            /* 현재 재학 중인 모든 학생 */
             SELECT account_seq 
             FROM lms.tb_account 
             WHERE status = 'ENROLLED'
@@ -182,14 +182,16 @@
         )
         SELECT 
             COUNT(ts.account_seq) AS total_students,
-            COUNT(ta.account_seq) FILTER (WHERE ta.status = 'PRESENT') AS present_count,
+            -- 기록이 없으면(NULL이면) 정상 출석으로 간주
+            COUNT(ts.account_seq) FILTER (WHERE ta.account_seq IS NULL) AS present_count,
+            -- 특이사항 상태별 카운트
             COUNT(ta.account_seq) FILTER (WHERE ta.status = 'LATE') AS late_count,
             COUNT(ta.account_seq) FILTER (WHERE ta.status = 'ABSENT') AS absent_count,
             COUNT(ta.account_seq) FILTER (WHERE ta.status = 'EARLY') AS early_count,
             COUNT(ta.account_seq) FILTER (WHERE ta.status = 'OUTING') AS outing_count,
             COUNT(ta.account_seq) FILTER (WHERE ta.status = 'OFFICIAL') AS official_count,
-            -- 전체 대상자 중 아직 출석 체크(태그)를 하지 않은 인원
-            (COUNT(ts.account_seq) - COUNT(ta.account_seq)) AS yet_to_arrive_count
+            -- 특이사항 기록 방식에서는 '미입실' 개념이 모호하므로 0으로 처리하거나 제거 가능
+            0 AS yet_to_arrive_count
         FROM TargetStudents ts
         LEFT JOIN TodayAttendance ta ON ts.account_seq = ta.account_seq
     </select>

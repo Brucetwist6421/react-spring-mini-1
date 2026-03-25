@@ -24,6 +24,7 @@ import LmsDashboardRow from "./components/LmsDashboardRow";
 import LmsStatCard from "./components/LmsStatCard";
 import type { LmsDashboardData } from "./types/lmsDashboardType";
 import CurriculumAddModal from "./components/CurriculumAddModal";
+import AttendanceTodayCard from "./components/AttendanceTodayCard";
 
 const LmsDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -139,6 +140,10 @@ const LmsDashboard: React.FC = () => {
             }}
           />
         </Box>
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <AttendanceTodayCard />
       </Box>
 
       {/* 요약 통계 카드 섹션 */}
