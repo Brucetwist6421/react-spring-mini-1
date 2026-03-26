@@ -151,9 +151,8 @@
             lms.tb_attendance B ON (A.account_seq = B.account_seq 
                                     AND B.cur_seq = #{curSeq} 
                                     AND B.attendance_date = CAST(#{attendanceDate} AS DATE))
-        WHERE 
-            A.cur_seq = #{curSeq}
-            A.del_yn = 'N'
+        WHERE A.cur_seq = #{curSeq}
+          AND A.del_yn = 'N'
         ORDER BY A.account_name ASC
     </select>
 </mapper>
