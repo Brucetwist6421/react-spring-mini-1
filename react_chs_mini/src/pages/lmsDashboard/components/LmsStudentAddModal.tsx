@@ -181,9 +181,32 @@ const LmsStudentAddModal = ({ open, onClose, curSeq, curName, curClass, term, on
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-            <DialogTitle sx={{ fontWeight: 900, bgcolor: '#f8fafc' }}>
-                신규 훈련생 등록 [{curName}-{curClass}호 ({term}기)]
+        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth scroll='paper'>
+            <DialogTitle sx={{ 
+                fontWeight: 900, 
+                bgcolor: '#f8fafc', 
+                m: 0, 
+                p: 2.5,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+            }}>
+                <Typography variant="h6" sx={{ fontWeight: 900, color: '#1e293b' }}>
+                    신규 훈련생 등록 [{curName}-{curClass}호 ({term}기)]
+                </Typography>
+                
+                {/* 우측 상단 X 닫기 버튼 추가 */}
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose}
+                    sx={{
+                        color: (theme) => theme.palette.grey[500],
+                        '&:hover': { color: '#ef4444', bgcolor: '#fee2e2' },
+                        transition: '0.2s'
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
             </DialogTitle>
             <Divider />
             <DialogContent sx={{ p: 4 }}>

@@ -10,6 +10,7 @@ import api from "../../../api/axiosInstance";
 import { fileListDownload } from "../../../api/fileListDownload";
 import RandomSpinner from "../../../components/RandomSpinner";
 import AttendanceTab from './AttendanceTab';
+import CloseIcon from '@mui/icons-material/Close';
 
 const LmsDailyLogModal = ({ open, onClose, curSeq, curData, startDate, endDate }: any) => {
   const [logDate, setLogDate] = useState<string>("");
@@ -133,19 +134,41 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData, startDate, endDate }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
-      <DialogTitle sx={{ bgcolor: '#f8f9fa', borderBottom: '1px solid #e0e0e0' }}>
-        <Box>훈련일지 관리 - {curData?.curName} - {curData?.className}호 ({curData?.term}기)</Box>
-        <Typography variant="caption" sx={{ color: "#666", fontSize: "1rem" }}>
-          훈련 기간 : {curData.period? `${curData.period}` : `${startDate} ~ ${endDate}`}
-        </Typography>
+      {/* 헤더 섹션: 제목과 X 버튼 */}
+      <DialogTitle sx={{ 
+        m: 0, p: 2.5, bgcolor: '#f8f9fa', 
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' 
+      }}>
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 900, color: '#1e293b' }}>
+            훈련일지 관리 - {curData?.curName} - {curData?.className}호 ({curData?.term}기)
+          </Typography>
+          <Typography variant="caption" sx={{ color: "#64748b", fontSize: "0.95rem", fontWeight: 500 }}>
+            📅 훈련 기간 : {curData.period? `${curData.period}` : `${startDate} ~ ${endDate}`}
+          </Typography>
+        </Box>
+        
+        {/* 우측 상단 X 버튼 */}
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            color: (theme) => theme.palette.grey[500],
+            '&:hover': { color: '#ef4444', bgcolor: '#fee2e2' },
+            transition: '0.2s'
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
-      <DialogTitle>
-        {/* 기존 타이틀 코드 */}
-        <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} sx={{ mt: 2 }}>
-          <Tab label="훈련 일지" />
-          <Tab label="출석 관리" />
+
+      {/* 탭 섹션 */}
+      <Box sx={{ px: 3, bgcolor: '#f8f9fa', borderBottom: '1px solid #e2e8f0' }}>
+        <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)}>
+          <Tab label="훈련 일지" sx={{ fontWeight: 700 }} />
+          <Tab label="출석 관리" sx={{ fontWeight: 700 }} />
         </Tabs>
-      </DialogTitle>
+      </Box>
       <DialogContent sx={{ bgcolor: '#f9f9f9', pt: 2 }}>
         {activeTab === 0 ? (
           !isReady ? <RandomSpinner /> : (
