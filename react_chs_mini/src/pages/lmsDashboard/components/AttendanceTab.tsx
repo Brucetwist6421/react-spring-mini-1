@@ -31,8 +31,7 @@ const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabP
   const [loading, setLoading] = useState(false);
   const dateRef = useRef<HTMLInputElement>(null);
 
-  // ✅ 1. useCallback으로 함수를 감싸 메모이제이션합니다.
-  // 의존성 배열에 있는 logDate나 curSeq가 변할 때만 함수가 새로 정의됩니다.
+  // ✅ 데이터 조회 함수 (useCallback으로 메모이제이션)
   const fetchAttendance = useCallback(async () => {
     if (!logDate || !curSeq) return;
     setLoading(true);
@@ -49,14 +48,24 @@ const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabP
     } finally {
       setLoading(false);
     }
-  }, [logDate, curSeq]); // logDate와 curSeq를 의존성에 추가
+  }, [logDate, curSeq]);
 
-  // ✅ 2. 이제 useEffect의 의존성 배열에 fetchAttendance를 넣어도 안전합니다.
+  // ✅ 초기 및 날짜 변경 시 조회
   useEffect(() => {
     fetchAttendance();
   }, [fetchAttendance]);
 
+  // ✅ 데이터 업데이트 및 실시간 중복 체크
   const updateRow = (cat: string, index: number, field: string, value: any) => {
+    // 학생 선택 시 중복 검사
+    if (field === 'accountSeq' && value !== "") {
+      const isDuplicate = Object.values(data).flat().some(row => row.accountSeq === value);
+      if (isDuplicate) {
+        alert("이미 명단에 추가된 학생입니다.");
+        return;
+      }
+    }
+
     setData(prev => {
       const newCatData = [...(prev[cat] || [])];
       if (field === 'file') {
@@ -96,17 +105,14 @@ const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabP
     }));
   };
 
-  // ✅ 행 삭제 로직 수정 (API 연동)
+  // ✅ 행 삭제 로직 (API 연동 및 확인 창)
   const removeRow = async (cat: string, index: number) => {
     const rowToDelete = data[cat][index];
 
-    // DB에 저장된 데이터인 경우 서버에 삭제 요청
     if (rowToDelete.attendanceSeq) {
       if (!window.confirm("이 출석 기록을 영구 삭제하시겠습니까?")) return;
-      
       try {
         await api.delete(`/api/attendance/${rowToDelete.attendanceSeq}`);
-        // 삭제 성공 시 알림 생략하고 바로 UI 업데이트 가능
       } catch (e) {
         console.error(e);
         alert("기록 삭제 중 오류가 발생했습니다.");
@@ -114,18 +120,25 @@ const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabP
       }
     }
 
-    // UI 상태 업데이트
     setData(prev => ({
       ...prev,
       [cat]: prev[cat].filter((_, i) => i !== index)
     }));
   };
 
+  // ✅ 저장 로직 (최종 중복 검사 포함)
   const handleSaveAttendance = async () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     const payload: any[] = [];
     const formData = new FormData();
     let hasError = false;
+
+    // 전체 선택된 학생 리스트 추출 및 중복 검사
+    const allSelectedSeqs = Object.values(data).flat().map(r => r.accountSeq).filter(s => s !== "");
+    if (allSelectedSeqs.length !== new Set(allSelectedSeqs).size) {
+      alert("중복된 학생이 존재합니다. 확인 후 다시 시도해주세요.");
+      return;
+    }
 
     for (const [cat, rows] of Object.entries(data)) {
       for (const [idx, row] of (rows as any[]).entries()) {
@@ -156,7 +169,7 @@ const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabP
     try {
       await api.post("/api/attendance/insert", formData, { headers: { 'Content-Type': undefined } });
       alert("저장되었습니다.");
-      fetchAttendance(); // 저장 후 최신 데이터 재조회 (attendanceSeq 확보용)
+      fetchAttendance(); 
     } catch (e) {
       console.error(e);
       alert("저장 실패");
@@ -239,16 +252,7 @@ const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabP
                       <IconButton size="small" onClick={() => removeFile(cat, idx)}><CancelIcon color="error" fontSize="small" /></IconButton>
                     </Box>
                   )}
-                  {/* ✅ 아이콘 대신 '삭제' 버튼으로 변경 */}
-                  <Button 
-                    variant="outlined" 
-                    color="error" 
-                    size="small" 
-                    onClick={() => removeRow(cat, idx)}
-                    sx={{ minWidth: 60, fontWeight: 'bold' }}
-                  >
-                    삭제
-                  </Button>
+                  <Button variant="outlined" color="error" size="small" onClick={() => removeRow(cat, idx)} sx={{ minWidth: 60, fontWeight: 'bold' }}>삭제</Button>
                 </Grid>
               </Grid>
             );
