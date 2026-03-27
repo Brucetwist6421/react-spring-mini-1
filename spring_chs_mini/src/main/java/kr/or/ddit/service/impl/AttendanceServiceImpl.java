@@ -15,9 +15,11 @@ import kr.or.ddit.service.AttendanceService;
 import kr.or.ddit.service.FileService;
 import kr.or.ddit.vo.AttendanceVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AttendanceServiceImpl implements AttendanceService {
     private final AttendanceMapper attendanceMapper;
     private final FileService fileService; // 공통 파일 업로드 서비스 의존성 주입
@@ -103,6 +105,9 @@ public class AttendanceServiceImpl implements AttendanceService {
     public AttendanceVO getTodayAttendanceStats(String date) {
         String searchDate = (date == null || date.isEmpty()) ? LocalDate.now().toString() : date;
         List<AttendanceVO> allAttendance = attendanceMapper.selectDailyAttendanceWithAccount(searchDate);
+        long nullCount = allAttendance.stream().filter(vo -> vo.getStatus() == null).count();
+        log.info("전체 데이터 수: {}", allAttendance.size());
+        log.info("Status가 NULL인 데이터 수: {}", nullCount);
 
         AttendanceVO stats = new AttendanceVO();
         stats.setTotalStudents(allAttendance.size());
