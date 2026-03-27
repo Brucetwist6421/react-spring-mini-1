@@ -132,6 +132,11 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData, startDate, endDate }
     }
   };
 
+  const handleCloseAndReload = () => {
+    onClose(); // 부모의 state를 닫힘으로 변경
+    window.location.reload(); // 페이지 전체 새로고침
+  };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
       {/* 헤더 섹션: 제목과 X 버튼 */}
@@ -151,7 +156,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData, startDate, endDate }
         {/* 우측 상단 X 버튼 */}
         <IconButton
           aria-label="close"
-          onClick={onClose}
+          onClick={handleCloseAndReload}
           sx={{
             color: (theme) => theme.palette.grey[500],
             '&:hover': { color: '#ef4444', bgcolor: '#fee2e2' },
