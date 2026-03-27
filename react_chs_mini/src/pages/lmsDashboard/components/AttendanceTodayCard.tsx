@@ -46,8 +46,8 @@ const AttendanceTodayCard: React.FC = () => {
     open: false,
     label: "",
     color: "",
-    list: [] as any[]
-  });
+    type: "" // 여기에 type 속성을 추가합니다.
+    });
 
   const fetchAttendance = async (dateStr: string) => {
     setLoading(true);
@@ -64,10 +64,13 @@ const AttendanceTodayCard: React.FC = () => {
   };
 
   const handleItemClick = (label: string, color: string, type: string) => {
-    // 인덱스 접근 에러 해결: stats[key] 형태 접근 가능
-    const list = stats ? stats[`${type}List`] || [] : []; 
-    setDetailModal({ open: true, label, color, list });
-  };
+    setDetailModal({ 
+        open: true, 
+        label, 
+        color, 
+        type // 클릭한 상태의 타입(present, late 등) 전달
+    });
+    };
 
   useEffect(() => {
     if (selectedDate && selectedDate.isValid()) {
@@ -144,8 +147,9 @@ const AttendanceTodayCard: React.FC = () => {
         onClose={() => setDetailModal(prev => ({ ...prev, open: false }))}
         statusLabel={detailModal.label}
         statusColor={detailModal.color}
-        studentList={detailModal.list}
-      />
+        date={selectedDate?.format("YYYY-MM-DD") || ""} // 현재 선택된 날짜
+        type={detailModal.type} // 클릭한 타입
+        />
     </>
   );
 };

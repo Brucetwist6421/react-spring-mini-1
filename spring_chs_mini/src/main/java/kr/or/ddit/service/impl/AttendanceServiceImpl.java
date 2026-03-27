@@ -101,33 +101,35 @@ public class AttendanceServiceImpl implements AttendanceService {
     
     @Override
     public AttendanceVO getTodayAttendanceStats(String date) {
-        // 날짜가 없으면 오늘 날짜 기본값 설정
         String searchDate = (date == null || date.isEmpty()) ? LocalDate.now().toString() : date;
-
-        // 1. 해당 날짜의 전체 학생 및 출석 상태 조회 (Mapper 호출)
         List<AttendanceVO> allAttendance = attendanceMapper.selectDailyAttendanceWithAccount(searchDate);
 
-        // 2. 결과를 담을 메인 객체 생성
         AttendanceVO stats = new AttendanceVO();
         stats.setTotalStudents(allAttendance.size());
 
-        // 3. 상태별 리스트 필터링 및 카운트 설정
-        stats.setPresentList(filterByStatus(allAttendance, "정상"));
+        // 1. "정상" 대신 DB 값인 "PRESENT" (또는 해당 코드) 사용
+        // 만약 Mapper에서 COALESCE로 '결석'을 넣었다면 그 부분도 'ABSENT'로 수정 필요
+        stats.setPresentList(filterByStatus(allAttendance, "PRESENT")); 
         stats.setPresentCount(stats.getPresentList().size());
 
-        stats.setLateList(filterByStatus(allAttendance, "지각"));
+        // 2. "지각" -> "LATE"
+        stats.setLateList(filterByStatus(allAttendance, "LATE"));
         stats.setLateCount(stats.getLateList().size());
 
-        stats.setAbsentList(filterByStatus(allAttendance, "결석"));
+        // 3. "결석" -> "ABSENT"
+        stats.setAbsentList(filterByStatus(allAttendance, "ABSENT"));
         stats.setAbsentCount(stats.getAbsentList().size());
 
-        stats.setEarlyList(filterByStatus(allAttendance, "조퇴"));
+        // 4. "조퇴" -> "EARLY"
+        stats.setEarlyList(filterByStatus(allAttendance, "EARLY"));
         stats.setEarlyCount(stats.getEarlyList().size());
 
-        stats.setOutingList(filterByStatus(allAttendance, "외출"));
+        // 5. "외출" -> "OUTING"
+        stats.setOutingList(filterByStatus(allAttendance, "OUTING"));
         stats.setOutingCount(stats.getOutingList().size());
 
-        stats.setOfficialList(filterByStatus(allAttendance, "공결"));
+        // 6. "공결" -> "OFFICIAL"
+        stats.setOfficialList(filterByStatus(allAttendance, "OFFICIAL"));
         stats.setOfficialCount(stats.getOfficialList().size());
 
         return stats;

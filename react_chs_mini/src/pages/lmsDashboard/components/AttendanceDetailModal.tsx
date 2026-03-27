@@ -1,18 +1,19 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
-    Avatar, Box, Chip, Dialog, DialogContent, DialogTitle, Divider,
+    Avatar, Box, Chip, CircularProgress, Dialog, DialogContent, DialogTitle, Divider,
     IconButton, Paper, Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid'; 
+import Grid from '@mui/material/Grid';
+import { useEffect, useState } from 'react';
+import api from "../../../api/axiosInstance";
 
-// 백엔드 AttendanceVO 구조와 일치하도록 인터페이스 수정
 interface Student {
   accountSeq: number;
   accountName: string;
-  mainFilePath?: string; // VO의 필드명과 일치
+  mainFilePath?: string;
   tel?: string;
-  status: string;        // VO의 필드명과 일치 ("정상", "지각" 등)
-  startTime?: string;    // VO의 TO_CHAR 결과값
+  status: string;
+  startTime?: string;
 }
 
 interface DetailModalProps {
@@ -20,112 +21,100 @@ interface DetailModalProps {
   onClose: () => void;
   statusLabel: string;
   statusColor: string;
-  studentList: Student[];
+  date: string; 
+  type: string; 
 }
 
-const AttendanceDetailModal = ({ open, onClose, statusLabel, statusColor, studentList }: DetailModalProps) => {
-  // 이미지 경로 유효성 검사 및 서버 URL 결합 헬퍼 함수
+const AttendanceDetailModal = ({ open, onClose, statusLabel, statusColor, date, type }: DetailModalProps) => {
+  const [studentList, setStudentList] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchDetailList = async () => {
+      if (!open || !type) return;
+      
+      setLoading(true);
+      try {
+        const res = await api.get("/api/attendance/attendance-today/list", {
+          params: { date }
+        });
+        
+        // 데이터 구조 확인: res.data 가 바로 객체이고 그 안에 absentList 등이 있음
+        const listName = `${type}List`; // 예: "absentList"
+        console.log("선택된 리스트 명:", listName);
+        console.log("서버 응답 데이터:", res.data);
+
+        setStudentList(res.data[listName] || []);
+      } catch (err) {
+        console.error("상세 명단 로딩 실패:", err);
+        setStudentList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetailList();
+  }, [open, date, type]);
+
   const getProfileImage = (path?: string) => {
     if (!path) return '';
-    // 만약 path에 이미 http가 포함되어 있다면 그대로 반환, 아니면 서버 주소 결합
-    return path.startsWith('http') 
-      ? path 
-      : `http://168.107.51.143:8080/upload/${encodeURIComponent(path)}`;
+    // DB 응답값에 이미 파일명이 있으므로 경로 결합
+    return path.startsWith('http') ? path : `http://168.107.51.143:8080/upload/${encodeURIComponent(path)}`;
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="sm" 
-      fullWidth 
-      scroll="paper"
-      PaperProps={{
-        sx: { borderRadius: 3 }
-      }}
-    >
-      <DialogTitle sx={{ 
-        m: 0, p: 2.5, bgcolor: '#f8fafc',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center' 
-      }}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth scroll="paper" PaperProps={{ sx: { borderRadius: 3 } }}>
+      <DialogTitle sx={{ m: 0, p: 2.5, bgcolor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Typography variant="h6" sx={{ fontWeight: 900, color: '#1e293b' }}>
-            {statusLabel} 명단
-          </Typography>
-          <Chip 
-            label={`${studentList?.length || 0}명`} 
-            size="small" 
-            sx={{ bgcolor: statusColor, color: 'white', fontWeight: 800 }} 
-          />
+          <Typography variant="h6" sx={{ fontWeight: 900, color: '#1e293b' }}>{statusLabel} 명단</Typography>
+          {!loading && (
+            <Chip label={`${studentList.length}명`} size="small" sx={{ bgcolor: statusColor, color: 'white', fontWeight: 800 }} />
+          )}
         </Box>
-        <IconButton
-          onClick={onClose}
-          sx={{
-            color: (theme) => theme.palette.grey[500],
-            '&:hover': { color: '#ef4444', bgcolor: '#fee2e2' },
-            transition: '0.2s'
-          }}
-        >
+        <IconButton onClick={onClose} sx={{ color: (theme) => theme.palette.grey[500], '&:hover': { color: '#ef4444', bgcolor: '#fee2e2' } }}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      
       <Divider />
-
       <DialogContent sx={{ p: 2, bgcolor: '#f1f5f9', minHeight: '300px' }}>
-        {!studentList || studentList.length === 0 ? (
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 10 }}>
+            <CircularProgress size={40} sx={{ color: statusColor }} />
+          </Box>
+        ) : studentList.length === 0 ? (
           <Box sx={{ py: 10, textAlign: 'center' }}>
-            <Typography sx={{ color: '#94a3b8', fontWeight: 600 }}>
-              해당하는 학생이 없습니다.
-            </Typography>
+            <Typography sx={{ color: '#94a3b8', fontWeight: 600 }}>해당하는 학생이 없습니다.</Typography>
           </Box>
         ) : (
+          /* Grid2(MUI v6) 사양 준수 */
           <Grid container spacing={1.5}>
             {studentList.map((student) => (
               <Grid size={12} key={student.accountSeq}>
-                <Paper sx={{ 
-                  p: 1.8, borderRadius: 2, 
-                  border: '1px solid #e2e8f0',
-                  boxShadow: 'none',
-                  '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderColor: statusColor + '50' },
-                  transition: 'all 0.2s'
-                }}>
+                <Paper sx={{ p: 1.8, borderRadius: 2, border: '1px solid #e2e8f0', boxShadow: 'none', '&:hover': { boxShadow: '0 4px 12px rgba(0,0,0,0.05)', borderColor: statusColor + '50' } }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar 
                         src={getProfileImage(student.mainFilePath)} 
-                        sx={{ 
-                          width: 48, height: 48, 
-                          bgcolor: '#e2e8f0', 
-                          fontWeight: 700,
-                          fontSize: '1.1rem',
-                          color: '#475569',
-                          border: '1px solid #f1f5f9'
-                        }}
+                        sx={{ width: 48, height: 48, bgcolor: '#e2e8f0', fontWeight: 700 }}
                       >
                         {student.accountName ? student.accountName[0] : '?'}
                       </Avatar>
                       <Box>
-                        <Typography sx={{ fontWeight: 800, color: '#1e293b', fontSize: '1rem', mb: 0.2 }}>
+                        <Typography sx={{ fontWeight: 800, color: '#1e293b', fontSize: '1rem' }}>
                           {student.accountName}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, display: 'block' }}>
-                          {student.tel || '연락처 정보 없음'}
+                        <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                          {student.tel || '연락처 없음'}
                         </Typography>
                       </Box>
                     </Box>
-                    
-                    {/* 상태가 '정상'이거나 시간이 기록된 경우만 표시 */}
-                    {student.startTime && (
-                      <Box sx={{ textAlign: 'right' }}>
-                        <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700, mb: 0.3 }}>
-                          입실 시간
+                    {/* 결석일 경우 startTime이 null일 수 있으므로 조건부 렌더링 확인 */}
+                    <Box sx={{ textAlign: 'right' }}>
+                        <Typography sx={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 700 }}>상태</Typography>
+                        <Typography sx={{ fontWeight: 800, color: statusColor, fontSize: '0.95rem' }}>
+                          {student.status}
                         </Typography>
-                        <Typography sx={{ fontWeight: 800, color: statusColor, fontSize: '0.95rem', letterSpacing: -0.5 }}>
-                          {student.startTime}
-                        </Typography>
-                      </Box>
-                    )}
+                    </Box>
                   </Box>
                 </Paper>
               </Grid>
