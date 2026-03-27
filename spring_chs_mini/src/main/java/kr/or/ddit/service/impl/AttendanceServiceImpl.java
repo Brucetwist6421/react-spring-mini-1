@@ -1,7 +1,9 @@
 package kr.or.ddit.service.impl;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,4 +99,44 @@ public class AttendanceServiceImpl implements AttendanceService {
         return attendanceMapper.getDailyAttendanceList(curSeq, attendanceDate);
     }
     
+    @Override
+    public AttendanceVO getTodayAttendanceStats(String date) {
+        // 날짜가 없으면 오늘 날짜 기본값 설정
+        String searchDate = (date == null || date.isEmpty()) ? LocalDate.now().toString() : date;
+
+        // 1. 해당 날짜의 전체 학생 및 출석 상태 조회 (Mapper 호출)
+        List<AttendanceVO> allAttendance = attendanceMapper.selectDailyAttendanceWithAccount(searchDate);
+
+        // 2. 결과를 담을 메인 객체 생성
+        AttendanceVO stats = new AttendanceVO();
+        stats.setTotalStudents(allAttendance.size());
+
+        // 3. 상태별 리스트 필터링 및 카운트 설정
+        stats.setPresentList(filterByStatus(allAttendance, "정상"));
+        stats.setPresentCount(stats.getPresentList().size());
+
+        stats.setLateList(filterByStatus(allAttendance, "지각"));
+        stats.setLateCount(stats.getLateList().size());
+
+        stats.setAbsentList(filterByStatus(allAttendance, "결석"));
+        stats.setAbsentCount(stats.getAbsentList().size());
+
+        stats.setEarlyList(filterByStatus(allAttendance, "조퇴"));
+        stats.setEarlyCount(stats.getEarlyList().size());
+
+        stats.setOutingList(filterByStatus(allAttendance, "외출"));
+        stats.setOutingCount(stats.getOutingList().size());
+
+        stats.setOfficialList(filterByStatus(allAttendance, "공결"));
+        stats.setOfficialCount(stats.getOfficialList().size());
+
+        return stats;
+    }
+
+    // 중복 로직 방지를 위한 헬퍼 메서드
+    private List<AttendanceVO> filterByStatus(List<AttendanceVO> list, String statusName) {
+        return list.stream()
+                .filter(vo -> statusName.equals(vo.getStatus()))
+                .collect(Collectors.toList());
+    }
 }

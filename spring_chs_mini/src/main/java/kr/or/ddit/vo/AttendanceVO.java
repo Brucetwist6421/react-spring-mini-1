@@ -29,6 +29,7 @@ public class AttendanceVO {
     private String curName;
     private String startDate;
     private String endDate;
+    private String tel; // 연락처 추가 (모달 표시용)
 
     private String accountStatus;  // 학생 상태 (ENROLLED, DROPOUT, EARLYOUT 등)
     private String referenceDate;  // 출석률 계산 기준일 (오늘 날짜 혹은 dropout_date)
@@ -47,5 +48,19 @@ public class AttendanceVO {
     private List<Map<String, Object>> attList; // 특이사항 목록 (날짜, 유형, 사유 등)
 
     private boolean fileDeleted; // 프론트에서 '삭제' 여부를 boolean으로 받음
+
+    // --- [대시보드 실시간 현황을 위해 새로 추가하는 필드] ---
+    private int totalStudents;     // 전체 학생 수
+    private int presentCount;      // 정상 출석 수
+    private int officialCount;     // 공결 수
+    private int yetToArriveCount;  // 미입실 수
+
+    // 모달용 리스트 (React의 typeList 명칭과 매핑)
+    private List<AttendanceVO> presentList;
+    private List<AttendanceVO> lateList;
+    private List<AttendanceVO> absentList;
+    private List<AttendanceVO> earlyList;
+    private List<AttendanceVO> outingList;
+    private List<AttendanceVO> officialList;
 
 }

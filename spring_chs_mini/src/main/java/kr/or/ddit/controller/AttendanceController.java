@@ -62,4 +62,12 @@ public class AttendanceController {
             @RequestParam String logDate) { // YYYY-MM-DD 형식
         return ResponseEntity.ok(attendanceService.getDailyAttendanceList(curSeq, logDate));
     }
+
+    @Operation(summary = "대시보드 실시간 출석 통계", description = "오늘 또는 특정 날짜의 상태별 통계 및 학생 명단을 조회합니다.")
+    @GetMapping("/attendance-today/list")
+    public ResponseEntity<AttendanceVO> getAttendanceToday(
+            @RequestParam(value = "date", required = false) String date) {
+        // date가 null이면 서비스 레이어에서 오늘 날짜로 처리
+        return ResponseEntity.ok(attendanceService.getTodayAttendanceStats(date));
+    }
 }

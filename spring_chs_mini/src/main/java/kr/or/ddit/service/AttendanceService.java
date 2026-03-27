@@ -12,4 +12,6 @@ public interface AttendanceService {
     void insertAttendance(List<AttendanceVO> attendanceVO, MultipartHttpServletRequest request);
 
     List<AttendanceVO> getDailyAttendanceList(int curSeq, String attendanceDate);
+
+    AttendanceVO getTodayAttendanceStats(String date);
 }

@@ -22,4 +22,6 @@ public interface AttendanceMapper {
         @Param("curSeq") int curSeq, 
         @Param("attendanceDate") String attendanceDate
     );
+
+    List<AttendanceVO> selectDailyAttendanceWithAccount(@Param("date") String date);
 }
