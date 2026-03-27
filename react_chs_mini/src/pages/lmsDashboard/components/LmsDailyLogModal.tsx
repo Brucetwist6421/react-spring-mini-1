@@ -29,7 +29,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData, startDate, endDate }
       const [subRes, logRes, stuRes] = await Promise.all([
         api.get(`/api/curriculum/subjects/${curSeq}`),
         api.get(`/api/daily-log/curriculum/${curSeq}`, { params: { logDate } }),
-        api.get(`/api/account/${curSeq}/students`)
+        api.get(`/api/account/${curSeq}/students/daily`)
       ]);
       setSubjects(subRes.data);
       const logMap = (logRes.data || []).reduce((acc: any, cur: any) => ({ ...acc, [cur.period]: { ...cur } }), {});

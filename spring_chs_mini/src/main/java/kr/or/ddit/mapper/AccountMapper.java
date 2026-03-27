@@ -24,6 +24,8 @@ public interface AccountMapper {
 
     List<AccountVO> selectStudentsByCurriculum(Integer curSeq);
 
+    List<AccountVO> selectStudentsByCurriculumDaily(Integer curSeq);
+
     AccountVO selectAccountDetail(Integer accountSeq);
 
     List<AccountAttachmentVO> selectAttachmentsByAccountSeq(Integer accountSeq);

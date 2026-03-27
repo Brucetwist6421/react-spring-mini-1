@@ -41,6 +41,21 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<AccountVO> getStudentsByCurriculumDaily(Integer curSeq) {
+        List<AccountVO> accountList = accountMapper.selectStudentsByCurriculumDaily(curSeq);
+        // 첨부파일 정보도 함께 조회하여 VO에 세팅 (필요 시)
+		// if (accountList != null && !accountList.isEmpty()) {
+		// 	for (AccountVO vo : accountList) {
+		// 		List<AccountAttachmentVO> attachments = accountMapper.selectAttachmentsByAccountSeq(vo.getAccountSeq());
+		// 		if (attachments != null && !attachments.isEmpty()) {
+		// 			vo.setAttachments(attachments);
+		// 		}
+		// 	}
+		// }
+		return accountList;
+    }
+
+    @Override
     public AccountVO getAccountDetail(Integer accountSeq) {
         return accountMapper.selectAccountDetail(accountSeq);
     }

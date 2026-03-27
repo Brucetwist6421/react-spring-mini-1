@@ -39,6 +39,13 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getStudentsByCurriculum(curSeq));
     }
 
+    //과정 별 학생 목록 조회(훈련 일지 조회용)
+    @Operation(summary = "과정 별 학생 목록 조회(훈련 일지 조회용-재학 중인 학생만 조회)", description = "특정 교육과정에 등록된 학생 목록을 조회합니다.")
+    @GetMapping("/{curSeq}/students/daily")
+    public ResponseEntity<List<AccountVO>> getStudentsByCurriculumDaily(@Parameter(description = "과정 시퀀스") @PathVariable Integer curSeq) {
+        return ResponseEntity.ok(accountService.getStudentsByCurriculumDaily(curSeq));
+    }
+
     //계정 상세조회
     @Operation(summary = "계정 상세 조회", description = "특정 계정의 상세 정보를 조회합니다.")
     @GetMapping("/{accountSeq}")

@@ -61,6 +61,36 @@
         ORDER BY a.account_name ASC
     </select>
 
+    <select id="selectStudentsByCurriculumDaily" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
+        SELECT 
+            a.account_seq,
+            a.cur_seq,
+            a.account_id,
+            a.account_name,
+            a.birth,
+            a.gender,
+            a.tel,
+            a.edu,
+            a.major,
+            a.status,
+            a.account_email,
+            a.account_type,
+            a.reg_date,
+            c.cur_name,
+            c.room,
+            c.term,
+            c.start_date,
+            c.end_date,
+            a.main_image_path
+        FROM lms.tb_account a
+        LEFT JOIN lms.tb_curriculum c ON a.cur_seq = c.cur_seq
+        WHERE a.cur_seq = #{curSeq}
+          AND a.account_type = 'STU'  
+          AND a.status = 'ENROLLED'
+          AND a.del_yn = 'N'
+        ORDER BY a.account_name ASC
+    </select>
+
     <select id="selectAccountDetail" parameterType="int" resultType="kr.or.ddit.vo.AccountVO">
         SELECT 
             -- 1. 학생 기본 및 연락처 정보

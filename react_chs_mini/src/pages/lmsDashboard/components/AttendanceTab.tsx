@@ -113,6 +113,7 @@ const AttendanceTab = ({ students, curSeq, logDate, setLogDate }: AttendanceTabP
       if (!window.confirm("이 출석 기록을 영구 삭제하시겠습니까?")) return;
       try {
         await api.delete(`/api/attendance/${rowToDelete.attendanceSeq}`);
+        alert("삭제되었습니다.");
       } catch (e) {
         console.error(e);
         alert("기록 삭제 중 오류가 발생했습니다.");
