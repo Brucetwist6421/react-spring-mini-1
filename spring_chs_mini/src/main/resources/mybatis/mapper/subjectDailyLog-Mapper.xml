@@ -33,4 +33,10 @@
             update_id = #{regId},
             update_date = CURRENT_TIMESTAMP
     </insert>
+
+    <delete id="deleteAttendance" parameterType="int">
+        DELETE FROM lms.tb_attendance
+        WHERE attendance_seq = #{attendanceSeq}
+    </delete>
+    
 </mapper>
