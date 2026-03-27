@@ -157,23 +157,23 @@
     </select>
 
     <select id="selectDailyAttendanceWithAccount" resultType="kr.or.ddit.vo.AttendanceVO">
-    SELECT 
-        a.account_seq AS accountSeq,
-        a.account_name AS accountName,
-        a.tel AS tel,
-        a.main_image_path AS mainFilePath,
-        COALESCE(att.status, '결석') AS status, -- 출석 기록 없으면 기본 '결석' 처리
-        TO_CHAR(att.start_time::time, 'HH24:MI') AS startTime
-    FROM 
-        lms.tb_account a
-    LEFT JOIN 
-        lms.tb_attendance att ON a.account_seq = att.account_seq 
-        AND att.attendance_date = #{date}::date
-    WHERE 
-        a.account_type = 'STU' -- 학생만 조회
-        AND a.status = 'ENROLLED' -- 재학 중인 학생만
-        AND (a.del_yn IS NULL OR a.del_yn = 'N')
-    ORDER BY 
-        a.account_name ASC
-</select>
+        SELECT 
+            a.account_seq AS accountSeq,
+            a.account_name AS accountName,
+            a.tel AS tel,
+            a.main_image_path AS mainFilePath,
+            att.status AS status, -- NULL이면 정상, 값이 있으면 특이사항
+            TO_CHAR(att.start_time::time, 'HH24:MI') AS startTime
+        FROM 
+            lms.tb_account a
+        LEFT JOIN 
+            lms.tb_attendance att ON a.account_seq = att.account_seq 
+            AND att.attendance_date = #{date}::date
+        WHERE 
+            a.account_type = 'STU'
+            AND a.status = 'ENROLLED'
+            AND (a.del_yn IS NULL OR a.del_yn = 'N')
+        ORDER BY 
+            a.account_name ASC
+    </select>
 </mapper>
