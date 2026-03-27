@@ -134,7 +134,7 @@ const LmsDailyLogModal = ({ open, onClose, curSeq, curData, startDate, endDate }
 
   const handleCloseAndReload = () => {
     onClose(); // 부모의 state를 닫힘으로 변경
-    window.location.reload(); // 페이지 전체 새로고침
+    // window.location.reload(); // 페이지 전체 새로고침
   };
 
   return (
