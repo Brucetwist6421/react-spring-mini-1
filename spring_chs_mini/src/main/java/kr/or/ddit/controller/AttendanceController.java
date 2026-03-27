@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,5 +70,21 @@ public class AttendanceController {
             @RequestParam(value = "date", required = false) String date) {
         // date가 null이면 서비스 레이어에서 오늘 날짜로 처리
         return ResponseEntity.ok(attendanceService.getTodayAttendanceStats(date));
+    }
+
+    @Operation(summary = "출석 기록 삭제", description = "출석 일련번호(seq)를 이용해 특정 출석 기록을 삭제합니다.")
+    @DeleteMapping("/{attendanceSeq}")
+    public ResponseEntity<String> deleteAttendance(@PathVariable Integer attendanceSeq) {
+        try {
+            boolean isDeleted = attendanceService.deleteAttendance(attendanceSeq);
+            if (isDeleted) {
+                return ResponseEntity.ok("Success");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Data not found");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Fail");
+        }
     }
 }

@@ -14,8 +14,5 @@ public interface SubjectDailyLogMapper {
     
     List<SubjectDailyLogVO> selectDailyLogList(Map<String, Object> params);
 
-    /**
-     * 출석 테이블에서 특정 seq 삭제
-     */
-    int deleteAttendance(Integer attendanceSeq);
+    
 }

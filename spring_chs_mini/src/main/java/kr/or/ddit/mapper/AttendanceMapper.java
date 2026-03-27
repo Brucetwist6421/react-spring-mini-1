@@ -24,4 +24,9 @@ public interface AttendanceMapper {
     );
 
     List<AttendanceVO> selectDailyAttendanceWithAccount(@Param("date") String date);
+
+    /**
+     * 출석 테이블에서 특정 seq 삭제
+     */
+    int deleteAttendance(Integer attendanceSeq);
 }

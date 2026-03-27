@@ -142,4 +142,12 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .filter(vo -> statusName.equals(vo.getStatus())) // null인 경우 자연스럽게 제외됨
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional
+    public boolean deleteAttendance(Integer attendanceSeq) {
+        // 실제 운영 시에는 파일 서비스(fileService)를 호출하여 
+        // 해당 레코드의 main_file_path에 있는 실제 물리 파일도 삭제하는 로직을 추가하는 것이 좋습니다.
+        return attendanceMapper.deleteAttendance(attendanceSeq) > 0;
+    }
 }

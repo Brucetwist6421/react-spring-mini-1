@@ -176,4 +176,9 @@
         ORDER BY 
             a.account_name ASC
     </select>
+
+    <delete id="deleteAttendance" parameterType="int">
+        DELETE FROM lms.tb_attendance
+        WHERE attendance_seq = #{attendanceSeq}
+    </delete>
 </mapper>
