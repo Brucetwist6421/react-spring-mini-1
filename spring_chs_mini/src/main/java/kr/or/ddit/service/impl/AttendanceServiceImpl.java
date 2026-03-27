@@ -107,38 +107,34 @@ public class AttendanceServiceImpl implements AttendanceService {
         AttendanceVO stats = new AttendanceVO();
         stats.setTotalStudents(allAttendance.size());
 
-        // 1. "정상" 대신 DB 값인 "PRESENT" (또는 해당 코드) 사용
-        // 만약 Mapper에서 COALESCE로 '결석'을 넣었다면 그 부분도 'ABSENT'로 수정 필요
-        stats.setPresentList(filterByStatus(allAttendance, "PRESENT")); 
+        // 1. NULL인 경우가 "정상" (PRESENT)
+        stats.setPresentList(allAttendance.stream()
+                .filter(vo -> vo.getStatus() == null) 
+                .collect(Collectors.toList()));
         stats.setPresentCount(stats.getPresentList().size());
 
-        // 2. "지각" -> "LATE"
-        stats.setLateList(filterByStatus(allAttendance, "LATE"));
-        stats.setLateCount(stats.getLateList().size());
-
-        // 3. "결석" -> "ABSENT"
+        // 2. 특이사항 5가지 (영문 코드 기준 필터링)
         stats.setAbsentList(filterByStatus(allAttendance, "ABSENT"));
         stats.setAbsentCount(stats.getAbsentList().size());
 
-        // 4. "조퇴" -> "EARLY"
+        stats.setLateList(filterByStatus(allAttendance, "LATE"));
+        stats.setLateCount(stats.getLateList().size());
+
         stats.setEarlyList(filterByStatus(allAttendance, "EARLY"));
         stats.setEarlyCount(stats.getEarlyList().size());
 
-        // 5. "외출" -> "OUTING"
         stats.setOutingList(filterByStatus(allAttendance, "OUTING"));
         stats.setOutingCount(stats.getOutingList().size());
 
-        // 6. "공결" -> "OFFICIAL"
         stats.setOfficialList(filterByStatus(allAttendance, "OFFICIAL"));
         stats.setOfficialCount(stats.getOfficialList().size());
 
         return stats;
     }
 
-    // 중복 로직 방지를 위한 헬퍼 메서드
     private List<AttendanceVO> filterByStatus(List<AttendanceVO> list, String statusName) {
         return list.stream()
-                .filter(vo -> statusName.equals(vo.getStatus()))
+                .filter(vo -> statusName.equals(vo.getStatus())) // null인 경우 자연스럽게 제외됨
                 .collect(Collectors.toList());
     }
 }
