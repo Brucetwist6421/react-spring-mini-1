@@ -295,7 +295,10 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
       {/* 훈련 일지 등록 모달 */}
       <LmsDailyLogModal 
         open={isLogModalOpen}
-        onClose={() => setIsLogModalOpen(false)}
+        onClose={() => {
+          setIsLogModalOpen(false); // 1. 모달창을 닫고
+          onRefresh();              // 2. 부모(Dashboard)의 통합 새로고침 함수 실행!
+        }}
         curSeq={row.curSeq} // 과정 시퀀스 전달
         curData={row} // 필요 시 과정 데이터 전체 전달
       />

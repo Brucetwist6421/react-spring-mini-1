@@ -37,7 +37,7 @@ interface StatusItem {
   bgColor: string;
 }
 
-const AttendanceTodayCard: React.FC = () => {
+const AttendanceTodayCard: React.FC<{ refreshTrigger?: number }> = ({ refreshTrigger }) => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
@@ -76,7 +76,7 @@ const AttendanceTodayCard: React.FC = () => {
     if (selectedDate && selectedDate.isValid()) {
       fetchAttendance(selectedDate.format("YYYY-MM-DD"));
     }
-  }, [selectedDate]);
+  }, [selectedDate,refreshTrigger]);
 
   // 2. type 속성 추가 및 타입 지정으로 에러 해결
   const statusItems: StatusItem[] = [

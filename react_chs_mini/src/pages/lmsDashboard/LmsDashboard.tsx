@@ -33,6 +33,15 @@ const LmsDashboard: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [myClassOnly, setMyClassOnly] = useState<boolean>(false);
 
+  // ✅ 1. 출석 카드를 위한 독립적인 트리거 상태 추가
+  const [attendanceTrigger, setAttendanceTrigger] = useState(0);
+
+  // ✅ 2. 전체 데이터를 새로고침하면서 출석 카드도 같이 찌르는 통합 함수
+  const refreshAll = () => {
+    fetchData(selectedYear); // 기존 리스트 새로고침
+    setAttendanceTrigger(prev => prev + 1); // 출석 카드 리렌더링 유도
+  };
+
   // 1. API 호출 함수 (year 파라미터 전달)
   const fetchData = async (year: string) => {
     setLoading(true);
@@ -209,7 +218,7 @@ const LmsDashboard: React.FC = () => {
       </Paper>
 
       <Box sx={{ mb: 3 }}>
-        <AttendanceTodayCard />
+        <AttendanceTodayCard refreshTrigger={attendanceTrigger} />
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 1.5, px: 0.5 }}>
@@ -262,7 +271,12 @@ const LmsDashboard: React.FC = () => {
               </TableRow>
             ) : filteredData.length > 0 ? (
               filteredData.map((item, index) => (
-                <LmsDashboardRow key={`${item.className}-${index}`} row={item} onRefresh={() => fetchData(selectedYear)} />
+                <LmsDashboardRow 
+                  key={`${item.className}-${index}`} 
+                  row={item} 
+                  // ✅ 4. 자식에게 통합 새로고침 함수 전달
+                  onRefresh={refreshAll} 
+                />
               ))
             ) : (
               <TableRow>
@@ -279,7 +293,7 @@ const LmsDashboard: React.FC = () => {
       <CurriculumAddModal 
         open={modalOpen} 
         onClose={() => setModalOpen(false)} 
-        onSuccess={() => fetchData(selectedYear)} // 성공 시 목록 새로고침
+        onSuccess={refreshAll}
       />
     </Box>
   );
