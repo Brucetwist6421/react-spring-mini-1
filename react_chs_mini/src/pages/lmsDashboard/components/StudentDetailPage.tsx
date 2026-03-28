@@ -12,7 +12,6 @@ import {
   AlternateEmail as AlternateEmailIcon,
   Analytics as AnalyticsIcon, AssignmentInd as AssignmentIndIcon, Badge as BadgeIcon,
   Business as BusinessIcon,
-  Chat as ChatIcon,
   CheckCircle as CheckCircleIcon,
   ContactPage as ContactPageIcon,
   Delete as DeleteIcon,
@@ -198,7 +197,7 @@ const StudentDetailPage = ({ onUpdateSuccess, curSeq, curData }: { onUpdateSucce
               <Tab icon={<EventAvailableIcon />} label={<Typography sx={{ fontWeight: 800 }}>출석 현황</Typography>} />
               <Tab icon={<AnalyticsIcon />} label={<Typography sx={{ fontWeight: 800 }}>성적/평가</Typography>} />
               <Tab icon={<AssignmentIndIcon />} label={<Typography sx={{ fontWeight: 800 }}>경력/기록</Typography>} />
-              <Tab icon={<ChatIcon />} label={<Typography sx={{ fontWeight: 800 }}>상담 일지</Typography>} />
+              {/* <Tab icon={<ChatIcon />} label={<Typography sx={{ fontWeight: 800 }}>상담 일지</Typography>} /> */}
             </Tabs>
             <Box sx={{ p: 5 }}>
               {tabValue === 0 && <AttendanceStatusView accountSeq={student.accountSeq} curSeq={curSeq} curData={curData} startDate={student?.startDate} endDate={student?.endDate} />}

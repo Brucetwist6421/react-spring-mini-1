@@ -253,7 +253,7 @@ const LmsStudentManagement = () => {
         onConfirm={handleBatchGraduate}
         title="일괄 수료 확정"
         content="현재 과정의 모든 재학생을 수료 처리하시겠습니까?"
-        subContent="이 작업은 해당 과정(반) 전체 학생의 상태를 'GRADUATED'로 변경하며, 되돌릴 수 없습니다."
+        subContent="이 작업은 해당 과정(반) 전체 학생의 상태를 '수료'로 변경하며, 되돌릴 수 없습니다."
         confirmText="수료 확정"
         confirmColor="primary" // 삭제가 아니므로 primary 사용 가능
       />
