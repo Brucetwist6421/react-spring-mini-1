@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.SubjectMapper">
+
+    <select id="getSubjectsByCurSeq" parameterType="int" resultType="kr.or.ddit.vo.SubjectVO">
+        SELECT 
+            sub_seq,
+            cur_seq,
+            sub_name,
+            start_date,
+            end_date,
+            status,
+            reg_id,
+            reg_date,
+            update_id,
+            update_date,
+            account_seq
+        FROM 
+            lms.tb_subject
+        WHERE 
+            cur_seq = #{curSeq}
+        ORDER BY 
+            start_date ASC
+    </select>
+
+</mapper>
