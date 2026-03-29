@@ -11,6 +11,7 @@ import LmsStudentAddModal from "./LmsStudentAddModal"; // 생성한 모달 임�
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import ListIcon from "@mui/icons-material/List"; // 아이콘 추가
 
 import { useNavigate } from "react-router-dom"; 
 import SettingsIcon from "@mui/icons-material/Settings"; 
@@ -18,6 +19,7 @@ import { Tooltip } from "@mui/material";
 import LmsCurriculumEditModal from "./LmsCurriculumEditModal";
 import api from "../../../api/axiosInstance";
 import LmsDailyLogModal from "./LmsDailyLogModal";
+import LmsSubjectListModal from "./LmsSubjectListModal";
 
 const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh: () => void }) => {
   const [open, setOpen] = useState(false);
@@ -26,6 +28,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false); // 과목 모달 상태 추가
 
   const navigate = useNavigate();
 
@@ -123,7 +126,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         </TableCell>
 
         {/* 4. 이행률 */}
-        <TableCell align="left" width="25%"> 
+        <TableCell align="left" width="20%"> 
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <Typography variant="body1" sx={{ mr: 2, minWidth: 50, fontWeight: "bold", fontSize: "1rem" }}>
               {row.totalAvgRatio}%
@@ -138,8 +141,22 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         </TableCell>
 
         {/* 5. 버튼 그룹 셀 (현황보기 유지 + 과정관리 추가) */}
-        <TableCell align="center" width="35%">
+        <TableCell align="center" width="40%">
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+            {/*  과목 관리 버튼 */}
+            <Button
+              variant="outlined"
+              size="small"
+              color="success" // 다른 버튼과 구분되게 초록색 계열 추천
+              startIcon={<ListIcon />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsSubjectModalOpen(true);
+              }}
+              sx={{ borderRadius: "6px", fontWeight: "bold" }}
+            >
+              과목관리
+            </Button>
              {/* 학생 등록 버튼 */}
             <Button
               variant="outlined"
@@ -282,6 +299,14 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
           onRefresh();
           setIsAddModalOpen(false);
         }}
+      />
+
+      {/*  과목 관리 모달 */}
+      <LmsSubjectListModal 
+        open={isSubjectModalOpen}
+        onClose={() => setIsSubjectModalOpen(false)}
+        curSeq={row.curSeq}
+        curName={row.curName}
       />
 
       {/* 과정 정보 수정 모달 */}
