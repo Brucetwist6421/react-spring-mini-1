@@ -35,4 +35,14 @@ public class SubjectServiceImpl implements SubjectService {
         // subjectVO.setUpdateId("ADMIN"); 
         return subjectMapper.updateSubject(subjectVO);
     }
+
+    @Override
+    @Transactional
+    public int removeSubject(int subSeq, String updateId) {
+        SubjectVO subjectVO = new SubjectVO();
+        subjectVO.setSubSeq(subSeq);
+        subjectVO.setUpdateId(updateId); // 전달받은 ID 세팅
+        
+        return subjectMapper.deleteSubjectStatus(subjectVO);
+    }
 }

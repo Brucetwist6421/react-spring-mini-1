@@ -66,4 +66,14 @@
             sub_seq = #{subSeq}
     </update>
 
+    <update id="deleteSubjectStatus" parameterType="kr.or.ddit.vo.SubjectVO">
+        UPDATE lms.tb_subject
+        SET
+            status = 'D',
+            update_id = #{updateId},
+            update_date = CURRENT_TIMESTAMP
+        WHERE 
+            sub_seq = #{subSeq}
+    </update>
+
 </mapper>

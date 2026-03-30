@@ -11,4 +11,6 @@ public interface SubjectMapper {
     int insertSubject(SubjectVO subjectVO);
 
     int updateSubject(SubjectVO subjectVO);
+
+    int deleteSubjectStatus(SubjectVO subjectVO);
 }

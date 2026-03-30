@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,5 +66,18 @@ public class SubjectController {
         return result > 0 
             ? ResponseEntity.ok("수정 성공") 
             : ResponseEntity.status(HttpStatus.NOT_FOUND).body("수정 대상을 찾을 수 없습니다.");
+    }
+
+    @Operation(summary = "과목 논리 삭제", description = "상태를 'D'로 변경하고 수정자를 기록합니다.")
+    @PatchMapping("/delete/{subSeq}")
+    public ResponseEntity<String> deleteSubject(
+            @PathVariable int subSeq, 
+            @RequestParam String updateId) { // 로컬스토리지에서 넘어온 ID
+        
+        int result = subjectService.removeSubject(subSeq, updateId);
+        
+        return result > 0 
+            ? ResponseEntity.ok("삭제 성공") 
+            : ResponseEntity.status(HttpStatus.NOT_FOUND).body("대상을 찾을 수 없습니다.");
     }
 }
