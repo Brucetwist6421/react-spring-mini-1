@@ -24,9 +24,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional // 등록 작업이므로 트랜잭션 보장
     public int registerSubject(SubjectVO subjectVO) {
         // 기본값 설정 등이 필요할 경우 여기서 처리 (예: 상태가 없으면 '운영중'으로 설정)
-        if(subjectVO.getStatus() == null) {
-            subjectVO.setStatus("운영중");
-        }
+        subjectVO.setStatus("A");
         return subjectMapper.insertSubject(subjectVO);
     }
 

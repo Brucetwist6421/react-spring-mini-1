@@ -80,6 +80,7 @@
         FROM lms.tb_subject s
         LEFT JOIN lms.tb_account a ON s.account_seq = a.account_seq
         WHERE s.cur_seq = #{curSeq}
+          AND s.status != 'D'
         ORDER BY s.sub_name ASC
     </select>
 

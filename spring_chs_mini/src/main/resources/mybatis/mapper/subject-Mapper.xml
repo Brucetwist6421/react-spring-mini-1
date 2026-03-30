@@ -21,6 +21,7 @@
             lms.tb_account A ON S.account_seq = A.account_seq
         WHERE 
             S.cur_seq = #{curSeq}
+          AND S.status != 'D'
         ORDER BY 
             S.start_date ASC
     </select>

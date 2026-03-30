@@ -66,12 +66,13 @@
             COALESCE(ast.graduated_count, 0) AS graduated_count,
             COALESCE(ast.active_and_graduated, 0) AS active_and_graduated,
             -- 분모를 active_and_graduated로 변경하여 수료생 포함 비율 계산
+            -- 'A' 상태인 과목들만의 제출 비율 평균 계산
             ROUND(AVG(
                 CASE 
                     WHEN COALESCE(ast.active_and_graduated, 0) = 0 THEN 0 
                     ELSE (COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_and_graduated, 0) * 100)
                 END
-            ), 1) AS total_avg_ratio,
+            ) FILTER (WHERE s.STATUS = 'A'), 1) AS total_avg_ratio,
             
             COALESCE(
                 JSONB_AGG(
@@ -83,7 +84,7 @@
                                     ELSE ROUND(COALESCE(tst.submitted_count, 0)::NUMERIC / NULLIF(ast.active_and_graduated, 0) * 100, 1)
                                 END
                     ) ORDER BY s.SUB_SEQ
-                ) FILTER (WHERE s.SUB_SEQ IS NOT NULL), 
+                ) FILTER (WHERE s.SUB_SEQ IS NOT NULL AND s.STATUS = 'A'), -- 과목 리스트에서도 'A'만 포함
                 '[]'::JSONB
             ) AS subjects
         FROM lms.TB_CURRICULUM c
@@ -91,6 +92,7 @@
                                 AND t.DEL_YN = 'N' -- 3. 담임 교수 정보 조회 시에도 삭제 여부 확인
         LEFT JOIN AccountStats ast ON c.CUR_SEQ = ast.CUR_SEQ
         LEFT JOIN lms.TB_SUBJECT s ON c.CUR_SEQ = s.CUR_SEQ
+                                   AND s.STATUS = 'A'
         LEFT JOIN TestStats tst ON s.SUB_SEQ = tst.SUB_SEQ
         <where>
             AND c.STATUS = 'A'
@@ -137,6 +139,7 @@
                 sub_name 
             FROM lms.tb_subject 
             WHERE cur_seq = #{curSeq}
+              AND status = 'A'
         ),
         ScoreMatrix AS (
             SELECT 

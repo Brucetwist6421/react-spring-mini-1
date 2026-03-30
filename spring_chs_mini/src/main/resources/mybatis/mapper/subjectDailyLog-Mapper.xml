@@ -7,6 +7,7 @@
         FROM lms.tb_subject_daily_log d
         JOIN lms.tb_subject s ON d.sub_seq = s.sub_seq
         WHERE s.cur_seq = #{curSeq}
+          AND s.status = 'A' -- 과목이 활성 상태인 경우만 조회
         <if test="logDate != null and logDate != ''">
             AND d.log_date = #{logDate}::date
         </if>
