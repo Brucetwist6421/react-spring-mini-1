@@ -34,4 +34,17 @@ public class SubjectController {
         
         return ResponseEntity.ok(subjects);
     }
+
+    @Operation(summary = "새로운 과목 등록", description = "특정 과정에 귀속되는 새로운 과목을 생성합니다.")
+    @PostMapping("/register")
+    public ResponseEntity<Integer> registerSubject(@RequestBody SubjectVO subjectVO) {
+        log.info("Registering new subject: {}", subjectVO.getSubName());
+        
+        // 성공 시 생성된 subSeq를 반환하도록 설계 (RESTful)
+        int result = subjectService.registerSubject(subjectVO);
+        
+        return result > 0 
+            ? ResponseEntity.status(HttpStatus.CREATED).body(subjectVO.getSubSeq()) 
+            : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
 }

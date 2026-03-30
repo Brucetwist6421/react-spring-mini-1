@@ -7,4 +7,6 @@ import kr.or.ddit.vo.SubjectVO;
 @Mapper
 public interface SubjectMapper {
     List<SubjectVO> getSubjectsByCurSeq(Integer curSeq);
+
+    int insertSubject(SubjectVO subjectVO);
 }

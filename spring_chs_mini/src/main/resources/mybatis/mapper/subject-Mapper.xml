@@ -23,4 +23,30 @@
             start_date ASC
     </select>
 
+    <insert id="insertSubject" parameterType="kr.or.ddit.vo.SubjectVO">
+        <selectKey keyProperty="subSeq" resultType="int" order="AFTER">
+            SELECT currval('lms.tb_subject_sub_seq_seq')
+        </selectKey>
+        
+        INSERT INTO lms.tb_subject (
+            cur_seq,
+            sub_name,
+            start_date,
+            end_date,
+            status,
+            reg_id,
+            reg_date,
+            account_seq
+        ) VALUES (
+            #{curSeq},
+            #{subName},
+            #{startDate},
+            #{endDate},
+            #{status},
+            #{regId},
+            CURRENT_TIMESTAMP,
+            #{accountSeq}
+        )
+    </insert>
+
 </mapper>

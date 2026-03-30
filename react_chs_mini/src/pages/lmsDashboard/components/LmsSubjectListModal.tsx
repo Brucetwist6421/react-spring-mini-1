@@ -2,18 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
   Button, Table, TableBody, TableCell, TableHead, TableRow, 
-  Chip, Typography, Box, CircularProgress 
+  Chip, Typography, Box, CircularProgress, TextField 
 } from "@mui/material";
 import api from "../../../api/axiosInstance";
 
-// -----------------------------------------------------------
-// 별도 파일 없이 내부에 직접 선언한 SubjectVO 타입 (DB 구조 반영)
-// -----------------------------------------------------------
 interface SubjectVO {
   subSeq: number;
   curSeq: number;
   subName: string;
-  startDate: string; // LocalDate는 JSON 변환 시 string으로 옵니다.
+  startDate: string;
   endDate: string;
   status: string | null;
   regId: string;
@@ -33,27 +30,63 @@ interface Props {
 const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
   const [subjects, setSubjects] = useState<SubjectVO[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // 과목 추가 입력을 위한 상태
+  const [isAdding, setIsAdding] = useState(false);
+  const [newSubject, setNewSubject] = useState({
+    subName: "",
+    startDate: "",
+    endDate: ""
+  });
 
-  // 1. useCallback으로 감싸서 메모이제이션
-    const fetchSubjects = useCallback(async () => {
+  const fetchSubjects = useCallback(async () => {
     setLoading(true);
     try {
-        const res = await api.get(`/api/subject/curriculum/${curSeq}`);
-        setSubjects(res.data);
+      const res = await api.get(`/api/subject/curriculum/${curSeq}`);
+      setSubjects(res.data);
     } catch (err) {
-        console.error("과목 조회 실패:", err);
+      console.error("과목 조회 실패:", err);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    }, [curSeq]); // curSeq가 바뀔 때만 함수가 새로 생성됨
+  }, [curSeq]);
 
-    // 2. 이제 의존성 배열에 안전하게 추가 가능
-    useEffect(() => {
+  useEffect(() => {
     if (open) {
-        fetchSubjects();
+      fetchSubjects();
+      setIsAdding(false); // 모달 열 때 입력창 초기화
     }
-    }, [open, fetchSubjects]);
+  }, [open, fetchSubjects]);
 
+  // -----------------------------------------------------------
+  // 과목 등록 실행 함수 (API 연동)
+  // -----------------------------------------------------------
+  const handleAddSubject = async () => {
+    if (!newSubject.subName || !newSubject.startDate || !newSubject.endDate) {
+      alert("모든 필드를 입력해주세요.");
+      return;
+    }
+
+    try {
+      const payload = {
+        ...newSubject,
+        curSeq: curSeq,
+        regId: "ADMIN", // 실제 구현 시 로그인한 사용자 ID 권장
+        status: "운영중"
+      };
+
+      await api.post("/api/subject/register", payload);
+      alert("새 과목이 등록되었습니다.");
+      
+      // 입력창 초기화 및 목록 새로고침
+      setNewSubject({ subName: "", startDate: "", endDate: "" });
+      setIsAdding(false);
+      fetchSubjects(); 
+    } catch (err) {
+      console.error("과목 등록 실패:", err);
+      alert("등록 중 오류가 발생했습니다.");
+    }
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -67,60 +100,83 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
             <CircularProgress size={30} />
-            <Typography sx={{ ml: 2, color: 'text.secondary' }}>과목 데이터를 불러오는 중...</Typography>
           </Box>
-        ) : subjects.length > 0 ? (
+        ) : (
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '40%' }}>과목명</TableCell>
+                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9" }}>과목명</TableCell>
                 <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9" }} align="center">학습 기간</TableCell>
                 <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9" }} align="center">상태</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {subjects.map((sub) => (
-                <TableRow key={sub.subSeq} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCell sx={{ fontWeight: 500, color: "#334155" }}>
-                    {sub.subName}
-                  </TableCell>
-                  <TableCell align="center" sx={{ color: "#64748b" }}>
-                    {sub.startDate} ~ {sub.endDate}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Chip 
-                      label={sub.status || "운영중"} 
-                      size="small" 
-                      color={sub.status === "종료" ? "default" : "primary"}
-                      variant={sub.status === "종료" ? "outlined" : "filled"}
-                      sx={{ fontWeight: 'bold', fontSize: '0.75rem' }}
+              {/* 과목 추가 입력 행 (isAdding이 true일 때만 표시) */}
+              {isAdding && (
+                <TableRow sx={{ bgcolor: "#fffbeb" }}>
+                  <TableCell>
+                    <TextField 
+                      size="small" fullWidth placeholder="과목명 입력"
+                      value={newSubject.subName}
+                      onChange={(e) => setNewSubject({...newSubject, subName: e.target.value})}
                     />
                   </TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <TextField 
+                        type="date" size="small"
+                        value={newSubject.startDate}
+                        onChange={(e) => setNewSubject({...newSubject, startDate: e.target.value})}
+                      />
+                      ~
+                      <TextField 
+                        type="date" size="small"
+                        value={newSubject.endDate}
+                        onChange={(e) => setNewSubject({...newSubject, endDate: e.target.value})}
+                      />
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button variant="contained" size="small" onClick={handleAddSubject}>저장</Button>
+                    <Button size="small" color="inherit" onClick={() => setIsAdding(false)}>취소</Button>
+                  </TableCell>
                 </TableRow>
-              ))}
+              )}
+
+              {subjects.length > 0 ? (
+                subjects.map((sub) => (
+                  <TableRow key={sub.subSeq} hover>
+                    <TableCell sx={{ fontWeight: 500 }}>{sub.subName}</TableCell>
+                    <TableCell align="center" sx={{ color: "#64748b" }}>
+                      {sub.startDate} ~ {sub.endDate}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip label={sub.status || "운영중"} size="small" color="primary" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : !isAdding && (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 5 }}>등록된 과목이 없습니다.</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
-        ) : (
-          <Box sx={{ py: 8, textAlign: 'center' }}>
-            <Typography sx={{ color: 'text.secondary', mb: 1 }}>등록된 과목 정보가 없습니다.</Typography>
-            <Typography variant="caption" color="text.disabled">행정실에 교육과정 편성을 확인해주세요.</Typography>
-          </Box>
         )}
       </DialogContent>
 
       <DialogActions sx={{ p: 2, borderTop: '1px solid #e2e8f0', bgcolor: "#f8fafc" }}>
-        <Button onClick={onClose} variant="outlined" color="inherit" sx={{ fontWeight: 'bold' }}>
-          닫기
-        </Button>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<span>+</span>}
-          onClick={() => alert('과목 추가/편집 기능은 다음 업데이트에 포함될 예정입니다.')}
-          sx={{ fontWeight: 'bold', boxShadow: 'none' }}
-        >
-          과목 추가
-        </Button>
+        <Button onClick={onClose} variant="outlined" color="inherit">닫기</Button>
+        {!isAdding && (
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={() => setIsAdding(true)}
+            sx={{ fontWeight: 'bold' }}
+          >
+            과목 추가
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
