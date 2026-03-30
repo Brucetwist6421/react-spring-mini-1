@@ -51,4 +51,18 @@
         )
     </insert>
 
+    <update id="updateSubject" parameterType="kr.or.ddit.vo.SubjectVO">
+        UPDATE lms.tb_subject
+        SET
+            sub_name = #{subName},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            status = #{status},
+            account_seq = #{accountSeq, jdbcType=INTEGER},
+            update_id = #{updateId},
+            update_date = CURRENT_TIMESTAMP
+        WHERE 
+            sub_seq = #{subSeq}
+    </update>
+
 </mapper>

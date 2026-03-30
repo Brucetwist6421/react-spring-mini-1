@@ -29,4 +29,12 @@ public class SubjectServiceImpl implements SubjectService {
         }
         return subjectMapper.insertSubject(subjectVO);
     }
+
+    @Override
+    @Transactional
+    public int modifySubject(SubjectVO subjectVO) {
+        // 실제 운영 환경이라면 세션에서 로그인한 사용자 ID를 가져와 세팅하는 것이 좋습니다.
+        // subjectVO.setUpdateId("ADMIN"); 
+        return subjectMapper.updateSubject(subjectVO);
+    }
 }

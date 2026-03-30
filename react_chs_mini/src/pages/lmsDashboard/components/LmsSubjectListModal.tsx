@@ -1,13 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
-import { 
-  Dialog, DialogTitle, DialogContent, DialogActions, 
-  Button, Table, TableBody, TableCell, TableHead, TableRow, 
-  Chip, Typography, Box, CircularProgress, TextField,
-  Select, MenuItem, FormControl
+import EditIcon from "@mui/icons-material/Edit"; // 수정 아이콘 추가 시 필요
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  MenuItem,
+  Select,
+  Table, TableBody, TableCell, TableHead, TableRow,
+  TextField
 } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 
-// 과목 정보 타입
 interface SubjectVO {
   subSeq: number;
   curSeq: number;
@@ -20,10 +28,9 @@ interface SubjectVO {
   updateId: string | null;
   updateDate: string | null;
   accountSeq: number | null;
-  teacherName?: string; // 교사 이름 (JOIN 결과로 추가)
+  teacherName?: string; 
 }
 
-// 교사 정보 타입 (AccountController 대응)
 interface AccountVO {
   accountSeq: number;
   accountId: string;
@@ -39,83 +46,101 @@ interface Props {
 
 const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
   const [subjects, setSubjects] = useState<SubjectVO[]>([]);
-  const [teachers, setTeachers] = useState<AccountVO[]>([]); // 교사 목록 상태
+  const [teachers, setTeachers] = useState<AccountVO[]>([]);
   const [loading, setLoading] = useState(false);
   
+  // 상태 관리: 등록(isAdding), 수정(editingSeq)
   const [isAdding, setIsAdding] = useState(false);
-  const [newSubject, setNewSubject] = useState({
+  const [editingSeq, setEditingSeq] = useState<number | null>(null);
+  
+  // 입력 폼 상태 (등록/수정 공용)
+  const [formValues, setFormValues] = useState({
     subName: "",
     startDate: "",
     endDate: "",
-    accountSeq: "" // 초기값은 빈 문자열
+    accountSeq: "" as string | number,
+    status: "운영중"
   });
 
-  // 1. 과목 목록 조회
   const fetchSubjects = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get(`/api/subject/curriculum/${curSeq}`);
       setSubjects(res.data);
-    } catch (err) {
-      console.error("과목 조회 실패:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   }, [curSeq]);
 
-  // 2. 교사 목록 조회
   const fetchTeachers = useCallback(async () => {
     try {
       const res = await api.get("/api/account/teachers");
       setTeachers(res.data);
-    } catch (err) {
-      console.error("교사 목록 로드 실패:", err);
-    }
+    } catch (err) { console.error(err); }
   }, []);
 
   useEffect(() => {
     if (open) {
       fetchSubjects();
       fetchTeachers();
-      setIsAdding(false);
+      cancelAction();
     }
   }, [open, fetchSubjects, fetchTeachers]);
 
-  // 3. 과목 등록 처리
-  const handleAddSubject = async () => {
-    if (!newSubject.subName || !newSubject.startDate || !newSubject.endDate) {
+  // 취소 처리 (입력폼 초기화)
+  const cancelAction = () => {
+    setIsAdding(false);
+    setEditingSeq(null);
+    setFormValues({ subName: "", startDate: "", endDate: "", accountSeq: "", status: "운영중" });
+  };
+
+  // 수정 모드 진입
+  const startEdit = (sub: SubjectVO) => {
+    setIsAdding(false);
+    setEditingSeq(sub.subSeq);
+    setFormValues({
+      subName: sub.subName,
+      startDate: sub.startDate,
+      endDate: sub.endDate,
+      accountSeq: sub.accountSeq || "",
+      status: sub.status || "운영중"
+    });
+  };
+
+  // 등록 및 수정 실행
+  const handleSave = async () => {
+    if (!formValues.subName || !formValues.startDate || !formValues.endDate) {
       alert("모든 필드를 입력해주세요.");
       return;
     }
 
-    try {
-      const payload = {
-        ...newSubject,
-        curSeq: curSeq,
-        regId: "ADMIN", 
-        status: "운영중",
-        // accountSeq가 빈 문자열이면 null로, 값이 있으면 숫자로 변환
-        accountSeq: newSubject.accountSeq === "" ? null : Number(newSubject.accountSeq)
-      };
+    const payload = {
+      ...formValues,
+      curSeq: curSeq,
+      accountSeq: formValues.accountSeq === "" ? null : Number(formValues.accountSeq)
+    };
 
-      await api.post("/api/subject/register", payload);
-      alert("새 과목이 등록되었습니다.");
-      
-      setNewSubject({ subName: "", startDate: "", endDate: "", accountSeq: "" });
-      setIsAdding(false);
-      fetchSubjects(); 
+    try {
+      if (editingSeq) {
+        // 수정 API 호출 (PUT)
+        await api.put("/api/subject/update", { ...payload, subSeq: editingSeq, updateId: "ADMIN" });
+        alert("과목 정보가 수정되었습니다.");
+      } else {
+        // 등록 API 호출 (POST)
+        await api.post("/api/subject/register", { ...payload, regId: "ADMIN" });
+        alert("새 과목이 등록되었습니다.");
+      }
+      fetchSubjects();
+      cancelAction();
     } catch (err) {
-      console.error("과목 등록 실패:", err);
-      alert("등록 중 오류가 발생했습니다.");
+      console.error(err);
+      alert("처리 중 오류가 발생했습니다.");
     }
   };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle sx={{ fontWeight: "bold", bgcolor: "#f8fafc", borderBottom: '1px solid #e2e8f0' }}>
-        <Typography variant="h6" component="span" sx={{ fontWeight: "bold", color: "#1e293b" }}>
-          [{curName}] 과정 커리큘럼 상세
-        </Typography>
+        [{curName}] 과정 커리큘럼 상세
       </DialogTitle>
       
       <DialogContent sx={{ p: 0 }}>
@@ -128,98 +153,83 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
             <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '25%' }}>과목명</TableCell>
-                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '20%' }} align="center">담당 교수</TableCell>
-                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '35%' }} align="center">학습 기간</TableCell>
-                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '20%' }} align="center">상태/관리</TableCell>
+                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '20%' }} align="center">담당 교수명</TableCell>
+                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '30%' }} align="center">학습 기간</TableCell>
+                <TableCell sx={{ fontWeight: "bold", bgcolor: "#f1f5f9", width: '25%' }} align="center">관리</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
+              {/* 등록 행 */}
               {isAdding && (
                 <TableRow sx={{ bgcolor: "#f0f9ff" }}>
-                  <TableCell>
-                    <TextField 
-                      size="small" fullWidth placeholder="과목명"
-                      value={newSubject.subName}
-                      onChange={(e) => setNewSubject({...newSubject, subName: e.target.value})}
-                    />
-                  </TableCell>
+                  <TableCell><TextField size="small" fullWidth value={formValues.subName} onChange={(e) => setFormValues({...formValues, subName: e.target.value})} /></TableCell>
                   <TableCell align="center">
                     <FormControl size="small" fullWidth>
-                      <Select
-                        value={newSubject.accountSeq}
-                        onChange={(e) => setNewSubject({...newSubject, accountSeq: e.target.value as string})}
-                        displayEmpty
-                      >
+                      <Select value={formValues.accountSeq} onChange={(e) => setFormValues({...formValues, accountSeq: e.target.value})} displayEmpty>
                         <MenuItem value=""><em>미지정</em></MenuItem>
-                        {teachers.map((t) => (
-                          <MenuItem key={t.accountSeq} value={t.accountSeq}>
-                            {t.accountName} ({t.accountId})
-                          </MenuItem>
-                        ))}
+                        {teachers.map((t) => <MenuItem key={t.accountSeq} value={t.accountSeq}>{t.accountName}</MenuItem>)}
                       </Select>
                     </FormControl>
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <TextField 
-                        type="date" size="small"
-                        value={newSubject.startDate}
-                        onChange={(e) => setNewSubject({...newSubject, startDate: e.target.value})}
-                      />
+                      <TextField type="date" size="small" value={formValues.startDate} onChange={(e) => setFormValues({...formValues, startDate: e.target.value})} />
                       ~
-                      <TextField 
-                        type="date" size="small"
-                        value={newSubject.endDate}
-                        onChange={(e) => setNewSubject({...newSubject, endDate: e.target.value})}
-                      />
+                      <TextField type="date" size="small" value={formValues.endDate} onChange={(e) => setFormValues({...formValues, endDate: e.target.value})} />
                     </Box>
                   </TableCell>
                   <TableCell align="center">
-                    <Button variant="contained" size="small" onClick={handleAddSubject} sx={{ mr: 1 }}>저장</Button>
-                    <Button variant="outlined" size="small" color="inherit" onClick={() => setIsAdding(false)}>취소</Button>
+                    <Button variant="contained" size="small" onClick={handleSave} sx={{ mr: 1 }}>저장</Button>
+                    <Button variant="outlined" size="small" onClick={cancelAction}>취 cotton</Button>
                   </TableCell>
                 </TableRow>
               )}
 
-              {subjects.length > 0 ? (
-                subjects.map((sub) => (
-                  <TableRow key={sub.subSeq} hover>
-                    <TableCell sx={{ fontWeight: 500 }}>{sub.subName}</TableCell>
+              {subjects.map((sub) => (
+                editingSeq === sub.subSeq ? (
+                  /* 수정 행 */
+                  <TableRow key={sub.subSeq} sx={{ bgcolor: "#fffbeb" }}>
+                    <TableCell><TextField size="small" fullWidth value={formValues.subName} onChange={(e) => setFormValues({...formValues, subName: e.target.value})} /></TableCell>
                     <TableCell align="center">
-                      <Typography variant="body2">
-                        {/* 현재는 Seq만 표시, 추후 JOIN 쿼리 적용 시 이름 표시 가능 */}
-                        {sub.accountSeq ? `교수명: ${sub.teacherName}` : "-"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center" sx={{ color: "#64748b" }}>
-                      {sub.startDate} ~ {sub.endDate}
+                      <FormControl size="small" fullWidth>
+                        <Select value={formValues.accountSeq} onChange={(e) => setFormValues({...formValues, accountSeq: e.target.value})} displayEmpty>
+                          <MenuItem value=""><em>미지정</em></MenuItem>
+                          {teachers.map((t) => <MenuItem key={t.accountSeq} value={t.accountSeq}>{t.accountName}</MenuItem>)}
+                        </Select>
+                      </FormControl>
                     </TableCell>
                     <TableCell align="center">
-                      <Chip label={sub.status || "운영중"} size="small" color="primary" variant="outlined" />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TextField type="date" size="small" value={formValues.startDate} onChange={(e) => setFormValues({...formValues, startDate: e.target.value})} />
+                        <TextField type="date" size="small" value={formValues.endDate} onChange={(e) => setFormValues({...formValues, endDate: e.target.value})} />
+                      </Box>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button variant="contained" color="success" size="small" onClick={handleSave} sx={{ mr: 1 }}>수정완료</Button>
+                      <Button variant="outlined" size="small" onClick={cancelAction}>취소</Button>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : !isAdding && (
-                <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 5 }}>등록된 과목이 없습니다.</TableCell>
-                </TableRow>
-              )}
+                ) : (
+                  /* 일반 조회 행 */
+                  <TableRow key={sub.subSeq} hover>
+                    <TableCell sx={{ fontWeight: 500 }}>{sub.subName}</TableCell>
+                    <TableCell align="center">{sub.teacherName || "-"}</TableCell>
+                    <TableCell align="center" sx={{ color: "#64748b" }}>{sub.startDate} ~ {sub.endDate}</TableCell>
+                    <TableCell align="center">
+                      <Button size="small" variant="text" startIcon={<EditIcon />} onClick={() => startEdit(sub)}>수정</Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              ))}
             </TableBody>
           </Table>
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 2, borderTop: '1px solid #e2e8f0', bgcolor: "#f8fafc" }}>
+      <DialogActions sx={{ p: 2, bgcolor: "#f8fafc" }}>
         <Button onClick={onClose} variant="outlined" color="inherit">닫기</Button>
-        {!isAdding && (
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={() => setIsAdding(true)}
-            sx={{ fontWeight: 'bold' }}
-          >
-            과목 추가
-          </Button>
+        {!isAdding && !editingSeq && (
+          <Button variant="contained" onClick={() => setIsAdding(true)}>과목 추가</Button>
         )}
       </DialogActions>
     </Dialog>

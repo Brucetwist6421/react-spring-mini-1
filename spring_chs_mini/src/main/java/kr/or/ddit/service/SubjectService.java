@@ -7,4 +7,6 @@ public interface SubjectService {
     List<SubjectVO> getSubjectsByCurSeq(Integer curSeq);
 
     int registerSubject(SubjectVO subjectVO);
+
+    int modifySubject(SubjectVO subjectVO);
 }

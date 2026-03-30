@@ -9,4 +9,6 @@ public interface SubjectMapper {
     List<SubjectVO> getSubjectsByCurSeq(Integer curSeq);
 
     int insertSubject(SubjectVO subjectVO);
+
+    int updateSubject(SubjectVO subjectVO);
 }

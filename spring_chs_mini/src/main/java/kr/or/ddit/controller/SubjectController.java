@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,5 +51,18 @@ public class SubjectController {
         return result > 0 
             ? ResponseEntity.status(HttpStatus.CREATED).body(subjectVO.getSubSeq()) 
             : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @Operation(summary = "과목 정보 수정", description = "기존 과목의 이름, 기간, 상태, 담당 교수를 수정합니다.")
+    @PutMapping("/update")
+    public ResponseEntity<String> updateSubject(@RequestBody SubjectVO subjectVO) {
+        log.info("Updating subject: {}", subjectVO.getSubSeq());
+        
+        // 수정 성공 시 1(행의 수)이 반환됩니다.
+        int result = subjectService.modifySubject(subjectVO);
+        
+        return result > 0 
+            ? ResponseEntity.ok("수정 성공") 
+            : ResponseEntity.status(HttpStatus.NOT_FOUND).body("수정 대상을 찾을 수 없습니다.");
     }
 }
