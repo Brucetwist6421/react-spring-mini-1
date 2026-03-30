@@ -304,7 +304,10 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
       {/*  과목 관리 모달 */}
       <LmsSubjectListModal 
         open={isSubjectModalOpen}
-        onClose={() => setIsSubjectModalOpen(false)}
+        onClose={() => {
+          setIsSubjectModalOpen(false);
+          onRefresh(); // 모달이 닫힐 때 최신 데이터를 상위에서 다시 불러옴
+        }}
         curSeq={row.curSeq}
         curName={row.curName}
       />

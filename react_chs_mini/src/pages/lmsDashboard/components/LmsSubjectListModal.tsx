@@ -1,17 +1,17 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit"; // 수정 아이콘 추가 시 필요
 import {
   Box,
   Button,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
   MenuItem,
   Select,
   Table, TableBody, TableCell, TableHead, TableRow,
-  TextField, IconButton
+  TextField,
+  Typography
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
@@ -190,26 +190,65 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {/* 등록 행 생략 (기존과 동일하되 handleSave에서 accId 사용) */}
+              
+              {/* ✅ [수정포인트 1] 과목 추가 행: 테이블 컬럼 구조를 그대로 유지해야 합니다 */}
               {isAdding && (
                 <TableRow sx={{ bgcolor: "#f0f9ff" }}>
-                   {/* ... 기존 등록 폼 유지 ... */}
-                   <TableCell colSpan={4}>
-                     <Box sx={{ display: 'flex', gap: 1 }}>
-                        <TextField size="small" placeholder="과목명" value={formValues.subName} onChange={(e) => setFormValues({...formValues, subName: e.target.value})} />
-                        {/* 교수 선택 Select 등 기존 UI 유지 */}
-                        <Button variant="contained" onClick={handleSave}>저장</Button>
-                        <Button onClick={cancelAction}>취소</Button>
-                     </Box>
-                   </TableCell>
+                  <TableCell>
+                    <TextField 
+                      size="small" 
+                      fullWidth 
+                      placeholder="과목명 입력"
+                      value={formValues.subName} 
+                      onChange={(e) => setFormValues({...formValues, subName: e.target.value})} 
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <FormControl size="small" fullWidth>
+                      <Select 
+                        value={formValues.accountSeq} 
+                        onChange={(e) => setFormValues({...formValues, accountSeq: e.target.value})} 
+                        displayEmpty
+                      >
+                        <MenuItem value=""><em>미지정</em></MenuItem>
+                        {teachers.map((t) => (
+                          <MenuItem key={t.accountSeq} value={t.accountSeq}>{t.accountName}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <TextField 
+                        type="date" 
+                        size="small" 
+                        value={formValues.startDate} 
+                        onChange={(e) => setFormValues({...formValues, startDate: e.target.value})} 
+                      />
+                      <Typography variant="body2">~</Typography>
+                      <TextField 
+                        type="date" 
+                        size="small" 
+                        value={formValues.endDate} 
+                        onChange={(e) => setFormValues({...formValues, endDate: e.target.value})} 
+                      />
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button variant="contained" size="small" onClick={handleSave} sx={{ mr: 1 }}>저장</Button>
+                    <Button variant="outlined" size="small" onClick={cancelAction}>취소</Button>
+                  </TableCell>
                 </TableRow>
               )}
 
+              {/* 과목 목록 출력 (기존과 동일) */}
               {subjects.map((sub) => (
                 editingSeq === sub.subSeq ? (
-                  /* 수정 행 UI */
+                  /* 수정 모드 행 */
                   <TableRow key={sub.subSeq} sx={{ bgcolor: "#fffbeb" }}>
-                    <TableCell><TextField size="small" fullWidth value={formValues.subName} onChange={(e) => setFormValues({...formValues, subName: e.target.value})} /></TableCell>
+                    <TableCell>
+                      <TextField size="small" fullWidth value={formValues.subName} onChange={(e) => setFormValues({...formValues, subName: e.target.value})} />
+                    </TableCell>
                     <TableCell align="center">
                       <FormControl size="small" fullWidth>
                         <Select value={formValues.accountSeq} onChange={(e) => setFormValues({...formValues, accountSeq: e.target.value})} displayEmpty>
@@ -230,14 +269,14 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  /* 일반 조회 행 */
+                  /* 조회 모드 행 */
                   <TableRow key={sub.subSeq} hover>
                     <TableCell sx={{ fontWeight: 500 }}>{sub.subName}</TableCell>
                     <TableCell align="center">{sub.teacherName || "-"}</TableCell>
                     <TableCell align="center" sx={{ color: "#64748b" }}>{sub.startDate} ~ {sub.endDate}</TableCell>
                     <TableCell align="center">
-                      <IconButton size="small" color="primary" onClick={() => startEdit(sub)}><EditIcon fontSize="small" /></IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(sub.subSeq)}><DeleteIcon fontSize="small" /></IconButton>
+                      <Button size="small" variant="outlined" onClick={() => startEdit(sub)} sx={{ mr: 1 }}>수정</Button>
+                      <Button size="small" variant="outlined" color="error" onClick={() => handleDelete(sub.subSeq)}>삭제</Button>
                     </TableCell>
                   </TableRow>
                 )
@@ -246,7 +285,12 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
           </Table>
         )}
       </DialogContent>
-      {/* ... DialogActions 생략 ... */}
+      <DialogActions sx={{ p: 2, bgcolor: "#f8fafc" }}>
+        <Button onClick={onClose} variant="outlined" color="inherit">닫기</Button>
+        {!isAdding && !editingSeq && (
+          <Button variant="contained" onClick={() => setIsAdding(true)}>과목 추가</Button>
+        )}
+      </DialogActions>
     </Dialog>
   );
 };
