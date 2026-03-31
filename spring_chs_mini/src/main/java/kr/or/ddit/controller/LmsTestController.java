@@ -66,4 +66,23 @@ public class LmsTestController {
             ? ResponseEntity.ok("시험 정보가 수정되었습니다.") 
             : ResponseEntity.status(HttpStatus.NOT_FOUND).body("수정 대상을 찾을 수 없습니다.");
     }
+
+    @Operation(summary = "시험 삭제 (상태 변경)", description = "시험의 상태(status)를 'D'로 변경하여 논리적으로 삭제 처리합니다.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "삭제 성공"),
+        @ApiResponse(responseCode = "404", description = "삭제할 시험 대상을 찾을 수 없음")
+    })
+    @PatchMapping("/delete/{testSeq}")
+    public ResponseEntity<String> deleteTest(
+            @Parameter(description = "시험 일련번호", example = "1") @PathVariable int testSeq,
+            @Parameter(description = "수정자 ID", example = "admin") @RequestParam String updateId) {
+        
+        log.info("Soft deleting test: {} by {}", testSeq, updateId);
+        
+        int result = testService.removeTest(testSeq, updateId);
+        
+        return result > 0 
+            ? ResponseEntity.ok("시험이 삭제 처리되었습니다.") 
+            : ResponseEntity.status(HttpStatus.NOT_FOUND).body("삭제 대상을 찾을 수 없습니다.");
+    }
 }

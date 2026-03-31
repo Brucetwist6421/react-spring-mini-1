@@ -8,5 +8,6 @@ import kr.or.ddit.vo.TestVO;
 public interface LmsTestMapper {
     int insertTest(TestVO testVO);
     TestVO selectTestBySubSeq(int subSeq);
-    int updateTest(TestVO testVO); // 반환 타입 int 확인
+    int updateTest(TestVO testVO); 
+    int updateTestStatus(TestVO testVO);
 }

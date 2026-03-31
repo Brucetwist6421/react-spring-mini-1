@@ -16,11 +16,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableRow,
   TextField,
   Typography,
-  Stack
+  Stack,
+  IconButton
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import api from "../../../api/axiosInstance";
 import LmsTestFormModal from './LmsTestFormModal';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 
 interface SubjectVO {
   subSeq: number;
@@ -175,6 +177,22 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
     if (refresh) fetchSubjects(); // 시험 등록 후 목록(시험정보 유무) 갱신
   };
 
+  // 시험 정보 삭제(Soft Delete) 함수
+  const handleDeleteTest = async (testSeq: number, subName: string) => {
+    if (!window.confirm(`[${subName}]의 시험 설정을 삭제하시겠습니까?\n삭제된 시험 정보는 복구할 수 없습니다.`)) return;
+    
+    const currentAccId = getUpdateId();
+    try {
+      // 이전에 가이드드린 PATCH /api/test/delete/{testSeq} API 호출
+      await api.patch(`/api/test/delete/${testSeq}?updateId=${currentAccId}`);
+      alert("시험 정보가 삭제되었습니다.");
+      fetchSubjects(); // 목록 새로고침 (시험정보 컬럼 갱신)
+    } catch (err) {
+      console.error(err);
+      alert("시험 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <Dialog 
       open={open} 
@@ -286,28 +304,42 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {sub.testSeq ? (
-                        <Button 
-                          variant="contained" 
-                          color="info" 
-                          size="small"
-                          startIcon={<AssignmentIcon />}
-                          onClick={() => handleTestClick(sub)}
-                          sx={{ fontWeight: 'bold', minWidth: '100px' }}
-                        >
-                          시험관리
-                        </Button>
-                      ) : (
-                        <Button 
-                          variant="outlined" 
-                          size="small"
-                          startIcon={<AddCircleOutlineIcon />}
-                          onClick={() => handleTestClick(sub)}
-                          sx={{ color: '#64748b', borderColor: '#cbd5e1', minWidth: '100px' }}
-                        >
-                          시험등록
-                        </Button>
-                      )}
+                      <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                        {sub.testSeq ? (
+                          <>
+                            <Button 
+                              variant="contained" 
+                              color="info" 
+                              size="small"
+                              startIcon={<AssignmentIcon />}
+                              onClick={() => handleTestClick(sub)}
+                              sx={{ fontWeight: 'bold', minWidth: '100px' }}
+                            >
+                              시험관리
+                            </Button>
+                            {/* [추가] 시험 삭제 버튼 */}
+                            <IconButton 
+                              size="small" 
+                              color="error" 
+                              title="시험 정보 삭제"
+                              onClick={() => handleDeleteTest(sub.testSeq!, sub.subName)}
+                              sx={{ border: '1px solid', borderColor: 'error.light' }}
+                            >
+                              <DeleteSweepIcon fontSize="small" />
+                            </IconButton>
+                          </>
+                        ) : (
+                          <Button 
+                            variant="outlined" 
+                            size="small"
+                            startIcon={<AddCircleOutlineIcon />}
+                            onClick={() => handleTestClick(sub)}
+                            sx={{ color: '#64748b', borderColor: '#cbd5e1', minWidth: '100px' }}
+                          >
+                            시험등록
+                          </Button>
+                        )}
+                      </Stack>
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" spacing={1} justifyContent="center">

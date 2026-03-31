@@ -35,4 +35,16 @@ public class LmsTestServiceImpl implements LmsTestService {
         testVO.setUpdateDate(LocalDateTime.now());
         return testMapper.updateTest(testVO); // Mapper가 반환하는 int(수정된 행의 수)를 그대로 반환
     }
+
+    @Override
+    @Transactional
+    public int removeTest(int testSeq, String updateId) {
+        TestVO testVO = new TestVO();
+        testVO.setTestSeq(testSeq);
+        testVO.setUpdateId(updateId);
+        testVO.setStatus("D"); // 삭제 상태값 설정
+        testVO.setUpdateDate(LocalDateTime.now());
+        
+        return testMapper.updateTestStatus(testVO);
+    }
 }

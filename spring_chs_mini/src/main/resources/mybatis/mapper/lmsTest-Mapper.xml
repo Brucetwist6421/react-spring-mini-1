@@ -46,4 +46,14 @@
             update_date = CURRENT_TIMESTAMP
         WHERE test_seq = #{testSeq}
     </update>
+
+    <update id="updateTestStatus" parameterType="TestVO">
+        UPDATE lms.tb_test
+        SET 
+            status = #{status},
+            update_id = #{updateId},
+            update_date = CURRENT_TIMESTAMP
+        WHERE test_seq = #{testSeq}
+        AND status != 'D' 
+    </update>
 </mapper>
