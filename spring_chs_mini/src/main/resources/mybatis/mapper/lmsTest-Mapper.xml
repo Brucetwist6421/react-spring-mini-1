@@ -78,24 +78,26 @@
         ORDER BY s.sub_seq ASC, t.reg_date DESC
     </select>
 
-    <insert id="upsertTestResult" parameterType="TestScoreVO">
+    <insert id="upsertTestResult" parameterType="kr.or.ddit.vo.TestScoreVO">
         INSERT INTO lms.tb_test_result (
             account_seq,
             test_seq,
             total_score,
             status,
+            reg_id,
             reg_date
         ) VALUES (
             #{accountSeq},
             #{testSeq},
             #{totalScore},
             #{resultStatus},
+            #{regId},
             CURRENT_TIMESTAMP
         )
         ON CONFLICT (account_seq, test_seq) 
         DO UPDATE SET 
             total_score = EXCLUDED.total_score,
             status = EXCLUDED.status,
-            reg_date = CURRENT_TIMESTAMP
+            update_id = #{updateId},      update_date = CURRENT_TIMESTAMP 
     </insert>
 </mapper>
