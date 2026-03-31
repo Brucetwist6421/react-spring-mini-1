@@ -11,5 +11,6 @@ public interface LmsTestService {
     int updateTest(TestVO testVO);
     int removeTest(int testSeq, String updateId);
     List<TestScoreVO> getTestScoresByStudent(int accountSeq, int curSeq);
+    int saveStudentScore(TestScoreVO scoreVO);
 
 }

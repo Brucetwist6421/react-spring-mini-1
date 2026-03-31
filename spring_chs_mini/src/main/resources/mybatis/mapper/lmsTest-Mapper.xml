@@ -77,4 +77,25 @@
         AND t.status != 'D'  -- 시험이 삭제되지 않은 것
         ORDER BY s.sub_seq ASC, t.reg_date DESC
     </select>
+
+    <insert id="upsertTestResult" parameterType="TestScoreVO">
+        INSERT INTO lms.tb_test_result (
+            account_seq,
+            test_seq,
+            total_score,
+            status,
+            reg_date
+        ) VALUES (
+            #{accountSeq},
+            #{testSeq},
+            #{totalScore},
+            #{resultStatus},
+            CURRENT_TIMESTAMP
+        )
+        ON CONFLICT (account_seq, test_seq) 
+        DO UPDATE SET 
+            total_score = EXCLUDED.total_score,
+            status = EXCLUDED.status,
+            reg_date = CURRENT_TIMESTAMP
+    </insert>
 </mapper>

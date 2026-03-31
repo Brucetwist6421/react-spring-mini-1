@@ -99,4 +99,19 @@ public class LmsTestController {
         List<TestScoreVO> list = testService.getTestScoresByStudent(accountSeq, curSeq);
         return ResponseEntity.ok(list);
     }
+
+    @Operation(summary = "시험 성적 저장/수정", description = "학생의 시험 점수를 등록하거나 기존 점수를 수정합니다.")
+    @PostMapping("/score/save")
+    public ResponseEntity<String> saveTestScore(@RequestBody TestScoreVO scoreVO) {
+        // resultStatus가 없으면 기본값 'A'로 설정
+        if (scoreVO.getResultStatus() == null) {
+            scoreVO.setResultStatus("A");
+        }
+        
+        int result = testService.saveStudentScore(scoreVO);
+        
+        return result > 0 
+            ? ResponseEntity.ok("성적이 성공적으로 저장되었습니다.") 
+            : ResponseEntity.internalServerError().body("성적 저장에 실패했습니다.");
+    }
 }

@@ -21,4 +21,9 @@ public interface LmsTestMapper {
         @Param("accountSeq") int accountSeq, 
         @Param("curSeq") int curSeq
     );
+
+    /**
+     * 시험 결과 Upsert (Insert or Update)
+     */
+    int upsertTestResult(TestScoreVO scoreVO);
 }

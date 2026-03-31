@@ -54,4 +54,14 @@ public class LmsTestServiceImpl implements LmsTestService {
     public List<TestScoreVO> getTestScoresByStudent(int accountSeq, int curSeq) {
         return testMapper.selectTestScoresByStudent(accountSeq, curSeq);
     }
+    
+    @Override
+    @Transactional
+    public int saveStudentScore(TestScoreVO scoreVO) {
+        // 비즈니스 로직: 점수가 0~100 사이인지 검증 등 추가 가능
+        if (scoreVO.getTotalScore() != null && (scoreVO.getTotalScore() < 0 || scoreVO.getTotalScore() > 100)) {
+            throw new IllegalArgumentException("점수는 0점에서 100점 사이여야 합니다.");
+        }
+        return testMapper.upsertTestResult(scoreVO);
+    }
 }
