@@ -6,9 +6,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.or.ddit.service.LmsTestService;
+import kr.or.ddit.vo.TestScoreVO;
 import kr.or.ddit.vo.TestVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,5 +88,15 @@ public class LmsTestController {
         return result > 0 
             ? ResponseEntity.ok("시험이 삭제 처리되었습니다.") 
             : ResponseEntity.status(HttpStatus.NOT_FOUND).body("삭제 대상을 찾을 수 없습니다.");
+    }
+
+    @Operation(summary = "학생별 시험 및 성적 목록 조회", description = "특정 학생이 수강 중인 과정의 모든 시험과 본인의 성적을 조회합니다.")
+    @GetMapping("/score/student/{accountSeq}")
+    public ResponseEntity<List<TestScoreVO>> getStudentTestScores(
+            @PathVariable int accountSeq,
+            @RequestParam int curSeq) {
+        
+        List<TestScoreVO> list = testService.getTestScoresByStudent(accountSeq, curSeq);
+        return ResponseEntity.ok(list);
     }
 }

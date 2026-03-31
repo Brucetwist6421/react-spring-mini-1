@@ -57,4 +57,24 @@
         WHERE test_seq = #{testSeq}
         AND status != 'D' 
     </update>
+
+    <select id="selectTestScoresByStudent" resultType="TestScoreVO">
+        SELECT 
+            t.test_seq,
+            s.sub_seq,
+            s.sub_name,
+            t.test_name,
+            t.duration,
+            tr.total_score,
+            tr.status AS result_status,
+            t.status AS test_status
+        FROM lms.tb_subject s
+        INNER JOIN lms.tb_test t ON s.sub_seq = t.sub_seq
+        LEFT JOIN lms.tb_test_result tr ON t.test_seq = tr.test_seq 
+                                        AND tr.account_seq = #{accountSeq}
+                                        AND tr.status != 'D'  WHERE s.cur_seq = #{curSeq}
+        AND s.status != 'D'  -- 과목이 삭제되지 않은 것
+        AND t.status != 'D'  -- 시험이 삭제되지 않은 것
+        ORDER BY s.sub_seq ASC, t.reg_date DESC
+    </select>
 </mapper>

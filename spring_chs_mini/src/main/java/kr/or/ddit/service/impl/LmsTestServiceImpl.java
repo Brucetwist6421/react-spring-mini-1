@@ -1,12 +1,14 @@
 package kr.or.ddit.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.or.ddit.mapper.LmsTestMapper;
 import kr.or.ddit.service.LmsTestService;
+import kr.or.ddit.vo.TestScoreVO;
 import kr.or.ddit.vo.TestVO;
 import lombok.RequiredArgsConstructor;
 
@@ -46,5 +48,10 @@ public class LmsTestServiceImpl implements LmsTestService {
         testVO.setUpdateDate(LocalDateTime.now());
         
         return testMapper.updateTestStatus(testVO);
+    }
+
+    @Override
+    public List<TestScoreVO> getTestScoresByStudent(int accountSeq, int curSeq) {
+        return testMapper.selectTestScoresByStudent(accountSeq, curSeq);
     }
 }

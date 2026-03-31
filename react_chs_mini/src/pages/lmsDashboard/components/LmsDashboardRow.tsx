@@ -155,7 +155,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
               }}
               sx={{ borderRadius: "6px", fontWeight: "bold" }}
             >
-              과목관리
+              과목/시험관리
             </Button>
              {/* 학생 등록 버튼 */}
             <Button

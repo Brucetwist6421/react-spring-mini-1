@@ -29,6 +29,7 @@ import RandomSpinner from '../../../components/RandomSpinner';
 import AttendanceStatusView from './AttendanceStatusView';
 import EditStudentModal from './EditStudentModal';
 import StudentDeleteConfirmModal from './StudentDeleteConfirmModal';
+import StudentTestScoreView from './StudentTestScoreView';
 
 const StudentDetailPage = ({ onUpdateSuccess, curSeq, curData }: { onUpdateSuccess: () => void; curSeq: string|undefined; curData: any }) => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
@@ -195,12 +196,18 @@ const StudentDetailPage = ({ onUpdateSuccess, curSeq, curData }: { onUpdateSucce
           <Paper elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: 5, minHeight: 800, overflow: 'hidden' }}>
             <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} variant="fullWidth" sx={{ bgcolor: '#f8fafc', borderBottom: 1, borderColor: 'divider', py: 1 }}>
               <Tab icon={<EventAvailableIcon />} label={<Typography sx={{ fontWeight: 800 }}>출석 현황</Typography>} />
-              <Tab icon={<AnalyticsIcon />} label={<Typography sx={{ fontWeight: 800 }}>성적/평가</Typography>} />
+              <Tab icon={<AnalyticsIcon />} label={<Typography sx={{ fontWeight: 800 }}>시험 성적 관리</Typography>} />
               <Tab icon={<AssignmentIndIcon />} label={<Typography sx={{ fontWeight: 800 }}>경력/기록</Typography>} />
               {/* <Tab icon={<ChatIcon />} label={<Typography sx={{ fontWeight: 800 }}>상담 일지</Typography>} /> */}
             </Tabs>
             <Box sx={{ p: 5 }}>
               {tabValue === 0 && <AttendanceStatusView accountSeq={student.accountSeq} curSeq={curSeq} curData={curData} startDate={student?.startDate} endDate={student?.endDate} />}
+              {tabValue === 1 && (
+                <StudentTestScoreView 
+                  accountSeq={student.accountSeq} 
+                  curSeq={curSeq} 
+                />
+              )}
               {tabValue === 2 && (
                 <Box>
                   <Typography sx={{ fontSize: '1.4rem', fontWeight: 900, mb: 3 }}>학습자 관찰 기록</Typography>

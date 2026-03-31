@@ -222,7 +222,7 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '22%' }}>과목명</TableCell>
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '13%' }} align="center">담당 교수</TableCell>
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '22%' }} align="center">학습 기간</TableCell>
-                <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '15%' }} align="center">시험 정보</TableCell>
+                <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '15%' }} align="center">시험 명</TableCell>
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '13%' }} align="center">시험 관리</TableCell>
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '15%' }} align="center">설정</TableCell>
               </TableRow>
