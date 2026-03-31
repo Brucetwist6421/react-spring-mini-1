@@ -31,6 +31,7 @@
             reg_id, reg_date, update_id, update_date
         FROM lms.tb_test
         WHERE sub_seq = #{subSeq}
+          AND status = 'A'
         ORDER BY test_seq DESC
         LIMIT 1
     </select>

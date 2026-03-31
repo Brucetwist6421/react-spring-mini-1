@@ -126,7 +126,7 @@ const LmsTestFormModal = ({ open, onClose, subSeq, subName }: Props) => {
         <Stack direction="row" spacing={1} alignItems="center">
           <EventNoteIcon color="primary" />
           <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1e293b' }}>
-            시험 설정
+            시험 등록/수정
           </Typography>
         </Stack>
         <IconButton onClick={() => onClose()} size="small" sx={{ color: '#94a3b8' }}>
