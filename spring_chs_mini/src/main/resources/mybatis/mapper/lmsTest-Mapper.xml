@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.LmsTestMapper">
+
+    <insert id="insertTest" parameterType="TestVO">
+        INSERT INTO lms.tb_test (
+            sub_seq, 
+            test_name, 
+            duration, 
+            start_time, 
+            end_time, 
+            status, 
+            reg_id, 
+            reg_date
+        ) VALUES (
+            #{subSeq}, 
+            #{testName}, 
+            #{duration}, 
+            #{startTime}, 
+            #{endTime}, 
+            #{status}, 
+            #{regId}, 
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <select id="selectTestBySubSeq" parameterType="int" resultType="TestVO">
+        SELECT 
+            test_seq, sub_seq, test_name, duration, 
+            start_time, end_time, status, 
+            reg_id, reg_date, update_id, update_date
+        FROM lms.tb_test
+        WHERE sub_seq = #{subSeq}
+        ORDER BY test_seq DESC
+        LIMIT 1
+    </select>
+
+    <update id="updateTest" parameterType="TestVO">
+        UPDATE lms.tb_test
+        SET 
+            test_name = #{testName},
+            duration = #{duration},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            update_id = #{updateId},
+            update_date = CURRENT_TIMESTAMP
+        WHERE test_seq = #{testSeq}
+    </update>
+</mapper>
