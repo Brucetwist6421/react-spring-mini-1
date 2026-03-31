@@ -15,13 +15,19 @@
             S.update_id,
             S.update_date,
             S.account_seq,
-            A.account_name AS teacherName  
-            FROM lms.tb_subject S
-        LEFT OUTER JOIN 
-            lms.tb_account A ON S.account_seq = A.account_seq
+            A.account_name AS teacherName,
+            T.test_seq,
+            T.test_name,
+            T.duration,
+            T.start_time AS startTime,
+            T.end_time AS endTime,
+            T.status AS testStatus
+        FROM lms.tb_subject S
+        LEFT OUTER JOIN lms.tb_account A ON S.account_seq = A.account_seq
+        LEFT OUTER JOIN lms.tb_test T ON S.sub_seq = T.sub_seq AND T.status = 'A'
         WHERE 
             S.cur_seq = #{curSeq}
-          AND S.status != 'D'
+        AND S.status != 'D'
         ORDER BY 
             S.start_date ASC
     </select>

@@ -172,6 +172,7 @@ create table lms.tb_account (
   constraint fk_account_curriculum foreign KEY (cur_seq) references lms.tb_curriculum (cur_seq)
 ) TABLESPACE pg_default;
 
+status character varying null,
   reg_id character varying(100) null,
   reg_date timestamp without time zone null default CURRENT_TIMESTAMP,
 update_id character varying(100) null,

@@ -19,5 +19,13 @@ public class SubjectVO {
     private Integer accountSeq;  // 담당 교수 시퀀스
     private String teacherName;
 
+    // 시험(tb_test) 관련 필드
+    private Integer testSeq;       // 시험 시퀀스 (test_seq)
+    private String testName;       // 시험명 (test_name)
+    private Integer duration;      // 시험 시간 (duration)
+    private LocalDateTime startTime; // 시험 시작 일시 (start_time)
+    private LocalDateTime endTime;   // 시험 종료 일시 (end_time)
+    private String testStatus;     // 시험 상태 (status AS testStatus)
+
     
 }
