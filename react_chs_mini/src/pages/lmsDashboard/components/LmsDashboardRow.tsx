@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { LmsDashboardData } from "../types/lmsDashboardType";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import { Button } from "@mui/material";
-import LmsStudentStatusModal from "./LmsStudentStatusModal";
+import LmsStudentScoreStatusModal from "./LmsStudentScoreStatusModal";
 import PersonAddIcon from "@mui/icons-material/PersonAdd"; // 아이콘 추가
 import LmsStudentAddModal from "./LmsStudentAddModal"; // 생성한 모달 임포트
 import EditIcon from "@mui/icons-material/Edit";
@@ -280,7 +280,7 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
       </Dialog>
 
       {/* 학생 성적 상세 모달 */}
-      <LmsStudentStatusModal 
+      <LmsStudentScoreStatusModal 
         open={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         row={row} 

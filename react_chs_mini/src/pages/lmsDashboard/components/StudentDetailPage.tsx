@@ -5,7 +5,7 @@ import {
 import Grid from '@mui/material/Grid'; // Grid v6 (Grid2) 사용
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 // 아이콘 임포트
 import {
@@ -33,16 +33,22 @@ import StudentTestScoreView from './StudentTestScoreView';
 
 const StudentDetailPage = ({ onUpdateSuccess, curSeq, curData }: { onUpdateSuccess: () => void; curSeq: string|undefined; curData: any }) => {
   const { accountSeq } = useParams<{ accountSeq: string }>();
+  const [searchParams] = useSearchParams(); // 쿼리 스트링 읽기
   const navigate = useNavigate();
   
   const [student, setStudent] = useState<any>(null);
   const [attendance, setAttendance] = useState<any>(null);
-  const [tabValue, setTabValue] = useState(0);
+
+  // 쿼리 스트링에 'tab'이 있으면 해당 숫자로, 없으면 0(출석 현황)으로 시작
+  const initialTab = Number(searchParams.get('tab')) || 0;
+  const [tabValue, setTabValue] = useState(initialTab);
   const [loading, setLoading] = useState(true);
   
   // 모달 상태 관리
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  
 
   // 데이터 로드 함수
   const fetchDetail = useCallback(() => {
@@ -65,6 +71,14 @@ const StudentDetailPage = ({ onUpdateSuccess, curSeq, curData }: { onUpdateSucce
   useEffect(() => {
     fetchDetail();
   }, [fetchDetail]);
+
+  // 만약 URL이 변경될 때 탭도 같이 바뀌게 하고 싶다면 useEffect 추가 (선택사항)
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab !== null) {
+      setTabValue(Number(tab));
+    }
+  }, [searchParams]);
 
   // 수정 핸들러
   const handleUpdate = () => {
