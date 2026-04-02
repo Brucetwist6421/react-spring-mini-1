@@ -126,7 +126,7 @@ const LmsStudentScoreStatusModal = ({ open, onClose, row }: any) => {
                 </TableCell>
                 {/* 관리 버튼 헤더 추가 */}
                 <TableCell align="center" sx={{ fontWeight: "bold", bgcolor: "#f8fafc" }}>
-                  관리
+                  성적 관리
                 </TableCell>
               </TableRow>
             </TableHead>
