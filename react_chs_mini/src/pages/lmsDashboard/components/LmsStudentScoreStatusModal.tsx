@@ -73,7 +73,7 @@ const LmsStudentScoreStatusModal = ({ open, onClose, row }: any) => {
         }}
       >
         <Typography variant="h6" component="span" sx={{ fontWeight: "bold" }}>
-          {row.curName} - {row.className} 호 학생 별 성적 현황
+          {row.curName} - {row.className} 호({row.term}기) 학생 별 성적 현황
         </Typography>
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
