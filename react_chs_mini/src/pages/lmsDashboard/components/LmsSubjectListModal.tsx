@@ -50,9 +50,11 @@ interface Props {
   onClose: () => void;
   curSeq: number;
   curName: string;
+  term: number;
+  className: string;
 }
 
-const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
+const LmsSubjectListModal = ({ open, onClose, curSeq, curName, term, className }: Props) => {
   const [subjects, setSubjects] = useState<SubjectVO[]>([]);
   const [teachers, setTeachers] = useState<AccountVO[]>([]);
   const [loading, setLoading] = useState(false);
@@ -204,7 +206,7 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
         borderBottom: '1px solid #e2e8f0',
         p: 3
       }}>
-        [{curName}] 과목 및 시험 관리
+        [{curName} - {className}호({term}기)] 과목 및 시험 관리
       </DialogTitle>
       
       <DialogContent sx={{ p: 0 }}>

@@ -310,6 +310,8 @@ const LmsDashboardRow = ({ row, onRefresh }: { row: LmsDashboardData, onRefresh:
         }}
         curSeq={row.curSeq}
         curName={row.curName}
+        term={row.term}
+        className={row.className}
       />
 
       {/* 과정 정보 수정 모달 */}
