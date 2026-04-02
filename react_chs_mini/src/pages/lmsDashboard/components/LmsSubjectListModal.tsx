@@ -207,7 +207,7 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
         borderBottom: '1px solid #e2e8f0',
         p: 3
       }}>
-        [{curName}] 커리큘럼 및 시험 관리
+        [{curName}] 과목 및 시험 관리
       </DialogTitle>
       
       <DialogContent sx={{ p: 0 }}>
@@ -224,7 +224,7 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '22%' }} align="center">학습 기간</TableCell>
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '15%' }} align="center">시험 명</TableCell>
                 <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '13%' }} align="center">시험 관리</TableCell>
-                <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '15%' }} align="center">설정</TableCell>
+                <TableCell sx={{ fontWeight: "bold", fontSize: '1.1rem', bgcolor: "#f1f5f9", width: '15%' }} align="center">과목 관리</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -309,24 +309,22 @@ const LmsSubjectListModal = ({ open, onClose, curSeq, curName }: Props) => {
                           <>
                             <Button 
                               variant="contained" 
-                              color="info" 
-                              size="small"
-                              startIcon={<AssignmentIcon />}
+                              size="small" 
+                              color="primary" 
+                              startIcon={<EditIcon />} 
                               onClick={() => handleTestClick(sub)}
-                              sx={{ fontWeight: 'bold', minWidth: '100px' }}
                             >
-                              시험관리
+                              수정
                             </Button>
-                            {/* [추가] 시험 삭제 버튼 */}
-                            <IconButton 
+                            <Button 
+                              variant="contained" 
                               size="small" 
                               color="error" 
-                              title="시험 정보 삭제"
+                              startIcon={<DeleteIcon />} 
                               onClick={() => handleDeleteTest(sub.testSeq!, sub.subName)}
-                              sx={{ border: '1px solid', borderColor: 'error.light' }}
                             >
-                              <DeleteSweepIcon fontSize="small" />
-                            </IconButton>
+                              삭제
+                            </Button>
                           </>
                         ) : (
                           <Button 
