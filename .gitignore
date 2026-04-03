@@ -20,3 +20,40 @@ spring_chs_mini/.metadata/
 bin/
 target/
 *.log
+
+# ==========================================================
+# [새로 추가할 Python/FastAPI 관련]
+# ==========================================================
+
+# 가상환경 (가장 중요!)
+venv/
+env/
+ENV/
+.venv/
+
+# Python 컴파일 파일 및 캐시
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.iloc/
+
+# 분포 및 패키지 관련
+dist/
+sdist/
+*.egg-info/
+
+# 라이브러리 설치 시 생성되는 파일
+pip-log.txt
+pip-delete-this-directory.txt
+
+# [데이터 및 모델 관련]
+# 주식 데이터나 학습된 모델 파일은 용량이 커서 Git 보다는 별도 저장소 권장
+*.csv
+*.h5
+*.pkl
+*.pth
+
+# OS 관련 추가
+Thumbs.db
