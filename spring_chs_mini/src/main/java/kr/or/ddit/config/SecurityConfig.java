@@ -55,6 +55,7 @@ public class SecurityConfig {
                         .requestMatchers( "/api/daily-log/**").permitAll()
                         .requestMatchers( "/api/subject/**").permitAll()
                         .requestMatchers( "/api/test/**").permitAll()
+                        .requestMatchers( "/api/stock/**").permitAll()
                         ///api/lmsDashboard -- 시큐리티 적용 시 주석 풀어주기 끝
                         .anyRequest().authenticated())
                 // 인증 예외 발생 시 401 에러를 반환하도록 설정
