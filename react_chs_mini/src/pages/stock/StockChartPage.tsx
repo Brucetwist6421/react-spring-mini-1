@@ -41,6 +41,7 @@ const StockChartPage: React.FC<Props> = ({ stockCode = "005930" }) => {
         setError(null);
 
         // Spring Boot API 호출
+        // const response = await api.get<StockResponse>(`http://localhost:8080/api/stock/${stockCode}`);
         const response = await api.get<StockResponse>(`/api/stock/${stockCode}`);
 
         const { history, prediction } = response.data;

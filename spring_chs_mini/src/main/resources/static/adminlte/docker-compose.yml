@@ -10,6 +10,7 @@ services:
     - .:/code
     - /code/node_modules
 
+ # Python API 서비스 추가
     python-api:
     build: 
       context: ./stock-ai  # 루트 디렉토리 기준 stock-ai 폴더로 이동하여 빌드
