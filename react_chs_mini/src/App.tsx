@@ -15,6 +15,7 @@ import PokemonList from "./pages/lists/PokemonList";
 import LmsDashboard from "./pages/lmsDashboard/LmsDashboard";
 import LmsStudentManagement from "./pages/lmsDashboard/components/LmsStudentManagement";
 import theme from "./theme";
+import StockChartPage from "./pages/stock/StockChartPage";
 
 function App() {
   return (
@@ -47,6 +48,8 @@ function App() {
                 <Route path="/pokemon/create" element={<PokemonCreatePage />} />
                 <Route path="/pokemon/:id" element={<PokemonDetailPage />} />
                 <Route path="/pokemon2/:id" element={<NewPokemonDetailPage />} />
+                {/* 주식 예측 차트 페이지 추가 */}
+                <Route path="/stock/prediction" element={<StockChartPage />} />
                 {/* 2. 동적 파라미터는 가장 아래에 배치 */}
                 <Route path="/" element={<MainDashboard />} />
                 <Route path="/:pokemonName" element={<MainDashboard />} />
@@ -66,7 +69,7 @@ function App() {
             </Box>
 
             {/* 하단 푸터 */}
-            <Footer company="Project 2026" />
+            <Footer company="CHS Project 2026" />
           </Box>
         </Box>
       </BrowserRouter>

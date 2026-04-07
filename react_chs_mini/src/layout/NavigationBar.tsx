@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Avatar, IconButton } from "@mui/material";
-import { Dashboard, CatchingPokemon, AddCircle, Settings, CatchingPokemonTwoTone, Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@mui/icons-material";
-import { useNavigate, useLocation } from "react-router-dom";
+import { AddCircle, CatchingPokemon, CatchingPokemonTwoTone, ChevronLeft as ChevronLeftIcon, Dashboard, Menu as MenuIcon, Settings, ShowChart } from "@mui/icons-material";
+import { Avatar, Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import dditLogo from "../api/datas/dditLogo.png";
 
 const fullWidth = 260;
@@ -65,6 +65,7 @@ const NavigationBar = () => {
     { text: "기존 포켓몬 목록", icon: <CatchingPokemon />, path: "/pokemonList" },
     { text: "새 포켓몬 목록", icon: <CatchingPokemonTwoTone />, path: "/newPokemonList" },
     { text: "새 포켓몬 등록", icon: <AddCircle />, path: "/pokemon/create" },
+    { text: "주식 예측 차트", icon: <ShowChart />, path: "/stock/prediction" },
     { text: "LMS 대시보드", icon: <Dashboard />, path: "/lms/dashboard" },
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];
@@ -72,7 +73,8 @@ const NavigationBar = () => {
   // 로그인 상태에 따른 메뉴 필터링 (로그인 안 되면 대시보드만)
   const visibleMenuItems = isLoggedIn 
     ? menuItems.filter(item => item.text === "LMS 대시보드")
-    : menuItems.filter(item => item.text === "포켓몬대시보드" || item.text === "기존 포켓몬 목록" || item.text === "새 포켓몬 목록" || item.text === "새 포켓몬 등록");
+    : menuItems.filter(item => item.text === "포켓몬대시보드" || item.text === "기존 포켓몬 목록" || item.text === "새 포켓몬 목록"
+       || item.text === "새 포켓몬 등록" || item.text === "주식 예측 차트");
 
   const currentWidth = open ? fullWidth : collapsedWidth;
 

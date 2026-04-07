@@ -1,0 +1,7 @@
+진행 상황 요약
+
+Python (FastAPI): yfinance로 실시간 데이터를 가져오고, Prophet 모델로 미래 5일을 예측하는 API 완성 (http://localhost:8000/stock/{code})
+
+Spring Boot: StockService와 StockController를 통해 Python 서버와 통신하고, 데이터를 VO에 담아 리액트로 전달할 준비 완료 (/api/stock/{code})
+
+데이터 검증: 삼성전자(005930) 코드로 호출 시, 과거 종가(history)와 AI 예측치(prediction)가 JSON 형태로 정상 출력됨을 확인
