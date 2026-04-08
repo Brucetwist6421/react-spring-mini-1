@@ -1,7 +1,42 @@
 진행 상황 요약
-
+==============
 Python (FastAPI): yfinance로 실시간 데이터를 가져오고, Prophet 모델로 미래 5일을 예측하는 API 완성 (http://localhost:8000/stock/{code})
 
 Spring Boot: StockService와 StockController를 통해 Python 서버와 통신하고, 데이터를 VO에 담아 리액트로 전달할 준비 완료 (/api/stock/{code})
 
 데이터 검증: 삼성전자(005930) 코드로 호출 시, 과거 종가(history)와 AI 예측치(prediction)가 JSON 형태로 정상 출력됨을 확인
+
+==============
+
+1. 인프라 환경 (Oracle Cloud E2.1.Micro)
+메모리 최적화: 물리 메모리(1GB) 부족 문제를 해결하기 위해 **2GB 스왑 메모리(Swap File)**를 설정하여 시스템 안정성을 확보했습니다.
+
+아키텍처: Docker 컨테이너 기반의 독립적 서비스 운영 (amd64 플랫폼 빌드).
+
+2. 서비스 구조 및 통신 설정
+서비스명,기술 스택,포트,통신 설정 (중요)
+React,Nginx / React,80,프론트엔드 (사용자 접속)
+Spring,Java 21 / Spring Boot,8080,--link python-container:python-api로 연결
+Python,Python 3.11 / FastAPI,8000,Prophet 라이브러리를 이용한 주식 예측 담당
+
+3. 핵심 변경 사항
+Python Dockerfile: python:3.11-slim 이미지를 사용하여 최신 라이브러리(anyio) 호환성 문제를 해결했습니다.
+
+Spring Service: 내부 통신 주소를 localhost에서 도커 별칭인 http://python-api:8000으로 수정하여 컨테이너 간 통신을 가능하게 했습니다.
+
+CI/CD (GitHub Actions):
+
+스프링 빌드 → 2. 도커 이미지 3종(React, Spring, Python) 빌드 및 푸시 → 3. 서버 접속 후 기존 컨테이너 교체의 자동화 흐름을 완성했습니다.
+
+=============================
+
+
+추천 개발 순서 (오늘의 미션)
+
+Axios 통신 테스트: useEffect를 사용해 페이지가 로드될 때 삼성전자(005930) 데이터를 콘솔(console.log)에 먼저 찍어봅니다.
+
+데이터 가공 함수 작성: JSON 데이터를 Recharts가 이해할 수 있는 [{name: '2026-04-03', price: 186200}, ...] 형태로 변환합니다.
+
+LineChart 컴포넌트 배치: 변환된 데이터를 바탕으로 화면에 그래프를 띄웁니다...
+
+
