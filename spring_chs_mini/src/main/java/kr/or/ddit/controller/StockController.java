@@ -30,13 +30,13 @@ public class StockController {
             @RequestParam(defaultValue = "1y") String period,
             @RequestParam(defaultValue = "15") int predict_days) {
         
-        log.info("주식 데이터 요청 수신 - 종목코드: {}, 기간: {}, 예측일: {}", code, period, predict_days);
+        // log.info("주식 데이터 요청 수신 - 종목코드: {}, 기간: {}, 예측일: {}", code, period, predict_days);
         
         // 서비스 호출 시 파라미터 전달
         StockVO result = stockService.getStockPrice(code, period, predict_days);
         
-        log.info("FastAPI에서 받은 결과: {}", result); // 여기서 volume이 있는지 확인!
-        log.info("주식 데이터 응답 완료 - 종목코드: {}", code);
+        // log.info("FastAPI에서 받은 결과: {}", result); // 여기서 volume이 있는지 확인!
+        // log.info("주식 데이터 응답 완료 - 종목코드: {}", code);
         return ResponseEntity.ok(result);
     }
 }

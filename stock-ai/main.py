@@ -4,6 +4,11 @@ from prophet import Prophet
 import pandas as pd
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+
+# 로그 설정
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -78,6 +83,8 @@ async def get_stock_prediction(code: str, period: str = "1y", predict_days: int 
             "2026-04-15": "1분기 실적 발표 임박",
             "2026-04-20": "반도체 수출 호조 뉴스"
         }
+
+        # logger.info(f"거래량 데이터 샘플 (첫 1건): {list(history_volume.items())[0]}")
 
         return {
             "symbol": code,

@@ -8,23 +8,29 @@ import {
   Typography
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
+// LineChart 대신 ComposedChart와 Bar를 가져옵니다.
 import {
-  CartesianGrid, Legend, Line, LineChart, ResponsiveContainer,
+  CartesianGrid, Legend, Line, ComposedChart, Bar, ResponsiveContainer,
   Tooltip, XAxis, YAxis
 } from 'recharts';
 import api from '../../api/axiosInstance';
 
+// 1. API 응답 인터페이스에 volume 추가
 interface StockResponse {
   symbol: string;
   history: { [key: string]: number };
   prediction: { [key: string]: number };
+  volume: { [key: string]: number }; // 추가
+  events: { [key: string]: string }; 
   error?: string;
 }
 
+// 2. 차트 데이터 아이템에 volume 추가
 interface ChartDataItem {
   date: string;
   actual?: number | null;
   predict?: number | null;
+  volume?: number | null; // 추가
 }
 
 const StockChartPage: React.FC = () => {
@@ -49,18 +55,20 @@ const StockChartPage: React.FC = () => {
           return;
         }
 
-        const { history, prediction } = response.data;
+        // 3. volume 데이터를 포함하여 병합 로직 수정
+        const { history, prediction, volume } = response.data;
         const allDates = Array.from(
           new Set([...Object.keys(history), ...Object.keys(prediction)])
         ).sort();
 
         const combinedData: ChartDataItem[] = allDates.map((date) => ({
           date,
-          // 확실하게 숫자 타입으로 캐스팅
           actual: history[date] !== undefined ? Number(history[date]) : null,
           predict: prediction[date] !== undefined ? Number(prediction[date]) : null,
+          // 해당 날짜의 거래량이 있으면 숫자로, 없으면 0으로 처리
+          volume: volume && volume[date] !== undefined ? Number(volume[date]) : 0,
         }));
-        console.log("Combined Chart Data:", combinedData);
+        
         setChartData(combinedData);
       } catch (err) {
         console.error("API Error:", err);
@@ -80,7 +88,7 @@ const StockChartPage: React.FC = () => {
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 4 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>📈 주식 종가 예측 프로그램</Typography>
-              <Typography variant="body2" color="text.secondary">삼성전자({stockCode}) | AI 예측</Typography>
+              <Typography variant="body2" color="text.secondary">삼성전자({stockCode}) | AI 예측 및 거래량</Typography>
             </Box>
 
             <Stack direction="row" spacing={2}>
@@ -106,7 +114,6 @@ const StockChartPage: React.FC = () => {
             </Stack>
           </Stack>
 
-          {/* 차트 박스에 명시적인 최소 높이 부여 */}
           <Box sx={{ width: '100%', height: 500, minHeight: 400 }}>
             {loading ? (
               <Stack justifyContent="center" alignItems="center" sx={{ height: '100%' }}><CircularProgress /></Stack>
@@ -114,28 +121,49 @@ const StockChartPage: React.FC = () => {
               <Stack justifyContent="center" alignItems="center" sx={{ height: '100%' }}><Typography color="error">{error}</Typography></Stack>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
+                {/* 4. LineChart를 ComposedChart로 변경 */}
+                <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} minTickGap={50} />
                   
-                  {/* YAxis를 하나만 선언하고 ID를 제거합니다 */}
+                  {/* 주가용 Y축 (왼쪽) */}
                   <YAxis 
-                    orientation="right" 
+                    yAxisId="left"
+                    orientation="left" 
                     domain={['auto', 'auto']} 
                     tick={{ fontSize: 11 }} 
                     tickFormatter={(val) => val.toLocaleString()} 
                   />
 
+                  {/* 거래량용 Y축 (오른쪽, 주가와 겹치지 않게 숨김 처리 권장) */}
+                  <YAxis 
+                    yAxisId="right"
+                    orientation="right" 
+                    hide={true} 
+                  />
+
                   <Tooltip 
                     formatter={(value: any, name: any) => {
                       if (value === null || value === undefined) return ["-", name];
+                      // 이름에 따라 포맷팅 변경
+                      if (name === "거래량") return [`${value.toLocaleString()}주`, name];
                       return [`${Math.round(Number(value)).toLocaleString()}원`, name];
                     }}
                   />
                   <Legend verticalAlign="top" align="right" />
                   
-                  {/* Line에서 yAxisId 속성을 모두 삭제합니다 */}
+                  {/* 5. 거래량 막대그래프 추가 (배경처럼 연하게 설정) */}
+                  <Bar 
+                    yAxisId="right"
+                    name="거래량"
+                    dataKey="volume"
+                    fill="#dd89d2"
+                    opacity={0.5}
+                    barSize={20}
+                  />
+
                   <Line 
+                    yAxisId="left"
                     name="실제 주가" 
                     type="monotone" 
                     dataKey="actual" 
@@ -146,6 +174,7 @@ const StockChartPage: React.FC = () => {
                     isAnimationActive={false} 
                   />
                   <Line 
+                    yAxisId="left"
                     name="AI 예측" 
                     type="monotone" 
                     dataKey="predict" 
@@ -156,7 +185,7 @@ const StockChartPage: React.FC = () => {
                     connectNulls 
                     isAnimationActive={false} 
                   />
-                </LineChart>
+                </ComposedChart>
               </ResponsiveContainer>
             )}
           </Box>
