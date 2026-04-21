@@ -6,7 +6,7 @@ h11==0.16.0
 anyio==4.13.0
 
 # --- Data Science & Finance ---
-numpy==2.4.4
+numpy
 pandas==3.0.2
 pandas-ta
 yfinance==1.2.0
