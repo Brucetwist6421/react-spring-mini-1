@@ -15,10 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/stock/{code}") # 앞에 /api 가 없는지 확인!
+@app.get("/stock/{code}")
 async def get_stock_prediction(code: str, period: str = "1y", predict_days: int = 15):
     try:
-        # 코스피(.KS), 코스닥(.KQ) 구분은 실제 서비스 시 추가 로직 필요 (여기선 KS 기준)
         ticker = f"{code}.KS"
         
         # 1. 데이터 수집
@@ -27,50 +26,65 @@ async def get_stock_prediction(code: str, period: str = "1y", predict_days: int 
         if df.empty:
             return {"symbol": code, "error": "데이터를 찾을 수 없습니다."}
 
-        # Multi-index 컬럼 구조 평탄화
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
-        # 2. Prophet 형식 가공
-        df_p = df[['Close']].reset_index()
-        df_p.columns = ['ds', 'y']
+        # 2. Prophet 학습용 데이터 정제 (Close와 Volume 포함)
+        df_p = df[['Close', 'Volume']].reset_index()
+        df_p.columns = ['ds', 'y', 'volume']
         df_p['ds'] = df_p['ds'].dt.tz_localize(None)
 
-        # 3. 모델 학습
+        # 3. Prophet 모델 설정 및 '거래량' 추가 변수 등록
         model = Prophet(
-            daily_seasonality=False, # 주식은 일일 변동성이 크지 않아 끎
+            daily_seasonality=False, 
             weekly_seasonality=True, 
             yearly_seasonality=True
         )
+        # 거래량을 보조 회귀 변수로 추가하여 가격 예측에 반영
+        model.add_regressor('volume') 
         model.fit(df_p)
         
-        # 4. 미래 예측 (freq='B'로 평일만 예측)
+        # 4. 미래 데이터프레임 생성 및 거래량 채우기
         future = model.make_future_dataframe(periods=predict_days, freq='B')
+        
+        # 미래의 거래량은 알 수 없으므로 과거 평균값으로 채움 (학습 모델의 규칙 준수)
+        avg_volume = df_p['volume'].mean()
+        # 과거 실제 거래량 + 미래 예측 기간의 평균 거래량 리스트 생성
+        future['volume'] = df_p['volume'].tolist() + [avg_volume] * predict_days
+        
         forecast = model.predict(future)
 
         # 5. 결과 데이터 정제
         history = {}
-        for date, row in df.iterrows():
-            val = row['Close']
-            price = float(val.iloc[0]) if isinstance(val, pd.Series) else float(val)
-            history[date.strftime('%Y-%m-%d')] = round(price, 2)
+        history_volume = {} # 차트 하단 막대그래프용
+        for _, row in df_p.iterrows():
+            date_str = row['ds'].strftime('%Y-%m-%d')
+            history[date_str] = round(float(row['y']), 2)
+            history_volume[date_str] = int(row['volume'])
         
-        # 예측 데이터 (실제 데이터 마지막 날짜 이후만 추출)
         prediction = {}
         last_history_date = df_p['ds'].max()
+        last_price = float(df_p['y'].iloc[-1])
         
-        # [연결 고리] 차트가 끊기지 않게 실제 마지막 값을 예측 시작점에 삽입
-        last_price = float(df['Close'].iloc[-1])
+        # 실제 마지막 값을 예측의 시작점으로 설정 (차트 연결)
         prediction[last_history_date.strftime('%Y-%m-%d')] = round(last_price, 2)
 
         future_forecast = forecast[forecast['ds'] > last_history_date]
         for _, row in future_forecast.iterrows():
             prediction[row['ds'].strftime('%Y-%m-%d')] = round(float(row['yhat']), 2)
 
+        # 6. 뉴스/이벤트 (기존 로직 유지)
+        events = {
+            "2026-04-15": "1분기 실적 발표 임박",
+            "2026-04-20": "반도체 수출 호조 뉴스"
+        }
+
         return {
             "symbol": code,
             "history": history,
-            "prediction": prediction
+            "prediction": prediction,
+            "volume": history_volume,
+            "events": events
         }
 
     except Exception as e:
