@@ -15,7 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/stock/{code}")
+@app.get("/stock/{code}") # 앞에 /api 가 없는지 확인!
 async def get_stock_prediction(code: str, period: str = "1y", predict_days: int = 15):
     try:
         # 코스피(.KS), 코스닥(.KQ) 구분은 실제 서비스 시 추가 로직 필요 (여기선 KS 기준)
