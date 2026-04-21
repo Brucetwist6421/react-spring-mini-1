@@ -109,7 +109,7 @@ const StockChartPage: React.FC = () => {
           
           <Stack direction={{ xs: 'column', lg: 'row' }} justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 4 }}>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>📈 HANSUNG'S TRI-CORE 분석</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>📈 주식 종가 예측/분석</Typography>
               <Typography variant="body2" color="text.secondary">삼성전자({stockCode}) | 가격 메인 분석</Typography>
             </Box>
 
