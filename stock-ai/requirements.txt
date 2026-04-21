@@ -8,7 +8,7 @@ anyio==4.13.0
 # --- Data Science & Finance ---
 numpy==2.4.4
 pandas==3.0.2
-git+https://github.com/twopirllc/pandas-ta.git@main
+https://github.com/twopirllc/pandas-ta/archive/refs/heads/main.zip
 yfinance==1.2.0
 matplotlib==3.10.8
 
