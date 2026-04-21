@@ -6,19 +6,19 @@ import uvicorn
 
 app = FastAPI()
 
+# 쿼리 파라미터로 period와 predict_days를 받도록 추가
 @app.get("/stock/{code}")
-def get_stock_prediction(code: str):
+def get_stock_prediction(code: str, period: str = "1y", predict_days: int = 15):
     try:
         ticker = f"{code}.KS"
         
-        # 1. 데이터 수집
-        df = yf.download(ticker, period="2y")
+        # 1. 데이터 수집 (요청받은 period 사용)
+        df = yf.download(ticker, period=period)
         
         if df.empty:
             return {"symbol": code, "error": "데이터를 찾을 수 없습니다."}
 
-        # [중요] Multi-index 컬럼 구조를 단일 레벨로 평탄화
-        # yfinance 업데이트로 인해 'Close' 컬럼이 ('Close', '005930.KS') 처럼 올 수 있음
+        # Multi-index 컬럼 평탄화
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
@@ -31,22 +31,21 @@ def get_stock_prediction(code: str):
         model = Prophet(daily_seasonality=True, weekly_seasonality=True, yearly_seasonality=True)
         model.fit(df_p)
         
-        # 4. 미래 5일 예측
-        future = model.make_future_dataframe(periods=5)
+        # 4. 미래 예측 (요청받은 predict_days 사용)
+        future = model.make_future_dataframe(periods=predict_days)
         forecast = model.predict(future)
 
         # 5. 결과 데이터 정제
-        # 과거 데이터 (최근 10일)
         history = {}
-        for date, row in df.tail(10).iterrows():
-            # row['Close']가 혹시라도 Series일 경우를 대비해 첫 번째 값만 취함
+        # 전체 조회 기간 중 프론트에 넘길 데이터 (필요에 따라 .tail() 조절)
+        for date, row in df.iterrows(): 
             val = row['Close']
             price = float(val.iloc[0]) if isinstance(val, pd.Series) else float(val)
             history[date.strftime('%Y-%m-%d')] = round(price, 2)
         
-        # 예측 데이터 (미래 5일)
         prediction = {}
-        for _, row in forecast[['ds', 'yhat']].tail(5).iterrows():
+        # 예측된 미래 데이터 정제
+        for _, row in forecast[['ds', 'yhat']].tail(predict_days).iterrows():
             prediction[row['ds'].strftime('%Y-%m-%d')] = round(float(row['yhat']), 2)
 
         return {
