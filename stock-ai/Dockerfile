@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # 2. 필수 빌드 도구 및 Prophet 설치를 위한 라이브러리 추가
 RUN apt-get update && apt-get install -y \
     build-essential \
+	git \
     gcc \
     g++ \
     python3-dev \
