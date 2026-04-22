@@ -1,0 +1,9 @@
+ - 다른 PC에서 프로젝트를 pull 받았다면, 다음 순서로 진행합니다.
+ 1. Python 설치 (버전은 가급적 동일하게) 
+ -Python 3.12.10
+  https://www.python.org/downloads/release/python-31210/
+ --vscode 터미널에서 실행
+ 2. 가상환경 생성: python -m venv venv
+ 3. 가상환경 활성화: call venv/Scripts/activate
+ 4. 라이브러리 일괄 설치 (핵심):
+ pip install -r requirements.txt
