@@ -26,21 +26,37 @@ async def get_stock_prediction(code: str, period: str = "1y", predict_days: int 
     try:
         ticker_symbol = f"{code}.KS"
         
-        # 1. 데이터 수집 (주가 + 시장 지수)
-        df = yf.download(ticker_symbol, period=period)
-        kospi = yf.download("^KS11", period=period)['Close']
+        # [수정] 지표 계산 및 Prophet 학습을 위해 최소 1년의 데이터 확보
+        # 사용자가 1mo를 요청해도 내부적으론 1y를 가져와서 계산의 안정성을 높입니다.
+        fetch_period = "1y" if period in ["1d", "5d", "1mo", "3mo"] else period
+        df = yf.download(ticker_symbol, period=fetch_period)
+        kospi_data = yf.download("^KS11", period=fetch_period)
+
         if df.empty:
             return {"symbol": code, "error": "데이터를 찾을 수 없습니다."}
 
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
 
-        # 2. 기술적 지표 계산 (차트 표시용 + 예측 변수용)
+        # 2. 기술적 지표 계산
         df['RSI'] = ta.rsi(df['Close'], length=14)
         df['MA20'] = ta.sma(df['Close'], length=20)
+
+        # [수정] MACD 계산 및 None 체크 (에러 방지)
         macd = ta.macd(df['Close'])
-        df['MACD'] = macd['MACD_12_26_9']
-        df['KOSPI'] = kospi
+        if macd is not None and not macd.empty:
+            # MACD_12_26_9 컬럼을 안전하게 가져옴
+            df['MACD'] = macd.iloc[:, 0]
+        else:
+            df['MACD'] = 0
+
+        # KOSPI 지수 결합 (인덱스 기준 매칭)
+        if not kospi_data.empty:
+            if isinstance(kospi_data.columns, pd.MultiIndex):
+                kospi_data.columns = kospi_data.columns.get_level_values(0)
+            df['KOSPI'] = kospi_data['Close']
+        else:
+            df['KOSPI'] = df['Close'] # 데이터 없으면 주가로 대체
 
         # NaN 제거 전 시각화용 데이터 보관
         plot_df = df.copy()
@@ -48,50 +64,47 @@ async def get_stock_prediction(code: str, period: str = "1y", predict_days: int 
 
         # 3. Prophet 학습 데이터 구성
         df_p = df.reset_index()
-        # 예측값이 튀는 것을 방지하기 위해 상관관계가 높은 지표만 선별
         df_p = df_p[['Date', 'Close', 'KOSPI', 'RSI', 'MACD']].rename(columns={'Date': 'ds', 'Close': 'y'})
         df_p['ds'] = df_p['ds'].dt.tz_localize(None)
         
-        # 4. 모델 설정 및 학습
+        # 4. 모델 설정 (안정성 위주)
         model = Prophet(
             daily_seasonality=False,
             weekly_seasonality=True,
             yearly_seasonality=True,
-            changepoint_prior_scale=0.15  # 추세 변화 민감도 상향
+            changepoint_prior_scale=0.15
         )
-
-        # 외부 변수 등록
         model.add_regressor('KOSPI')
         model.add_regressor('RSI')
         model.add_regressor('MACD')
         model.fit(df_p)
         
-        # 5. 미래 데이터 생성 및 변수 예측 (하락/상승 변동성 부여)
+        # 5. 미래 데이터 생성 및 보조 변수 채우기
         future = model.make_future_dataframe(periods=predict_days, freq='B')
         
-        # 미래의 보조 변수들을 단순히 고정하지 않고 최근 추세를 반영하여 채움
         for col in ['KOSPI', 'RSI', 'MACD']:
             last_val = df_p[col].iloc[-1]
-            # 최근 5일간의 평균 변화량 계산
-            delta = df_p[col].diff().tail(5).mean()
+            delta = df_p[col].diff().tail(7).mean() # 최근 7일 평균 변화율
 
             future_vals = []
             current = last_val
             for i in range(predict_days):
-                current += delta * (0.8 ** i) # 변화가 점차 수렴하도록 설정
+                current += delta * (0.8 ** i)
                 future_vals.append(current)
-
             future[col] = list(df_p[col]) + future_vals
 
         forecast = model.predict(future)
 
-        # 6. 기존 응답 구조에 맞게 데이터 패키징
+        # 6. 결과 패키징 (사용자가 요청한 period에 맞춰 history 필터링 가능)
+        # 여기서는 전체 history를 보내거나 plot_df를 조절할 수 있습니다.
         history = {}
         history_volume = {}
         history_rsi = {}
         history_ma20 = {}
 
-        for date, row in plot_df.iterrows():
+        # 마지막 100일치 데이터만 history로 전달 (너무 많으면 차트가 무거워짐)
+        display_df = plot_df.tail(100)
+        for date, row in display_df.iterrows():
             date_str = date.strftime('%Y-%m-%d')
             history[date_str] = round(float(row['Close']), 2)
             history_volume[date_str] = int(row['Volume'])
@@ -100,7 +113,6 @@ async def get_stock_prediction(code: str, period: str = "1y", predict_days: int 
 
         prediction = {}
         last_history_date = df_p['ds'].max()
-        # 마지막 역사적 데이터를 예측의 시작점으로 연결
         prediction[last_history_date.strftime('%Y-%m-%d')] = round(float(df_p['y'].iloc[-1]), 2)
 
         future_forecast = forecast[forecast['ds'] > last_history_date]
