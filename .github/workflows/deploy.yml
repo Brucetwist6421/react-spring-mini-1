@@ -52,26 +52,35 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SERVER_KEY }}
           script: |
-            # 1. 기존 컨테이너 중지 및 삭제 (파이썬 추가)
-            docker stop spring-container react-container python-container 2>/dev/null || true
-            docker rm spring-container react-container python-container 2>/dev/null || true
-            
+            # 1. 기존 컨테이너 및 네트워크 정리 (충돌 방지)
+            # 실행 중이거나 중지된 컨테이너를 확실히 제거합니다.
+            docker rm -f spring-container react-container python-container 2>/dev/null || true
+
             # 2. 최신 이미지 풀
             docker pull ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/react-app:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/stock-ai:latest
             
-            # 3. 파이썬 컨테이너 먼저 실행 (스프링이 참조해야 하므로)
+            # 3. 파이썬 AI 서버 실행 (가장 먼저 실행)
             docker run -d --name python-container \
               -p 8000:8000 \
+              --restart always \
               ${{ secrets.DOCKER_USERNAME }}/stock-ai:latest
 
-            # 4. 스프링 컨테이너 실행 (--link 또는 네트워크 설정 필요)
-            # --link python-container:python-api 를 추가하여 스프링에서 'python-api'라는 이름으로 접근 가능하게 합니다.
+            # 4. 스프링 컨테이너 실행
+            # --link 설정을 통해 스프링 서버 내부에서 'python-api'라는 이름으로 접근 가능하게 합니다.
             docker run -d --name spring-container \
               -p 8080:8080 \
               -v /home/ubuntu/upload:/upload \
               --link python-container:python-api \
+              --restart always \
               ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
               
-            docker run -d --name react-container -p 80:80 ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+            # 5. 리액트 컨테이너 실행
+            docker run -d --name react-container \
+              -p 80:80 \
+              --restart always \
+              ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+
+            # 6. 미사용 이미지 정리 (용량 확보)
+            docker image prune -f
