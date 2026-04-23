@@ -8,8 +8,10 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime
+from pykrx import stock
 
 # 로그 설정
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -95,8 +97,7 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
 
         forecast = model.predict(future)
 
-        # 6. 결과 데이터 정제 (JSON 에러 방지를 위해 float 변환 및 NaN 체크 필수)
-        # 시각화 데이터는 사용자가 선택한 period에 맞춰 절단
+                # 6. 결과 데이터 정제 (JSON 에러 방지를 위해 float 변환 및 NaN 체크 필수)
         display_days = {"1y": 252, "2y": 504, "5y": 1260}.get(period, 252)
         plot_df = df.tail(display_days)
 
@@ -105,23 +106,77 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             if pd.isna(v) or np.isinf(v):
                 return default
             return round(float(v), 2)
+
+        # 6-1. 기본 지표 데이터 생성
         history = {d.strftime('%Y-%m-%d'): clean_val(v) for d, v in zip(plot_df.index, plot_df['y'])}
         history_volume = {d.strftime('%Y-%m-%d'): int(v) if not pd.isna(v) else 0 for d, v in zip(plot_df.index, plot_df['Volume'])}
         history_rsi = {d.strftime('%Y-%m-%d'): clean_val(v) for d, v in zip(plot_df.index, plot_df['RSI'])}
         history_ma20 = {d.strftime('%Y-%m-%d'): clean_val(v) for d, v in zip(plot_df.index, plot_df['MA20'])}
 
+        # 6-2. 예측 데이터 생성
         prediction = {}
         last_date = df_p['ds'].max()
+        # 예측 시작점 (현재가)
         prediction[last_date.strftime('%Y-%m-%d')] = clean_val(df_p['y'].iloc[-1])
 
         future_forecast = forecast[forecast['ds'] > last_date]
         for _, row in future_forecast.iterrows():
             prediction[row['ds'].strftime('%Y-%m-%d')] = clean_val(row['yhat'])
 
-        # 7. 수급 및 이벤트 데이터 (기존 구조 유지 및 확장)
+        # 6-3. Total 데이터 생성 (History + Prediction 합치기)
+        total = history.copy()
+        total.update(prediction)
+        # 날짜 오름차순 정렬
+        total = dict(sorted(total.items()))
+
+        # 7. 실제 투자자 수급 데이터 수집 (pykrx)
+        try:
+            start_date_str = plot_df.index[0].strftime('%Y%m%d')
+            end_date_str = plot_df.index[-1].strftime('%Y%m%d')
+            # pykrx는 6자리 종목코드를 사용함 (KS/KQ 제외)
+            investor_df = stock.get_market_net_purchases_of_equities_by_ticker(start_date_str, end_date_str, code)
+            
+            # history 날짜와 동기화하기 위해 reindex 사용 (데이터가 없는 날은 0 처리)
+            investor_df.index = pd.to_datetime(investor_df.index)
+            investor_df = investor_df.reindex(plot_df.index).fillna(0)
+            
+            inv_dates = [d.strftime('%Y-%m-%d') for d in investor_df.index]
+            inv_foreign = [int(v) for v in investor_df['외국인']]
+            inv_institution = [int(v) for v in investor_df['기관합계']]
+        except Exception as e:
+            logger.warning(f"투자자 데이터 수집 실패: {e}")
+            inv_dates = list(history.keys())
+            inv_foreign = [0] * len(inv_dates)
+            inv_institution = [0] * len(inv_dates)
+
+        # 8. 실적 발표 및 이벤트 데이터
+        events = {}
+        try:
+            ticker_info = yf.Ticker(ticker_symbol)
+            calendar = ticker_info.calendar
+            if calendar is not None and not calendar.empty:
+                if 'Earnings Date' in calendar.index:
+                    # Earnings Date가 여러 개일 수 있으므로 처리
+                    e_dates = calendar.loc['Earnings Date']
+                    if isinstance(e_dates, pd.Series):
+                        for ed in e_dates:
+                            events[ed.strftime('%Y-%m-%d')] = "실적 발표 예정"
+                    else:
+                        events[e_dates.strftime('%Y-%m-%d')] = "실적 발표 예정"
+            
+            # 실적 데이터가 없는 경우 작년 기준 예측 (4, 7, 10, 1월 중순)
+            if not events:
+                current_year = datetime.now().year
+                # 예시: 다음 분기 실적 발표 예상일
+                events[f"{current_year}-04-15"] = "1분기 실적 발표 예상"
+                events[f"{current_year}-07-07"] = "2분기 실적 발표 예상"
+        except:
+            events["2026-04-15"] = "실적 발표 시즌"
+
         return {
             "symbol": code,
             "industry_status": "반도체 산업 장기 성장 추세 반영됨",
+            "total": total,
             "history": history,
             "prediction": prediction,
             "volume": history_volume,
@@ -130,15 +185,14 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
                 "ma20": history_ma20
             },
             "investors": {
-                "dates": df_p['ds'].tail(5).dt.strftime('%Y-%m-%d').tolist(),
-                "foreign": [120000, -50000, 300000, 450000, -120000],
-                "institution": [80000, 120000, -200000, 50000, 210000]
+                "dates": inv_dates,
+                "foreign": inv_foreign,
+                "institution": inv_institution
             },
-            "events": {
-                "2026-04-15": "실적 발표 임박",
-                "2026-04-20": "반도체 수출 호조"
-            }
+            "events": events
         }
+
+
 
     except Exception as e:
         logger.error(f"Error occurred: {e}")

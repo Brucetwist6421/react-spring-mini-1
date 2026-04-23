@@ -11,6 +11,8 @@ pandas==3.0.2
 pandas-ta
 yfinance==1.2.0
 matplotlib==3.10.8
+pykrx
+
 
 # --- AI & Time Series Forecasting (Prophet) ---
 prophet==1.3.0
