@@ -132,9 +132,9 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             s_date = plot_df.index[0].strftime('%Y%m%d')
             e_date = plot_df.index[-1].strftime('%Y%m%d')
             
-            # 단일 종목 일자별 수급 데이터 가져오기
-            investor_df = stock.get_market_net_purchases_of_equities(s_date, e_date, pure_code)
-            
+            # 단일 종목 일자별 수급 데이터 가져오기 (가장 안정적인 함수로 교체)
+            investor_df = stock.get_market_net_purchases_of_equities_by_date(s_date, e_date, pure_code)
+
             if not investor_df.empty:
                 investor_df.index = pd.to_datetime(investor_df.index)
                 investor_df = investor_df.reindex(plot_df.index).fillna(0)
