@@ -53,6 +53,9 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         if ticker_symbol not in close_data or close_data[ticker_symbol].dropna().empty:
             return {"error": "해당 종목의 유효한 데이터가 없습니다."}
 
+        # 데이터를 구성하고 NaN 처리 개선: 'y' (종목 종가)를 기준으로 NaN 제거
+        # KOSPI, SOX, NASDAQ, EXCHANGE, Volume은 ffill/bfill로 채우고,
+        # 그래도 남는 NaN은 제거하거나 0 처리
         df = pd.DataFrame({
             'y': close_data[ticker_symbol],
             'Volume': volume_data,
@@ -60,7 +63,11 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             'SOX': close_data['^SOX'],
             'NASDAQ': close_data['^IXIC'],
             'EXCHANGE': close_data['USDKRW=X']
-        }).ffill().dropna()
+        })
+        for col_to_fill in ['KOSPI', 'SOX', 'NASDAQ', 'EXCHANGE']:
+            df[col_to_fill] = df[col_to_fill].ffill().bfill()
+        df['Volume'] = df['Volume'].ffill().bfill().fillna(0) # Volume may legitimately be 0
+        df = df.dropna(subset=['y']) # 핵심 종가 데이터가 없는 행만 제거
 
         # 3. 기술적 지표 생성
         df['SOX_Trend'] = df['SOX'].rolling(window=200).mean()
@@ -103,7 +110,7 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
 
         forecast = model.predict(future)
 
-                # 7. 결과 데이터 정제
+        # 7. 결과 데이터 정제
         # 기간 설정 확장 (1m, 3m, 6m 추가)
         display_days = {
             "1m": 21, 
@@ -113,7 +120,9 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             "2y": 504, 
             "5y": 1260
         }.get(period, 252)
-        plot_df = df.tail(display_days)
+        
+        # plot_df는 df_clean(지표 계산 및 NaN 제거된 최종 데이터)에서 잘라야 함
+        plot_df = df_clean.tail(display_days) # <-- **PERIOD ISSUE FIX**
 
         def clean_val(v, default=0):
             if pd.isna(v) or np.isinf(v): return default
@@ -134,31 +143,41 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         total = {**history, **prediction}
         total = dict(sorted(total.items()))
 
-                # 8. 보완된 투자자 수급 데이터 수집 (pykrx)
+        # 8. 보완된 투자자 수급 데이터 수집 (pykrx) # <-- **INVESTOR DATA FIX**
         inv_dates, inv_foreign, inv_institution = [], [], []
         try:
             pure_code = code.split('.')[0]
-            # yfinance 인덱스 시간대 제거 (pykrx와 매칭을 위함)
-            plot_index_naive = plot_df.index.tz_localize(None)
+            # plot_df.index를 날짜(date) 객체로 변환하여 시간대와 시간 정보 제거
+            plot_dates_for_matching = [d.date() for d in plot_df.index.tz_localize(None)]
             
-            s_date = plot_index_naive[0].strftime('%Y%m%d')
-            e_date = plot_index_naive[-1].strftime('%Y%m%d')
-            
-            investor_df = stock.get_market_net_purchases_of_equities_by_date(s_date, e_date, pure_code)
+            s_date_str = plot_dates_for_matching[0].strftime('%Y%m%d') if plot_dates_for_matching else None
+            e_date_str = plot_dates_for_matching[-1].strftime('%Y%m%d') if plot_dates_for_matching else None
 
-            if not investor_df.empty:
-                # pykrx 인덱스도 datetime으로 변환 후 시간대 제거
-                investor_df.index = pd.to_datetime(investor_df.index).tz_localize(None)
-                # plot_index_naive 기준으로 데이터 재정렬 및 빈 날짜 0 채움
-                investor_df = investor_df.reindex(plot_index_naive).fillna(0)
-                
-                inv_dates = [d.strftime('%Y-%m-%d') for d in investor_df.index]
-                inv_foreign = [int(v) for v in investor_df['외국인']]
-                inv_institution = [int(v) for v in investor_df['기관합계']]
+            if s_date_str and e_date_str:
+                investor_raw_df = stock.get_market_net_purchases_of_equities_by_date(s_date_str, e_date_str, pure_code)
             else:
-                raise ValueError("No data returned from pykrx")
+                raise ValueError("Plot dates are empty for investor data fetching.")
+
+            if not investor_raw_df.empty:
+                # pykrx 데이터의 인덱스도 날짜(date) 객체로 변환
+                investor_raw_df.index = pd.to_datetime(investor_raw_df.index).date
+                
+                # plot_dates_for_matching의 각 날짜에 대해 수급 데이터 매칭
+                for plot_date in plot_dates_for_matching:
+                    inv_dates.append(plot_date.strftime('%Y-%m-%d'))
+                    if plot_date in investor_raw_df.index:
+                        # 해당 날짜의 외국인/기관 데이터 추가
+                        inv_foreign.append(int(investor_raw_df.loc[plot_date, '외국인']))
+                        inv_institution.append(int(investor_raw_df.loc[plot_date, '기관합계']))
+                    else:
+                        # 해당 날짜에 데이터가 없으면 0으로 채움
+                        inv_foreign.append(0)
+                        inv_institution.append(0)
+            else:
+                raise ValueError("No data returned from pykrx for the specified date range.")
         except Exception as e:
-            logger.warning(f"Investor data fetch failed for {code}: {e}")
+            logger.warning(f"투자자 데이터 수집 실패: {e}")
+            # 실패 시 plot_df의 날짜만큼 0으로 채워 반환 (클라이언트 오류 방지)
             inv_dates = [d.strftime('%Y-%m-%d') for d in plot_df.index]
             inv_foreign = [0] * len(inv_dates)
             inv_institution = [0] * len(inv_dates)
