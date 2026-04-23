@@ -2,7 +2,6 @@
 import {
   Box, Card, CardContent,
   Checkbox,
-  CircularProgress,
   FormControl,
   FormControlLabel, FormGroup,
   InputLabel, MenuItem, Select,
@@ -18,6 +17,7 @@ import {
   Tooltip, XAxis, YAxis
 } from 'recharts';
 import api from '../../api/axiosInstance';
+import RandomSpinner from '../../components/RandomSpinner';
 
 interface StockResponse {
   symbol: string;
@@ -142,7 +142,7 @@ const StockChartPage: React.FC = () => {
 
           <Box sx={{ width: '100%', height: 550 }}>
             {loading ? (
-              <Stack justifyContent="center" alignItems="center" sx={{ height: '100%' }}><CircularProgress /></Stack>
+              <Stack justifyContent="center" alignItems="center" sx={{ height: '100%' }}><RandomSpinner /></Stack>
             ) : error ? (
               <Stack justifyContent="center" alignItems="center" sx={{ height: '100%' }}><Typography color="error">{error}</Typography></Stack>
             ) : (

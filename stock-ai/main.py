@@ -63,11 +63,12 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             'SOX': close_data['^SOX'],
             'NASDAQ': close_data['^IXIC'],
             'EXCHANGE': close_data['USDKRW=X']
-        })
+        }).dropna(subset=['y']) # 핵심 종가 데이터가 없는 행만 제거
+
+        # Fill NaNs for other columns after initial 'y' drop
         for col_to_fill in ['KOSPI', 'SOX', 'NASDAQ', 'EXCHANGE']:
             df[col_to_fill] = df[col_to_fill].ffill().bfill()
         df['Volume'] = df['Volume'].ffill().bfill().fillna(0) # Volume may legitimately be 0
-        df = df.dropna(subset=['y']) # 핵심 종가 데이터가 없는 행만 제거
 
         # 3. 기술적 지표 생성
         df['SOX_Trend'] = df['SOX'].rolling(window=200).mean()
@@ -76,6 +77,7 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         df['MACD'] = macd.iloc[:, 0] if macd is not None else 0
         df['MA20'] = ta.sma(df['y'], length=20)
 
+        # df_clean은 Prophet 학습용으로, 모든 NaN 제거
         df_clean = df.dropna()
 
         # 4. Prophet 학습 데이터 구성
@@ -121,8 +123,12 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             "5y": 1260
         }.get(period, 252)
         
-        # plot_df는 df_clean(지표 계산 및 NaN 제거된 최종 데이터)에서 잘라야 함
-        plot_df = df_clean.tail(display_days) # <-- **PERIOD ISSUE FIX**
+        # plot_df는 원본 df에서 지표까지 계산된 상태에서 필요한 기간만큼 잘라서 사용.
+        # 이 시점에는 아직 NaNs가 존재할 수 있지만, display_days에 해당하는 가장 최근 데이터를 가져옴
+        # display에 필요한 최소한의 NaN만 제거
+        # 핵심 데이터 (y, Volume, RSI, MA20)가 모두 있는 행만 선택하여 기간 반영
+        plot_df_candidate = df[['y', 'Volume', 'RSI', 'MA20']].dropna() 
+        plot_df = plot_df_candidate.tail(display_days) # <-- **PERIOD ISSUE FIX**
 
         def clean_val(v, default=0):
             if pd.isna(v) or np.isinf(v): return default
@@ -154,7 +160,8 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             e_date_str = plot_dates_for_matching[-1].strftime('%Y%m%d') if plot_dates_for_matching else None
 
             if s_date_str and e_date_str:
-                investor_raw_df = stock.get_market_net_purchases_of_equities_by_date(s_date_str, e_date_str, pure_code)
+                # 함수명 변경: get_market_net_purchases_of_equities_by_date -> get_market_trading_volume_by_investor
+                investor_raw_df = stock.get_market_trading_volume_by_investor(s_date_str, e_date_str, pure_code)
             else:
                 raise ValueError("Plot dates are empty for investor data fetching.")
 
@@ -162,15 +169,32 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
                 # pykrx 데이터의 인덱스도 날짜(date) 객체로 변환
                 investor_raw_df.index = pd.to_datetime(investor_raw_df.index).date
                 
+                # 외국인과 기관의 순매수량 계산
+                investor_net_purchase = pd.DataFrame(index=investor_raw_df.index)
+                
+                # pykrx 버전별로 '외국인_순매수'가 바로 제공될 수도 있고, 매수-매도 차이로 계산해야 할 수도 있음
+                if '외국인_순매수' in investor_raw_df.columns:
+                    investor_net_purchase['외국인'] = investor_raw_df['외국인_순매수']
+                elif '외국인_매수' in investor_raw_df.columns and '외국인_매도' in investor_raw_df.columns:
+                    investor_net_purchase['외국인'] = investor_raw_df['외국인_매수'] - investor_raw_df['외국인_매도']
+                else:
+                    investor_net_purchase['외국인'] = 0 # 컬럼이 없으면 0으로 초기화
+
+                if '기관합계_순매수' in investor_raw_df.columns:
+                    investor_net_purchase['기관합계'] = investor_raw_df['기관합계_순매수']
+                elif '기관_매수' in investor_raw_df.columns and '기관_매도' in investor_raw_df.columns:
+                    investor_net_purchase['기관합계'] = investor_raw_df['기관_매수'] - investor_raw_df['기관_매도']
+                else:
+                    investor_net_purchase['기관합계'] = 0 # 컬럼이 없으면 0으로 초기화
+
+
                 # plot_dates_for_matching의 각 날짜에 대해 수급 데이터 매칭
                 for plot_date in plot_dates_for_matching:
                     inv_dates.append(plot_date.strftime('%Y-%m-%d'))
-                    if plot_date in investor_raw_df.index:
-                        # 해당 날짜의 외국인/기관 데이터 추가
-                        inv_foreign.append(int(investor_raw_df.loc[plot_date, '외국인']))
-                        inv_institution.append(int(investor_raw_df.loc[plot_date, '기관합계']))
+                    if plot_date in investor_net_purchase.index: # 계산된 순매수 데이터프레임에서 조회
+                        inv_foreign.append(int(investor_net_purchase.loc[plot_date, '외국인']))
+                        inv_institution.append(int(investor_net_purchase.loc[plot_date, '기관합계']))
                     else:
-                        # 해당 날짜에 데이터가 없으면 0으로 채움
                         inv_foreign.append(0)
                         inv_institution.append(0)
             else:
