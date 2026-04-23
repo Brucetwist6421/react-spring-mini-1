@@ -6,20 +6,19 @@ import lombok.Data;
 
 @Data
 public class StockVO {
-    private String symbol;        // 종목 코드 (예: 005930)
-    private Map<String, Double> history; // 날짜(String)와 종가(Double) 데이터
+    private String symbol;          // 종목 코드 (예: 005930)
+    private String industry_status; // 산업 현황 메시지 (추가)
+    private Map<String, Double> total;   // 전체 데이터 (History + Prediction) (추가)
+    private Map<String, Double> history; // 과거 종가 데이터
     private Map<String, Double> prediction; // AI 예측 데이터
 
-    // 추가된 필드
     private Map<String, Long> volume;      // 날짜별 거래량 데이터
-    private Map<String, String> events;    // 날짜별 주요 이벤트/키워드 데이터
+    private Map<String, String> events;    // 날짜별 주요 이벤트
 
-    // 신규 추가: 기술적 지표 (RSI 등)
-    // Python에서 "indicators": {"rsi": {...}} 형태로 보내므로 Map 안에 Map 구조가 필요합니다.
+    // 기술적 지표 (rsi, ma20 등)
     private Map<String, Map<String, Double>> indicators;
 
-    // 신규 추가: 수급 데이터 (외인/기관)
-    // Python에서 {"dates": [], "foreign": [], "institution": []} 형태로 보내므로 아래와 같이 정의합니다.
+    // 수급 데이터 (외인/기관)
     private InvestorVO investors;
 
     @Data

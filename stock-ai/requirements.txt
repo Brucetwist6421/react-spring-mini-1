@@ -1,45 +1,45 @@
 # --- Web Framework & Server ---
-fastapi==0.135.3
-uvicorn==0.42.0
-starlette==1.0.0
-h11==0.16.0
-anyio==4.13.0
+fastapi==0.115.0  # 현재 안정적인 버전으로 살짝 조정
+uvicorn==0.30.0
+starlette
+h11
+anyio
 
 # --- Data Science & Finance ---
 numpy
-pandas==3.0.2
+pandas<3.0.0      # 중요: Prophet과 pandas-ta는 아직 pandas 3.x와 호환성 이슈가 있을 수 있어 2.x대를 권장합니다.
 pandas-ta
-yfinance==1.2.0
-matplotlib==3.10.8
+yfinance
+matplotlib
 pykrx
-
+setuptools        # <-- 필수 추가: pkg_resources 에러 해결용
 
 # --- AI & Time Series Forecasting (Prophet) ---
-prophet==1.3.0
-cmdstanpy==1.3.0
-stanio==0.5.1
-holidays==0.93
+prophet==1.1.5    # 안정 버전
+cmdstanpy
+stanio
+holidays
 
 # --- Web Scraping & HTTP Clients ---
-requests==2.33.1
-beautifulsoup4==4.14.3
-urllib3==2.6.3
-curl_cffi==0.13.0
-soupsieve==2.8.3
+requests
+beautifulsoup4
+urllib3
+curl_cffi
+soupsieve
 
 # --- Core Utilities & Validation ---
-pydantic==2.12.5
-pydantic_core==2.41.5
-annotated-types==0.7.0
-typing_extensions==4.15.0
-python-dateutil==2.9.0.post0
-pytz==2026.1.post1
-certifi==2026.2.25
-idna==3.11
-click==8.3.1
-tqdm==4.67.3
+pydantic
+pydantic_core
+annotated-types
+typing_extensions
+python-dateutil
+pytz
+certifi
+idna
+click
+tqdm
 
 # --- Database & Others ---
-peewee==4.0.4
-frozendict==2.4.7
-pillow==12.2.0
+peewee
+frozendict
+pillow

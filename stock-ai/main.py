@@ -133,8 +133,11 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         try:
             start_date_str = plot_df.index[0].strftime('%Y%m%d')
             end_date_str = plot_df.index[-1].strftime('%Y%m%d')
-            # pykrx는 6자리 종목코드를 사용함 (KS/KQ 제외)
-            investor_df = stock.get_market_net_purchases_of_equities_by_ticker(start_date_str, end_date_str, code)
+            
+            # pykrx는 숫자 6자리 종목코드만 인식하므로 .KS 등을 제거합니다.
+            pure_code = code.split('.')[0] 
+            
+            investor_df = stock.get_market_net_purchases_of_equities_by_ticker(start_date_str, end_date_str, pure_code)
             
             # history 날짜와 동기화하기 위해 reindex 사용 (데이터가 없는 날은 0 처리)
             investor_df.index = pd.to_datetime(investor_df.index)
