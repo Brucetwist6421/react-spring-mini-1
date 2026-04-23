@@ -103,13 +103,22 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
 
         forecast = model.predict(future)
 
-        # 7. 결과 데이터 정제
-        display_days = {"1y": 252, "2y": 504, "5y": 1260}.get(period, 252)
+                # 7. 결과 데이터 정제
+        # 기간 설정 확장 (1m, 3m, 6m 추가)
+        display_days = {
+            "1m": 21, 
+            "3m": 63, 
+            "6m": 126, 
+            "1y": 252, 
+            "2y": 504, 
+            "5y": 1260
+        }.get(period, 252)
         plot_df = df.tail(display_days)
 
         def clean_val(v, default=0):
             if pd.isna(v) or np.isinf(v): return default
             return round(float(v), 2)
+
 
         history = {d.strftime('%Y-%m-%d'): clean_val(v) for d, v in zip(plot_df.index, plot_df['y'])}
         history_volume = {d.strftime('%Y-%m-%d'): int(v) if not pd.isna(v) else 0 for d, v in zip(plot_df.index, plot_df['Volume'])}
@@ -125,29 +134,35 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         total = {**history, **prediction}
         total = dict(sorted(total.items()))
 
-        # 8. 보완된 투자자 수급 데이터 수집 (pykrx)
+                # 8. 보완된 투자자 수급 데이터 수집 (pykrx)
         inv_dates, inv_foreign, inv_institution = [], [], []
         try:
             pure_code = code.split('.')[0]
-            s_date = plot_df.index[0].strftime('%Y%m%d')
-            e_date = plot_df.index[-1].strftime('%Y%m%d')
+            # yfinance 인덱스 시간대 제거 (pykrx와 매칭을 위함)
+            plot_index_naive = plot_df.index.tz_localize(None)
             
-            # 단일 종목 일자별 수급 데이터 가져오기 (가장 안정적인 함수로 교체)
+            s_date = plot_index_naive[0].strftime('%Y%m%d')
+            e_date = plot_index_naive[-1].strftime('%Y%m%d')
+            
             investor_df = stock.get_market_net_purchases_of_equities_by_date(s_date, e_date, pure_code)
 
             if not investor_df.empty:
-                investor_df.index = pd.to_datetime(investor_df.index)
-                investor_df = investor_df.reindex(plot_df.index).fillna(0)
+                # pykrx 인덱스도 datetime으로 변환 후 시간대 제거
+                investor_df.index = pd.to_datetime(investor_df.index).tz_localize(None)
+                # plot_index_naive 기준으로 데이터 재정렬 및 빈 날짜 0 채움
+                investor_df = investor_df.reindex(plot_index_naive).fillna(0)
+                
                 inv_dates = [d.strftime('%Y-%m-%d') for d in investor_df.index]
                 inv_foreign = [int(v) for v in investor_df['외국인']]
                 inv_institution = [int(v) for v in investor_df['기관합계']]
             else:
-                raise ValueError("데이터 빔")
-        except Exception:
-            # 수급 데이터 실패 시 차트 깨짐 방지를 위해 0으로 채움
-            inv_dates = list(history.keys())
+                raise ValueError("No data returned from pykrx")
+        except Exception as e:
+            logger.warning(f"Investor data fetch failed for {code}: {e}")
+            inv_dates = [d.strftime('%Y-%m-%d') for d in plot_df.index]
             inv_foreign = [0] * len(inv_dates)
             inv_institution = [0] * len(inv_dates)
+
 
         # 9. 이벤트 데이터
         try:
