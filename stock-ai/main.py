@@ -1,18 +1,22 @@
 import numpy as np
+
+# [CRITICAL] 패치를 모든 라이브러리 임포트보다 최상단에 배치합니다.
+# NumPy 2.0 이상 버전에서 삭제된 속성들을 수동으로 복구하여 Prophet 호환성을 확보합니다.
+for attr, target in [("float_", np.float64), ("int_", np.int64), ("bool_", bool)]:
+    if not hasattr(np, attr):
+        setattr(np, attr, target)
+
+# 패치 이후에 데이터 분석 라이브러리들을 임포트합니다.
+from prophet import Prophet 
 import pandas as pd
 import pandas_ta as ta
 import yfinance as yf
 from fastapi import FastAPI
-from prophet import Prophet
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from datetime import datetime, timedelta
 from pykrx import stock
-
-# NumPy 2.x 호환성 패치
-for attr, target in [("float_", np.float64), ("int_", np.int64), ("bool_", bool)]:
-    if not hasattr(np, attr): setattr(np, attr, target)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,28 +32,26 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         start_dt = end_dt - timedelta(days=365 * 5)
         s_date, e_date = start_dt.strftime("%Y%m%d"), end_dt.strftime("%Y%m%d")
 
-        # 1. Pykrx 데이터 풀(Pool) 수집
-        df_stock = stock.get_market_ohlcv(s_date, e_date, pure_code) # OHLCV
+        # 1. Pykrx 데이터 수집 (HANSUNG'S TRI-CORE 핵심 레이어)
+        df_stock = stock.get_market_ohlcv(s_date, e_date, pure_code)
         if df_stock.empty: return {"error": "데이터를 찾을 수 없습니다."}
         
-        df_investors = stock.get_market_net_purchases_of_equities_by_date(s_date, e_date, pure_code) # 수급
-        df_fund = stock.get_market_fundamental_by_date(s_date, e_date, pure_code) # PER, PBR, DIV, EPS
-        df_short = stock.get_shorting_status_by_date(s_date, e_date, pure_code) # 공매도 잔고
-        df_foreign = stock.get_exhaustion_rates_of_foreign_investment_by_date(s_date, e_date, pure_code) # 외인비중
+        df_investors = stock.get_market_net_purchases_of_equities_by_date(s_date, e_date, pure_code)
+        df_fund = stock.get_market_fundamental_by_date(s_date, e_date, pure_code)
+        df_short = stock.get_shorting_status_by_date(s_date, e_date, pure_code)
+        df_foreign = stock.get_exhaustion_rates_of_foreign_investment_by_date(s_date, e_date, pure_code)
 
-        # 2. yfinance 외부 지수 수집 (해외 지표)
+        # 2. yfinance 외부 지수 수집
         ext_tickers = ["^KS11", "^SOX", "^IXIC", "USDKRW=X"]
         df_ext = yf.download(ext_tickers, start=start_dt, end=end_dt)['Close'].ffill().bfill()
 
-        # 3. 데이터 통합 레이어
+        # 3. 데이터 통합
         df = pd.DataFrame(index=df_stock.index)
         df['y'] = df_stock['종가']
         df['Volume'] = df_stock['거래량']
         
-        # 외부 지수 Join
         df = df.join(df_ext.rename(columns={'^KS11': 'KOSPI', '^SOX': 'SOX', '^IXIC': 'NASDAQ', 'USDKRW=X': 'EXCHANGE'}))
         
-        # Fundamental & 공매도/외인비중 Join (데이터가 있을 경우에만)
         if not df_fund.empty:
             df = df.join(df_fund[['PER', 'PBR', 'DIV', 'EPS']])
         if not df_foreign.empty:
@@ -57,7 +59,7 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         if not df_short.empty:
             df['Short_Balance'] = df_short['잔고수량']
 
-        # 4. 기술적 지표 및 Prophet 학습
+        # 4. 기술적 지표 계산
         df['SOX_Trend'] = df['SOX'].rolling(window=200).mean()
         df['RSI'] = ta.rsi(df['y'], length=14)
         macd_res = ta.macd(df['y'])
@@ -66,49 +68,48 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
 
         df_clean = df.ffill().bfill().fillna(0)
         
-        # Prophet 학습 (추가된 PER, PBR, Foreign_Rate 등을 Regressor로 포함하여 학습 성능 강화)
+        # 5. Prophet 학습 및 예측
         df_p = df_clean.reset_index().rename(columns={'날짜': 'ds'})
         df_p['ds'] = df_p['ds'].dt.tz_localize(None)
 
         model = Prophet(daily_seasonality=False, weekly_seasonality=True, yearly_seasonality=True)
-        # 학습에 활용할 독립 변수들
         regressors = ['KOSPI', 'SOX', 'SOX_Trend', 'NASDAQ', 'EXCHANGE', 'RSI', 'MACD', 'PER', 'PBR', 'Foreign_Rate']
         for col in regressors:
             if col in df_p.columns: model.add_regressor(col)
         
         model.fit(df_p)
 
-        # 미래 예측 데이터 생성 로직 (기존과 동일)
         future = model.make_future_dataframe(periods=predict_days, freq='B')
         for col in regressors:
             if col in df_p.columns:
                 last_val, mean_val = df_p[col].iloc[-1], df_p[col].tail(252).mean()
-                future_vals = [last_val * 0.8 + mean_val * 0.2] # 간단한 선형 감쇄 예시
-                for _ in range(predict_days - 1): future_vals.append(future_vals[-1] * 0.9 + mean_val * 0.1)
+                future_vals = [last_val * 0.8 + mean_val * 0.2]
+                for _ in range(predict_days - 1): 
+                    future_vals.append(future_vals[-1] * 0.9 + mean_val * 0.1)
                 future[col] = list(df_p[col]) + future_vals
 
         forecast = model.predict(future)
 
-        # 5. StockVO 대응 JSON 구조 생성
+        # 6. Java StockVO 대응 JSON 구성
         req_period = period.lower().replace("o", "")
         display_days = {"1m": 22, "3m": 66, "6m": 132, "1y": 252, "2y": 504, "5y": 1260}.get(req_period, 252)
         plot_df = df_clean.tail(display_days)
 
-        def to_double_map(series): return {d.strftime('%Y-%m-%d'): round(float(v), 2) for d, v in zip(series.index, series)}
+        def to_double_map(series): 
+            return {d.strftime('%Y-%m-%d'): round(float(v), 2) for d, v in zip(series.index, series)}
         
         history = to_double_map(plot_df['y'])
         prediction = {row['ds'].strftime('%Y-%m-%d'): round(float(row['yhat']), 2) 
                       for _, row in forecast[forecast['ds'] > df_p['ds'].max()].iterrows()}
 
-        # 6. 최종 Response (Java StockVO 규격)
         return {
             "symbol": code,
-            "industry_status": "HANSUNG'S TRI-CORE: 거시지표 및 펀더멘털 분석 통합 완료",
+            "industry_status": "HANSUNG'S TRI-CORE 분석 엔진 정상 가동 중",
             "total": dict(sorted({**history, **prediction}.items())),
             "history": history,
             "prediction": prediction,
             "volume": {d.strftime('%Y-%m-%d'): int(v) for d, v in zip(plot_df.index, plot_df['Volume'])},
-            "events": {"2026-04-15": "실적 발표 기간"},
+            "events": {"2026-04-15": "시스템 데이터 통합 완료"},
             "indicators": {
                 "rsi": to_double_map(plot_df['RSI']),
                 "ma20": to_double_map(plot_df['MA20']),
