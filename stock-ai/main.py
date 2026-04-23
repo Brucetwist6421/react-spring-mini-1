@@ -113,28 +113,31 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         forecast = model.predict(future)
 
         # 7. 결과 데이터 정제
-        # 기간 설정 확장 (1m, 3m, 6m 추가)
+        # 사용자가 선택한 period에 따른 실제 영업일수 계산 (대략적)
         display_days = {
-            "1m": 21, 
-            "3m": 63, 
-            "6m": 126, 
+            "1m": 22, 
+            "3m": 66, 
+            "6m": 132, 
             "1y": 252, 
             "2y": 504, 
             "5y": 1260
         }.get(period, 252)
+
+        # 핵심 지표가 계산된 데이터프레임에서 NaN을 제거한 유효 데이터 확보
+        # RSI, MA20 등은 앞부분에 NaN이 생기므로 이를 제거해야 그래프가 깨지지 않음
+        valid_df = df.dropna(subset=['y', 'RSI', 'MA20'])
         
-        # plot_df는 원본 df에서 지표까지 계산된 상태에서 필요한 기간만큼 잘라서 사용.
-        # 이 시점에는 아직 NaNs가 존재할 수 있지만, display_days에 해당하는 가장 최근 데이터를 가져옴
-        # display에 필요한 최소한의 NaN만 제거
-        # 핵심 데이터 (y, Volume, RSI, MA20)가 모두 있는 행만 선택하여 기간 반영
-        plot_df_candidate = df[['y', 'Volume', 'RSI', 'MA20']].dropna() 
-        plot_df = plot_df_candidate.tail(display_days) # <-- **PERIOD ISSUE FIX**
+        # [수정 포인트] tail()만 쓰지 않고 명확하게 display_days만큼 슬라이싱
+        plot_df = valid_df.tail(display_days)
+
+        # 만약 가져온 데이터가 요청한 기간보다 적다면 로그 출력 (디버깅용)
+        logger.info(f"Requested period: {period}, Actual points: {len(plot_df)}")
 
         def clean_val(v, default=0):
             if pd.isna(v) or np.isinf(v): return default
             return round(float(v), 2)
 
-
+        # history 데이터 생성 (이 plot_df를 기준으로 8번 수급 데이터도 연동됨)
         history = {d.strftime('%Y-%m-%d'): clean_val(v) for d, v in zip(plot_df.index, plot_df['y'])}
         history_volume = {d.strftime('%Y-%m-%d'): int(v) if not pd.isna(v) else 0 for d, v in zip(plot_df.index, plot_df['Volume'])}
         history_rsi = {d.strftime('%Y-%m-%d'): clean_val(v) for d, v in zip(plot_df.index, plot_df['RSI'])}
@@ -149,59 +152,45 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         total = {**history, **prediction}
         total = dict(sorted(total.items()))
 
-        # 8. 보완된 투자자 수급 데이터 수집 (pykrx) # <-- **INVESTOR DATA FIX**
+        # 8. 보완된 투자자 수급 데이터 수집 (최종 수정본)
         inv_dates, inv_foreign, inv_institution = [], [], []
         try:
             pure_code = code.split('.')[0]
-            # plot_df.index를 날짜(date) 객체로 변환하여 시간대와 시간 정보 제거
-            plot_dates_for_matching = [d.date() for d in plot_df.index.tz_localize(None)]
-            
-            s_date_str = plot_dates_for_matching[0].strftime('%Y%m%d') if plot_dates_for_matching else None
-            e_date_str = plot_dates_for_matching[-1].strftime('%Y%m%d') if plot_dates_for_matching else None
+            # 1. 날짜 리스트 준비 (시간대 제거 및 문자열화)
+            naive_indices = plot_df.index.tz_localize(None)
+            s_date = naive_indices[0].strftime('%Y%m%d')
+            e_date = naive_indices[-1].strftime('%Y%m%d')
 
-            if s_date_str and e_date_str:
-                # 함수명 변경: get_market_net_purchases_of_equities_by_date -> get_market_trading_volume_by_investor
-                investor_raw_df = stock.get_market_trading_volume_by_investor(s_date_str, e_date_str, pure_code)
-            else:
-                raise ValueError("Plot dates are empty for investor data fetching.")
+            # 2. pykrx의 가장 안정적인 함수 사용 (일자별 순매수량)
+            # get_market_net_purchases_of_equities_by_ticker는 해당 기간 "합계"를 줄 가능성이 높으므로
+            # 일자별 데이터인 get_market_net_purchases_of_equities_by_date를 사용하되 컬럼명을 유연하게 처리합니다.
+            investor_df = stock.get_market_net_purchases_of_equities_by_date(s_date, e_date, pure_code)
 
-            if not investor_raw_df.empty:
-                # pykrx 데이터의 인덱스도 날짜(date) 객체로 변환
-                investor_raw_df.index = pd.to_datetime(investor_raw_df.index).date
+            if not investor_df.empty:
+                # pykrx 결과의 인덱스를 문자열(YYYY-MM-DD)로 변환하여 맵 생성
+                # 컬럼명이 '외국인', '기관합계' 인지 확인 (버전마다 다를 수 있음)
+                f_col = '외국인' if '외국인' in investor_df.columns else investor_df.columns[0]
+                i_col = '기관합계' if '기관합계' in investor_df.columns else investor_df.columns[1]
                 
-                # 외국인과 기관의 순매수량 계산
-                investor_net_purchase = pd.DataFrame(index=investor_raw_df.index)
-                
-                # pykrx 버전별로 '외국인_순매수'가 바로 제공될 수도 있고, 매수-매도 차이로 계산해야 할 수도 있음
-                if '외국인_순매수' in investor_raw_df.columns:
-                    investor_net_purchase['외국인'] = investor_raw_df['외국인_순매수']
-                elif '외국인_매수' in investor_raw_df.columns and '외국인_매도' in investor_raw_df.columns:
-                    investor_net_purchase['외국인'] = investor_raw_df['외국인_매수'] - investor_raw_df['외국인_매도']
-                else:
-                    investor_net_purchase['외국인'] = 0 # 컬럼이 없으면 0으로 초기화
+                res_map = investor_df.to_dict('index')
+                # Timestamp 키를 문자열 키로 변환
+                res_map = {k.strftime('%Y-%m-%d'): v for k, v in res_map.items()}
 
-                if '기관합계_순매수' in investor_raw_df.columns:
-                    investor_net_purchase['기관합계'] = investor_raw_df['기관합계_순매수']
-                elif '기관_매수' in investor_raw_df.columns and '기관_매도' in investor_raw_df.columns:
-                    investor_net_purchase['기관합계'] = investor_raw_df['기관_매수'] - investor_raw_df['기관_매도']
-                else:
-                    investor_net_purchase['기관합계'] = 0 # 컬럼이 없으면 0으로 초기화
-
-
-                # plot_dates_for_matching의 각 날짜에 대해 수급 데이터 매칭
-                for plot_date in plot_dates_for_matching:
-                    inv_dates.append(plot_date.strftime('%Y-%m-%d'))
-                    if plot_date in investor_net_purchase.index: # 계산된 순매수 데이터프레임에서 조회
-                        inv_foreign.append(int(investor_net_purchase.loc[plot_date, '외국인']))
-                        inv_institution.append(int(investor_net_purchase.loc[plot_date, '기관합계']))
+                for d in naive_indices:
+                    d_str = d.strftime('%Y-%m-%d')
+                    inv_dates.append(d_str)
+                    
+                    if d_str in res_map:
+                        inv_foreign.append(int(res_map[d_str].get(f_col, 0)))
+                        inv_institution.append(int(res_map[d_str].get(i_col, 0)))
                     else:
                         inv_foreign.append(0)
                         inv_institution.append(0)
             else:
-                raise ValueError("No data returned from pykrx for the specified date range.")
+                raise ValueError("수급 데이터 없음")
+
         except Exception as e:
-            logger.warning(f"투자자 데이터 수집 실패: {e}")
-            # 실패 시 plot_df의 날짜만큼 0으로 채워 반환 (클라이언트 오류 방지)
+            logger.warning(f"Investor data fetch failed: {e}")
             inv_dates = [d.strftime('%Y-%m-%d') for d in plot_df.index]
             inv_foreign = [0] * len(inv_dates)
             inv_institution = [0] * len(inv_dates)

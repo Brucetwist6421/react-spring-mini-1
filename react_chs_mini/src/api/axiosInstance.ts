@@ -4,7 +4,7 @@ const api = axios.create({
   // 배포 시 Nginx 프록시를 사용한다면 baseURL을 빈 문자열('')로 두거나 환경 변수를 사용하세요.
   baseURL: "http://168.107.51.143:8080",
   // baseURL: "",
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
