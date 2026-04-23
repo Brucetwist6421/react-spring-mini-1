@@ -1,13 +1,13 @@
 # --- Web Framework & Server ---
-fastapi==0.115.0  # 현재 안정적인 버전으로 살짝 조정
+fastapi==0.115.0
 uvicorn==0.30.0
 starlette
 h11
 anyio
 
 # --- Data Science & Finance ---
-numpy>=2.0.0      # 최신 버전 사용
-pandas<3.0.0      # pandas는 여전히 2.x대를 권장 (Prophet 안정성 때문)
+numpy>=2.0.0       # 3.12용 미리 빌드된 파일이 널려 있습니다.
+pandas>=2.2.2      
 pandas-ta
 yfinance
 matplotlib
@@ -15,8 +15,8 @@ pykrx
 setuptools
 
 # --- AI & Time Series Forecasting (Prophet) ---
-prophet==1.1.5    # 안정 버전
-cmdstanpy
+cmdstanpy==1.1.0  
+prophet==1.1.5
 stanio
 holidays
 

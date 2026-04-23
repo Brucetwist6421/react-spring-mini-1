@@ -1,7 +1,6 @@
 import numpy as np
 
-# [필독] NumPy 2.0+ 호환성 패치 (최상단 유지)
-# Prophet 및 일부 라이브러리에서 삭제된 구버전 넘파이 속성을 참조할 때 발생하는 에러를 방지합니다.
+# Prophet의 심폐소생술: 삭제된 구형 타입들을 최신 타입으로 연결
 if not hasattr(np, "float_"):
     np.float_ = np.float64
 if not hasattr(np, "int_"):
