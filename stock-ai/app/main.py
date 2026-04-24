@@ -57,18 +57,25 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         if df_stock.empty:
             return {"error": "시세 데이터를 가져오지 못했습니다."}
 
+        # 데이터 로드
         df_investors = dl.get_investor_data(pure_code)
         fund_info = dl.get_fundamental_data(pure_code)
+        
+        # Prophet 예측 (predictor.py에서 tail(predict_days) 처리됨)
         forecast = pt.predict_stock(df_stock, predict_days)
 
+        # 표시 기간 설정
         req_period = period.lower().replace("o", "")
         display_days = {"1m": 22, "3m": 66, "6m": 132, "1y": 252, "2y": 504}.get(req_period, 252)
         plot_df = df_stock.tail(display_days)
 
+        # 수급 데이터 정렬 (중요: 날짜 맞춤)
+        df_investors_plot = df_investors.reindex(plot_df.index).fillna(0)
+
         def to_map(series):
             return {d.strftime('%Y-%m-%d'): round(float(v), 2) for d, v in zip(series.index, series)}
 
-        # RSI 계산 (직접 구현한 함수 사용)
+        # RSI 계산
         rsi_series = calculate_rsi(df_stock['Close']).tail(display_days)
 
         return {
@@ -76,21 +83,15 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             "industry_status": "HANSUNG'S TRI-CORE 분석 엔진 가동 중",
             "history": to_map(plot_df['Close']),
             "prediction": {
-                d.strftime('%Y-%m-%d'): round(v, 2) for d, v in zip(forecast['ds'], forecast['yhat'])
+                d.strftime('%Y-%m-%d'): round(float(v), 2) for d, v in zip(forecast['ds'], forecast['yhat'])
             },
             "volume": {
                 d.strftime('%Y-%m-%d'): int(v) for d, v in zip(plot_df.index, plot_df['Volume'])
             },
             "investors": {
                 "dates": [d.strftime('%Y-%m-%d') for d in plot_df.index],
-                "foreign": [
-                    int(df_investors.loc[d, '외국인']) if not df_investors.empty and d in df_investors.index else 0 
-                    for d in plot_df.index
-                ],
-                "institution": [
-                    int(df_investors.loc[d, '기관합계']) if not df_investors.empty and d in df_investors.index else 0 
-                    for d in plot_df.index
-                ]
+                "foreign": df_investors_plot['외국인'].astype(int).tolist(),
+                "institution": df_investors_plot['기관합계'].astype(int).tolist()
             },
             "fundamental": fund_info,
             "indicators": {
