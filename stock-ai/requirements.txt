@@ -6,7 +6,7 @@ h11
 anyio
 
 # --- Data Science & Finance ---
-numpy>=2.0.0       # 3.12용 미리 빌드된 파일이 널려 있습니다.
+numpy<2.0.0
 pandas>=2.2.2      
 pandas-ta
 finance-datareader
