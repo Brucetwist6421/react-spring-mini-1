@@ -6,9 +6,9 @@ h11
 anyio
 
 # --- Data Science & Finance ---
-numpy<2.0.0
-pandas>=2.2.2      
-pandas-ta
+numpy==1.26.4
+pandas>=2.1.0,<2.2.0
+pandas-ta==0.3.14b0
 finance-datareader
 yfinance
 matplotlib
@@ -16,7 +16,7 @@ pykrx
 setuptools
 
 # --- AI & Time Series Forecasting (Prophet) ---
-cmdstanpy==1.1.0  
+cmdstanpy>=1.2.0
 prophet==1.1.5
 stanio
 holidays
