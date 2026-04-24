@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-from config import APP_KEY, APP_SECRET, URL_BASE, ACCESS_TOKEN
+from app.config import APP_KEY, APP_SECRET, URL_BASE, ACCESS_TOKEN
 import FinanceDataReader as fdr
 
 def get_kis_headers(tr_id):
