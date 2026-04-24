@@ -6,15 +6,15 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# 의존성 파일 복사
+# 1. 의존성 파일 복사 및 설치
 COPY requirements.txt .
-
-# 개별 패키지 강제 설치(numpy==2.4.4 등)를 지우고 
-# pip가 한 번에 해결하도록 맡깁니다.
 RUN pip install --no-cache-dir --upgrade pip 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 소스 코드 복사
-COPY main.py .
+# 2. 소스 코드 폴더 전체를 컨테이너의 app/ 폴더로 복사
+# 현재 로컬의 app/ 폴더 내용을 컨테이너의 /app/app/ 경로로 복사하게 됩니다.
+COPY app/ ./app/
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 3. 실행 명령어 수정
+# 패키지 구조이므로 'app.main:app' 형식으로 지정해야 합니다.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

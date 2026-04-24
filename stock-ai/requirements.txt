@@ -9,6 +9,7 @@ anyio
 numpy>=2.0.0       # 3.12용 미리 빌드된 파일이 널려 있습니다.
 pandas>=2.2.2      
 pandas-ta
+finance-datareader
 yfinance
 matplotlib
 pykrx
@@ -22,6 +23,7 @@ holidays
 
 # --- Web Scraping & HTTP Clients ---
 requests
+python-dotenv
 beautifulsoup4
 urllib3
 curl_cffi
