@@ -15,7 +15,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # 2. 소스 코드 및 환경 설정 파일 복사
 # .env 파일이 루트에 있다면 함께 복사되도록 설정 (배포 방식에 따라 선택)
-COPY .env . 
 COPY app/ ./app/
 
 # 3. 파이썬 경로 명시 (Import 에러 방지를 위한 안전장치)

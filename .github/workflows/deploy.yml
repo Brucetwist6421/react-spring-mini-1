@@ -61,9 +61,13 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/react-app:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/stock-ai:latest
             
-            # 3. 파이썬 AI 서버 실행 (가장 먼저 실행)
+            # 3. 파이썬 AI 서버 실행 (Secrets 주입)
+            # -e 옵션을 통해 GitHub Secrets 값을 컨테이너 내부 환경 변수로 전달합니다.
             docker run -d --name python-container \
               -p 8000:8000 \
+              -e KIS_APP_KEY="${{ secrets.APP_KEY }}" \
+              -e KIS_APP_SECRET="${{ secrets.APP_SECRET }}" \
+              -e KIS_URL_BASE="https://openapi.koreainvestment.com:9443" \
               --restart always \
               ${{ secrets.DOCKER_USERNAME }}/stock-ai:latest
 

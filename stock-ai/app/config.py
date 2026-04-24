@@ -11,7 +11,7 @@ load_dotenv()
 # os.environ.get을 통해 값을 가져옵니다.
 APP_KEY = os.environ.get("KIS_APP_KEY")
 APP_SECRET = os.environ.get("KIS_APP_SECRET")
-URL_BASE = os.environ.get("KIS_URL_BASE")
+URL_BASE = os.environ.get("KIS_URL_BASE", "https://openapi.koreainvestment.com:9443")
 
 ACCESS_TOKEN = None
 
