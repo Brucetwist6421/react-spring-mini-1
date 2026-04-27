@@ -148,7 +148,7 @@ const StockChartPage: React.FC = () => {
           <Stack direction={{ xs: 'column', lg: 'row' }} justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 4 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>📈 주식 종합 지표 및 AI 예측</Typography>
-              <Typography variant="body2" color="text.secondary">삼성전자({stockCode})</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{fontSize:18}}>삼성전자({stockCode})</Typography>
             </Box>
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
@@ -357,14 +357,14 @@ const StockChartPage: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                  <XAxis dataKey="date" tick={{ fontSize: 10 }} minTickGap={20} />
+                  <XAxis dataKey="date" tick={{ fontSize: 14 }} minTickGap={20} />
                   
                   <YAxis 
                     yAxisId="left"
                     orientation="left" 
                     domain={['dataMin - 2000', 'dataMax + 2000']}
                     tickFormatter={(val) => val.toLocaleString()} 
-                    tick={{ fontSize: 12, fontWeight: 'bold', fill: '#333' }}
+                    tick={{ fontSize: 16, fontWeight: 'bold', fill: '#333' }}
                   />
                   <YAxis yAxisId="sub" orientation="right" hide={true} domain={['dataMin * 4', 'dataMax * 4']} />
                   <YAxis yAxisId="rsi" orientation="right" domain={[0, 100]} hide={!showRSI} stroke="#f44336" />
@@ -433,7 +433,39 @@ const StockChartPage: React.FC = () => {
                   <Line yAxisId="left" name="실제 종가" type="monotone" dataKey="actual" stroke="#1976d2" strokeWidth={3} dot={false} connectNulls />
                   <Line yAxisId="left" name="AI 예측" type="monotone" dataKey="predict" stroke="#ff9800" strokeWidth={2} strokeDasharray="5 5" dot={false} connectNulls />
                   
-                  {showRSI && <Line yAxisId="rsi" name="RSI" type="monotone" dataKey="rsi" stroke="#f44336" strokeWidth={1} dot={false} />}
+                  {showRSI && (
+                    <>
+                      {/* 70(과열) 기준선: 빨간색 점선 */}
+                      <ReferenceLine 
+                        yAxisId="rsi" 
+                        y={70} 
+                        stroke="#ef5350" 
+                        strokeDasharray="3 3" 
+                        label={{ value: '과열', position: 'right', fill: '#ef5350', fontSize: 12, fontWeight: 'bold' }} 
+                      />
+                      
+                      {/* 30(침체) 기준선: 파란색 점선 */}
+                      <ReferenceLine 
+                        yAxisId="rsi" 
+                        y={30} 
+                        stroke="#1e88e5" 
+                        strokeDasharray="3 3" 
+                        label={{ value: '침체', position: 'right', fill: '#1e88e5', fontSize: 12, fontWeight: 'bold' }} 
+                      />
+
+                      {/* RSI 라인: 기본값은 회색계열로 두고 기준선과의 대비를 강조 */}
+                      <Line 
+                        yAxisId="rsi" 
+                        name="RSI" 
+                        type="monotone" 
+                        dataKey="rsi" 
+                        stroke="#f44336" 
+                        strokeWidth={2} 
+                        dot={false} 
+                        activeDot={{ r: 4 }}
+                      />
+                    </>
+                  )}
                 </ComposedChart>
               </ResponsiveContainer>
             )}
