@@ -14,6 +14,7 @@ import {
   Area,
   Bar,
   CartesianGrid,
+  Cell,
   ComposedChart,
   Legend, Line,
   ReferenceLine,
@@ -54,7 +55,8 @@ interface ChartDataItem {
   date: string;
   actual?: number | null;
   predict?: number | null;
-  predictRange?: [number, number] | null;
+  // 💡 [하한, 상한]을 담을 튜플 타입으로 정의
+  predictRange?: [number, number] | null; 
   volume?: number | null;
   rsi?: number | null;
   foreign: number;
@@ -95,30 +97,33 @@ const StockChartPage: React.FC = () => {
         ).sort();
 
         const combinedData: ChartDataItem[] = allDates.map((date) => {
-          const investorIdx = investors?.dates.indexOf(date);
-          const predData = prediction[date];
-          let validPredict = null;
-          let validRange: [number, number] | null = null;
+        const investorIdx = investors?.dates.indexOf(date);
+        const predData = prediction[date];
+        
+        let validPredict: number | null = null;
+        let validRange: [number, number] | null = null;
 
-          if (predData) {
-            const val = typeof predData === 'object' ? predData.value : predData;
-            validPredict = val > 0 ? Math.round(val) : null;
-            if (typeof predData === 'object') {
-              validRange = [Math.round(predData.lower), Math.round(predData.upper)];
-            }
+        if (predData && typeof predData === 'object') {
+          // 💡 백엔드 구조와 일치화: predData가 이제 무조건 객체로 옵니다.
+          validPredict = predData.value > 0 ? Math.round(predData.value) : null;
+          
+          // lower, upper 값이 있을 때만 범위 생성
+          if (predData.lower !== undefined && predData.upper !== undefined) {
+            validRange = [Math.round(predData.lower), Math.round(predData.upper)];
           }
+        }
 
-          return {
-            date,
-            actual: history[date] !== undefined ? Math.round(history[date]) : null,
-            predict: validPredict,
-            predictRange: validRange,
-            volume: volume?.[date] ?? 0,
-            rsi: indicators?.rsi?.[date] ?? null,
-            foreign: (investorIdx !== -1 && investors) ? investors.foreign[investorIdx] : 0,
-            institution: (investorIdx !== -1 && investors) ? investors.institution[investorIdx] : 0,
-          };
-        });
+        return {
+          date,
+          actual: history[date] !== undefined ? Math.round(history[date]) : null,
+          predict: validPredict,
+          predictRange: validRange,
+          volume: volume?.[date] ?? 0,
+          rsi: indicators?.rsi?.[date] ?? null,
+          foreign: (investorIdx !== -1 && investors) ? investors.foreign[investorIdx] : 0,
+          institution: (investorIdx !== -1 && investors) ? investors.institution[investorIdx] : 0,
+        };
+      });
 
         setChartData(combinedData);
       } catch (err) {
@@ -304,48 +309,36 @@ const StockChartPage: React.FC = () => {
                   <Area 
                     yAxisId="left"
                     name="예측 신뢰구간"
-                    dataKey="predictRange"
+                    // 💡 배열 데이터가 들어있는 키를 지정
+                    dataKey="predictRange" 
                     stroke="none"
                     fill="#ff9800"
-                    fillOpacity={0.15}
+                    fillOpacity={0.25}
                     connectNulls
+                    // 툴팁이나 호버 시 점이 생기지 않도록 설정 (선택사항)
+                    activeDot={false}
                   />
 
                   {showInvestors && <ReferenceLine yAxisId="sub" y={0} stroke="#999" strokeWidth={1} strokeDasharray="3 3" />}
                   {showVolume && <Bar yAxisId="sub" name="거래량" dataKey="volume" fill="#e0e0e0" opacity={0.4} barSize={15} />}
 
                   {showInvestors && (
-                    <>
+  <>
+                      <ReferenceLine yAxisId="sub" y={0} stroke="#999" strokeWidth={1} strokeDasharray="3 3" />
+                      
                       {/* 외인순매수 */}
-                      <Bar 
-                        yAxisId="sub" 
-                        name="외인순매수" 
-                        dataKey="foreign" 
-                        barSize={8}
-                        // shape 속성을 사용하면 개별 막대의 색상을 직접 제어할 수 있습니다.
-                        shape={(props: any) => {
-                          const { x, y, width, height, payload } = props;
-                          const color = payload.foreign >= 0 ? "#ef5350" : "#1e88e5";
-                          return <rect x={x} y={y} width={width} height={height} fill={color} />;
-                        }}
-                        // 범례(Legend)에 표시될 대표 색상
-                        fill="#ef5350" 
-                      />
+                      <Bar yAxisId="sub" name="외인순매수" dataKey="foreign" barSize={8} fill="#ef5350">
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-foreign-${index}`} fill={entry.foreign >= 0 ? "#ef5350" : "#1e88e5"} />
+                        ))}
+                      </Bar>
 
                       {/* 기관순매수 */}
-                      <Bar 
-                        yAxisId="sub" 
-                        name="기관순매수" 
-                        dataKey="institution" 
-                        barSize={8}
-                        shape={(props: any) => {
-                          const { x, y, width, height, payload } = props;
-                          const color = payload.institution >= 0 ? "#ff80ab" : "#90caf9";
-                          return <rect x={x} y={y} width={width} height={height} fill={color} />;
-                        }}
-                        // 범례(Legend)에 표시될 대표 색상
-                        fill="#ff80ab"
-                      />
+                      <Bar yAxisId="sub" name="기관순매수" dataKey="institution" barSize={8} fill="#ff80ab">
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-inst-${index}`} fill={entry.institution >= 0 ? "#ff80ab" : "#90caf9"} />
+                        ))}
+                      </Bar>
                     </>
                   )}
 

@@ -10,7 +10,7 @@ public class StockVO {
     private String industry_status; // 산업 현황 메시지 (추가)
     private Map<String, Double> total;   // 전체 데이터 (History + Prediction) (추가)
     private Map<String, Double> history; // 과거 종가 데이터
-    private Map<String, Double> prediction; // AI 예측 데이터
+    private Map<String, PredictionVO> prediction; // AI 예측 데이터
 
     //기본적 분석 데이터 (PER, PBR 등)를 담을 객체
     private FundamentalVO fundamental;
@@ -38,5 +38,12 @@ public class StockVO {
         private Double pbr;
         private Double eps;
         private Double div;
+    }
+
+    @Data
+    public static class PredictionVO {
+        private Double value; // 예측값 (yhat)
+        private Double lower; // 하한값 (yhat_lower)
+        private Double upper; // 상한값 (yhat_upper)
     }
 }

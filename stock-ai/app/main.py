@@ -83,7 +83,16 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             "industry_status": "HANSUNG'S TRI-CORE 분석 엔진 가동 중",
             "history": to_map(plot_df['Close']),
             "prediction": {
-                d.strftime('%Y-%m-%d'): round(float(v), 2) for d, v in zip(forecast['ds'], forecast['yhat'])
+                d.strftime('%Y-%m-%d'): {
+                    "value": round(float(yhat), 2),
+                    "lower": round(float(lower), 2),
+                    "upper": round(float(upper), 2)
+                } for d, yhat, lower, upper in zip(
+                    forecast['ds'], 
+                    forecast['yhat'], 
+                    forecast['yhat_lower'], 
+                    forecast['yhat_upper']
+                )
             },
             "volume": {
                 d.strftime('%Y-%m-%d'): int(v) for d, v in zip(plot_df.index, plot_df['Volume'])
