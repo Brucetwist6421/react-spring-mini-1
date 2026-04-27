@@ -7,20 +7,28 @@ for attr, target in [("float_", np.float64), ("int_", np.int64), ("bool_", bool)
     if not hasattr(np, attr): setattr(np, attr, target)
 
 def predict_stock(df, days):
-    """Prophet 예측 실행"""
-    # 1. 데이터 전처리 (ds, y 컬럼명 맞추기)
+    """Prophet 예측 실행 - 변동성 강화 버전"""
     pdf = df.reset_index()[['Date', 'Close']].rename(columns={'Date':'ds', 'Close':'y'})
     
-    # 2. 모델 설정 및 학습
-    model = Prophet(daily_seasonality=True, changepoint_prior_scale=0.05)
+    # 1. 모델 설정 최적화
+    model = Prophet(
+        daily_seasonality=True,
+        weekly_seasonality=True,
+        yearly_seasonality=True,
+        # 추세 변화 민감도 (높을수록 예측선이 구불구불해짐)
+        changepoint_prior_scale=0.5, 
+        # 계절성 반영 강도
+        seasonality_prior_scale=10.0,
+        # 가법(additive) 모델 대신 승법(multiplicative) 모델 고려 가능
+        seasonality_mode='multiplicative' 
+    )
+    
     model.fit(pdf)
     
-    # 3. 미래 날짜 생성 (학습 데이터 마지막 날 + days)
+    # 2. 미래 날짜 생성 (평일 기준)
     future = model.make_future_dataframe(periods=days, freq='B')
     
-    # 4. 예측 실행
+    # 3. 예측 실행
     forecast = model.predict(future)
     
-    # [핵심 수정] 전체 데이터 중 마지막 'days'만큼만 슬라이싱하여 반환
-    # 이렇게 하면 과거 학습 구간은 제외되고 실제 예측된 미래 데이터만 리턴됩니다.
     return forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(days)
