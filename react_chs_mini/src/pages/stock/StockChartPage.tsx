@@ -153,9 +153,66 @@ const StockChartPage: React.FC = () => {
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
               <FormGroup row>
-                <FormControlLabel control={<Checkbox checked={showVolume} onChange={e => setShowVolume(e.target.checked)} color="secondary" />} label="거래량" />
-                <FormControlLabel control={<Checkbox checked={showRSI} onChange={e => setShowRSI(e.target.checked)} color="error" />} label="RSI" />
-                <FormControlLabel control={<Checkbox checked={showInvestors} onChange={e => setShowInvestors(e.target.checked)} color="success" />} label="수급" />
+                {[
+                  { 
+                    label: '거래량', 
+                    checked: showVolume, 
+                    onChange: setShowVolume, 
+                    color: "secondary", 
+                    desc: "일별 주식 거래량을 막대 차트로 표시합니다." 
+                  },
+                  { 
+                    label: 'RSI', 
+                    checked: showRSI, 
+                    onChange: setShowRSI, 
+                    color: "error", 
+                    desc: "상대강도지수(RSI): 70 이상은 과매수(과열), 30 이하는 과매도(침체) 구간으로 해석합니다." 
+                  },
+                  { 
+                    label: '수급', 
+                    checked: showInvestors, 
+                    onChange: setShowInvestors, 
+                    color: "success", 
+                    desc: "외국인 및 기관의 순매수량을 표시합니다. (양수: 매수, 음수: 매도)" 
+                  }
+                ].map((item, idx) => (
+                  <MuiTooltip 
+                    key={idx}
+                    title={item.desc} 
+                    arrow 
+                    placement="top"
+                    enterTouchDelay={0}
+                    // 💡 그리드와 동일한 스타일 적용
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          fontSize: '0.85rem',
+                          lineHeight: 1.5,
+                          bgcolor: 'rgba(50, 50, 50, 0.95)',
+                          px: 1.5,
+                          py: 1,
+                          maxWidth: 250,
+                          borderRadius: 2,
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                        },
+                      },
+                      arrow: {
+                        sx: { color: 'rgba(50, 50, 50, 0.95)' },
+                      },
+                    }}
+                  >
+                    <FormControlLabel 
+                      control={
+                        <Checkbox 
+                          checked={item.checked} 
+                          onChange={e => item.onChange(e.target.checked)} 
+                          color={item.color as any} 
+                        />
+                      } 
+                      label={item.label} 
+                    />
+                  </MuiTooltip>
+                ))}
               </FormGroup>
 
               <FormControl size="small" sx={{ minWidth: 100 }}>
@@ -188,7 +245,7 @@ const StockChartPage: React.FC = () => {
             </Stack>
           </Stack>
 
-          {/* 2. 핵심 지표 Grid (PER, PBR, 등락률, 외인비율) */}
+          {/* 2. 핵심 지표 Grid (PER, PBR, 등락률, EPS) */}
           {!loading && fundamental && (
             <Grid container spacing={2} sx={{ mb: 4 }}>
               {[
@@ -207,18 +264,19 @@ const StockChartPage: React.FC = () => {
                   desc: '주가순자산비율: 주가를 주당순자산가치(BPS)로 나눈 값입니다. 1배 미만이면 청산가치보다 주가가 낮음을 의미합니다.' 
                 },
                 { 
-                  label: '등락률', 
+                  label: '전일 대비 등락률', 
                   value: fundamental.change_rt, 
                   unit: '%', 
-                  color: (fundamental.change_rt ?? 0) >= 0 ? '#d32f2f' : '#1976d2', // 양수면 빨강, 음수면 파랑
+                  color: (fundamental.change_rt ?? 0) >= 0 ? '#d32f2f' : '#1976d2',
                   desc: '전일 대비 가격 변동률입니다. 현재 시장의 단기적인 매수/매도 강도를 나타냅니다.' 
                 },
+                // 💡 외인비율 대신 EPS 추가
                 { 
-                  label: '외인비율', 
-                  value: fundamental.foreign_rt, 
-                  unit: '%', 
-                  color: '#7b1fa2', // 외인 수급은 보라색 계열로 차별화
-                  desc: '외국인 보유비율입니다. 대형주의 경우 외인 비중이 늘어나는지 확인하는 것이 수급 분석의 핵심입니다.' 
+                  label: 'EPS', 
+                  value: fundamental.eps, 
+                  unit: '원', 
+                  color: '#f57c00', // 수익성을 상징하는 오렌지/골드 계열
+                  desc: '주당순이익: 기업이 벌어들인 순이익을 발행 주식 수로 나눈 값입니다. 높을수록 기업의 수익성이 좋음을 의미합니다.' 
                 },
               ].map((item, idx) => (
                 <Grid key={idx} size={{ xs: 6, sm: 3 }}>
@@ -266,7 +324,7 @@ const StockChartPage: React.FC = () => {
                           fontWeight: 700, 
                           display: 'block',
                           mb: 0.5,
-                          fontSize: '0.9rem', // 라벨은 적절한 크기로 유지
+                          fontSize: '0.9rem',
                         }}
                       >
                         {item.label}
@@ -274,11 +332,11 @@ const StockChartPage: React.FC = () => {
                       <Typography 
                         variant="h6" 
                         sx={{ 
-                          fontWeight: 900, // 숫자를 더 강조
-                          color: item.label === '등락률' ? item.color : 'inherit' // 등락률은 숫자 자체에도 색상 적용
+                          fontWeight: 900, 
+                          color: item.label === '전일 대비 등락률' ? item.color : 'inherit' 
                         }}
                       >
-                        {item.label === '등락률' && (fundamental.change_rt ?? 0) > 0 ? '+' : ''}
+                        {item.label === '전일 대비 등락률' && (fundamental.change_rt ?? 0) > 0 ? '+' : ''}
                         {item.value?.toLocaleString() ?? '0'}
                         <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700 }}>{item.unit}</Typography>
                       </Typography>
