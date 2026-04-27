@@ -123,7 +123,7 @@ const NavigationBar = () => {
             )}
             {/* 2. 로그인 여부에 따른 텍스트 변경 */}
             <Typography variant="h6" fontWeight="bold" color="#38bdf8" sx={{ ml: 1 }}>
-              {isLoggedIn ? "대덕인재개발원" : "POKEMON"}
+              {isLoggedIn ? "대덕인재개발원" : "한성's 개인프로젝트"}
             </Typography>
 
           </Box>

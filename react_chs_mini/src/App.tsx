@@ -37,7 +37,7 @@ function App() {
             }}
           >
             {/* 상단 헤더 */}
-            <Header title="Pokemon Manager" />
+            <Header title="한성's 개인프로젝트" />
 
             {/* 메인 본문: 페이지 이동 시 여기만 바뀝니다 */}
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>

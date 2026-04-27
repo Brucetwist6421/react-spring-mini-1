@@ -18,16 +18,19 @@ import {
   Legend, Line,
   ReferenceLine,
   ResponsiveContainer,
-  Tooltip, XAxis, YAxis
+   XAxis, YAxis
 } from 'recharts';
 import api from '../../api/axiosInstance';
 import RandomSpinner from '../../components/RandomSpinner';
 
+import { Tooltip as MuiTooltip } from '@mui/material';
+import { Tooltip as ChartTooltip } from 'recharts'; // 차트 내부는 이걸로 변경
+
 interface FundamentalData {
-  PER: number;
-  PBR: number;
-  EPS: number;
-  DIV: number;
+  per: number;
+  pbr: number;
+  eps: number;
+  div: number;
 }
 
 interface StockResponse {
@@ -170,6 +173,8 @@ const StockChartPage: React.FC = () => {
                   <MenuItem value={60}>60일</MenuItem>
                   <MenuItem value={90}>90일</MenuItem>
                   <MenuItem value={120}>120일</MenuItem>
+                  <MenuItem value={150}>150일</MenuItem>
+                  <MenuItem value={180}>180일</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
@@ -177,28 +182,92 @@ const StockChartPage: React.FC = () => {
 
           {/* 기본적 분석 지표 (PER, PBR 등) */}
           {!loading && fundamental && (
-            <Grid container spacing={2} sx={{ mb: 4 }}>
-              {[
-                { label: 'PER', value: fundamental.PER, unit: '배', color: '#1976d2' },
-                { label: 'PBR', value: fundamental.PBR, unit: '배', color: '#388e3c' },
-                { label: 'EPS', value: fundamental.EPS, unit: '원', color: '#7b1fa2' },
-                { label: '배당수익률', value: fundamental.DIV, unit: '%', color: '#f57c00' },
-              ].map((item, idx) => (
-                <Grid key={idx} size={{ xs: 6, sm: 3 }}>
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            {[
+              { 
+                label: 'PER', 
+                value: fundamental.per, 
+                unit: '배', 
+                color: '#1976d2',
+                desc: '주가수익비율: 현재 주가를 주당순이익(EPS)으로 나눈 값입니다. 낮을수록 저평가된 것으로 봅니다.' 
+              },
+              { 
+                label: 'PBR', 
+                value: fundamental.pbr, 
+                unit: '배', 
+                color: '#388e3c',
+                desc: '주가순자산비율: 주가를 주당순자산가치(BPS)로 나눈 값입니다. 1배 미만이면 청산가치보다 주가가 낮음을 의미합니다.' 
+              },
+              { 
+                label: 'EPS', 
+                value: fundamental.eps, 
+                unit: '원', 
+                color: '#7b1fa2',
+                desc: '주당순이익: 기업이 벌어들인 순이익을 발행 주식 수로 나눈 값입니다. 높을수록 경영 실적이 좋음을 의미합니다.' 
+              },
+              { 
+                label: '배당수익률', 
+                value: fundamental.div, 
+                unit: '%', 
+                color: '#f57c00',
+                desc: '주가 대비 배당금의 비율입니다. 현재 주가로 주식을 샀을 때 기대할 수 있는 배당 수익을 나타냅니다.' 
+              },
+            ].map((item, idx) => (
+              <Grid key={idx} size={{ xs: 6, sm: 3 }}>
+                {/* Tooltip을 감싸 호버 시 desc를 보여줍니다 */}
+                <MuiTooltip 
+                  title={item.desc} 
+                  arrow 
+                  placement="top"
+                  enterTouchDelay={0} // 모바일에서도 바로 뜨게 설정
+                  // 💡 툴팁 내부 글자 크기 및 스타일 수정
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        fontSize: '0.85rem',      // 글자 크기 확대 (기본은 매우 작음)
+                        lineHeight: 1.5,          // 줄 간격 조절로 가독성 향상
+                        bgcolor: 'rgba(50, 50, 50, 0.95)', // 배경색을 좀 더 진하게
+                        px: 1.5,                  // 좌우 여백
+                        py: 1,                    // 상하 여백
+                        maxWidth: 250,            // 툴팁 최대 너비 제한 (줄바꿈 최적화)
+                        borderRadius: 2,          // 모서리 둥글게
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                      },
+                    },
+                    arrow: {
+                      sx: {
+                        color: 'rgba(50, 50, 50, 0.95)',
+                      },
+                    },
+                  }}
+                >
                   <Box sx={{ 
-                    p: 2, bgcolor: '#fff', borderRadius: 3, border: '1px solid #edf2f7',
-                    borderLeft: `4px solid ${item.color}`, boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                    p: 2, 
+                    bgcolor: '#fff', 
+                    borderRadius: 3, 
+                    border: '1px solid #edf2f7',
+                    borderLeft: `4px solid ${item.color}`, 
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                    cursor: 'help', // 마우스 포인터를 물음표 모양으로 변경
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                    }
                   }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{item.label}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+                      {item.label}
+                    </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>
                       {item.value?.toLocaleString() ?? '0'}
                       <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>{item.unit}</Typography>
                     </Typography>
                   </Box>
-                </Grid>
-              ))}
-            </Grid>
-          )}
+                </MuiTooltip>
+              </Grid>
+            ))}
+          </Grid>
+        )}
 
           {/* 차트 영역 */}
           <Box sx={{ width: '100%', height: 550 }}>
@@ -222,7 +291,7 @@ const StockChartPage: React.FC = () => {
                   <YAxis yAxisId="sub" orientation="right" hide={true} domain={['dataMin * 4', 'dataMax * 4']} />
                   <YAxis yAxisId="rsi" orientation="right" domain={[0, 100]} hide={!showRSI} stroke="#f44336" />
 
-                  <Tooltip 
+                  <ChartTooltip 
                     contentStyle={{ borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', border: 'none' }}
                     formatter={(value: any, name: any) => {
                       if (value === null || value === undefined) return ["-", name];
