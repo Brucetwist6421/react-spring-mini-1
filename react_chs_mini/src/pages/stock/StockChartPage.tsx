@@ -5,7 +5,8 @@ import {
   FormControl,
   FormControlLabel, FormGroup,
   InputLabel, MenuItem, Select,
-  Stack, Typography
+  Stack, Typography,
+  Grid // Grid v6(Grid2) 사용 권장
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import {
@@ -22,12 +23,20 @@ import {
 import api from '../../api/axiosInstance';
 import RandomSpinner from '../../components/RandomSpinner';
 
+interface FundamentalData {
+  PER: number;
+  PBR: number;
+  EPS: number;
+  DIV: number;
+}
+
 interface StockResponse {
   symbol: string;
   history: { [key: string]: number };
   prediction: { 
     [key: string]: { value: number; lower: number; upper: number } 
-  }; // 신뢰구간 데이터를 포함한 구조로 가정
+  };
+  fundamental: FundamentalData;
   volume: { [key: string]: number };
   indicators: { rsi: { [key: string]: number } };
   investors: {
@@ -52,14 +61,15 @@ interface ChartDataItem {
 const StockChartPage: React.FC = () => {
   const stockCode = "005930";
   const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+  const [fundamental, setFundamental] = useState<FundamentalData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [period, setPeriod] = useState<string>("3mo"); // 기본 범위를 3개월로 변경 (수급 데이터 확보량 고려)
+  const [period, setPeriod] = useState<string>("3mo");
   const [predictDays, setPredictDays] = useState<number>(15);
 
   const [showVolume, setShowVolume] = useState(true);
   const [showRSI, setShowRSI] = useState(false);
-  const [showInvestors, setShowInvestors] = useState(true); // 수급 분석 기본 활성화
+  const [showInvestors, setShowInvestors] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,26 +84,25 @@ const StockChartPage: React.FC = () => {
           return;
         }
 
-        const { history, prediction, volume, indicators, investors } = response.data;
+        const { history, prediction, volume, indicators, investors, fundamental: fundData } = response.data;
+        setFundamental(fundData);
+
         const allDates = Array.from(
           new Set([...Object.keys(history), ...Object.keys(prediction)])
         ).sort();
 
         const combinedData: ChartDataItem[] = allDates.map((date) => {
           const investorIdx = investors?.dates.indexOf(date);
-          
           const predData = prediction[date];
           let validPredict = null;
-          let validRange: [number, number] | null = null; // 타입을 명시적으로 선언
+          let validRange: [number, number] | null = null;
 
           if (predData) {
-              const val = typeof predData === 'object' ? predData.value : predData;
-              validPredict = val > 0 ? Math.round(val) : null;
-
-              if (typeof predData === 'object') {
-                  // [number, number] 타입으로 명시
-                  validRange = [Math.round(predData.lower), Math.round(predData.upper)];
-              }
+            const val = typeof predData === 'object' ? predData.value : predData;
+            validPredict = val > 0 ? Math.round(val) : null;
+            if (typeof predData === 'object') {
+              validRange = [Math.round(predData.lower), Math.round(predData.upper)];
+            }
           }
 
           return {
@@ -127,15 +136,15 @@ const StockChartPage: React.FC = () => {
           {/* 상단 컨트롤러 */}
           <Stack direction={{ xs: 'column', lg: 'row' }} justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 4 }}>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>📈 HANSUNG'S TRI-CORE 분석</Typography>
-              <Typography variant="body2" color="text.secondary">삼성전자({stockCode}) | 종합 수급 및 AI 예측</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>📈 주식 종합 지표 및 AI 예측</Typography>
+              <Typography variant="body2" color="text.secondary">삼성전자({stockCode})</Typography>
             </Box>
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
               <FormGroup row>
                 <FormControlLabel control={<Checkbox checked={showVolume} onChange={e => setShowVolume(e.target.checked)} color="secondary" />} label="거래량" />
                 <FormControlLabel control={<Checkbox checked={showRSI} onChange={e => setShowRSI(e.target.checked)} color="error" />} label="RSI" />
-                <FormControlLabel control={<Checkbox checked={showInvestors} onChange={e => setShowInvestors(e.target.checked)} color="success" />} label="투자자" />
+                <FormControlLabel control={<Checkbox checked={showInvestors} onChange={e => setShowInvestors(e.target.checked)} color="success" />} label="수급" />
               </FormGroup>
 
               <FormControl size="small" sx={{ minWidth: 100 }}>
@@ -150,17 +159,49 @@ const StockChartPage: React.FC = () => {
 
               <FormControl size="small" sx={{ minWidth: 100 }}>
                 <InputLabel>예측일</InputLabel>
-                <Select value={predictDays} label="예측일" onChange={(e) => setPredictDays(Number(e.target.value))}>
+                <Select 
+                  value={predictDays} 
+                  label="예측일" 
+                  onChange={(e) => setPredictDays(Number(e.target.value))} // setPredictDays 활성화
+                >
                   <MenuItem value={5}>5일</MenuItem>
                   <MenuItem value={15}>15일</MenuItem>
                   <MenuItem value={30}>30일</MenuItem>
+                  <MenuItem value={60}>60일</MenuItem>
+                  <MenuItem value={90}>90일</MenuItem>
+                  <MenuItem value={120}>120일</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
           </Stack>
 
+          {/* 기본적 분석 지표 (PER, PBR 등) */}
+          {!loading && fundamental && (
+            <Grid container spacing={2} sx={{ mb: 4 }}>
+              {[
+                { label: 'PER', value: fundamental.PER, unit: '배', color: '#1976d2' },
+                { label: 'PBR', value: fundamental.PBR, unit: '배', color: '#388e3c' },
+                { label: 'EPS', value: fundamental.EPS, unit: '원', color: '#7b1fa2' },
+                { label: '배당수익률', value: fundamental.DIV, unit: '%', color: '#f57c00' },
+              ].map((item, idx) => (
+                <Grid key={idx} size={{ xs: 6, sm: 3 }}>
+                  <Box sx={{ 
+                    p: 2, bgcolor: '#fff', borderRadius: 3, border: '1px solid #edf2f7',
+                    borderLeft: `4px solid ${item.color}`, boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                  }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>{item.label}</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                      {item.value?.toLocaleString() ?? '0'}
+                      <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>{item.unit}</Typography>
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+
           {/* 차트 영역 */}
-          <Box sx={{ width: '100%', height: 600 }}>
+          <Box sx={{ width: '100%', height: 550 }}>
             {loading ? (
               <Stack justifyContent="center" alignItems="center" sx={{ height: '100%' }}><RandomSpinner /></Stack>
             ) : error ? (
@@ -171,7 +212,6 @@ const StockChartPage: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                   <XAxis dataKey="date" tick={{ fontSize: 10 }} minTickGap={20} />
                   
-                  {/* 메인 Y축 (주가) */}
                   <YAxis 
                     yAxisId="left"
                     orientation="left" 
@@ -179,8 +219,6 @@ const StockChartPage: React.FC = () => {
                     tickFormatter={(val) => val.toLocaleString()} 
                     tick={{ fontSize: 12, fontWeight: 'bold', fill: '#333' }}
                   />
-
-                  {/* 보조 Y축 (수급/거래량용 - 실제 수치보다 크게 잡아 하단 배치 유도) */}
                   <YAxis yAxisId="sub" orientation="right" hide={true} domain={['dataMin * 4', 'dataMax * 4']} />
                   <YAxis yAxisId="rsi" orientation="right" domain={[0, 100]} hide={!showRSI} stroke="#f44336" />
 
@@ -194,7 +232,6 @@ const StockChartPage: React.FC = () => {
                   />
                   <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '20px' }} />
                   
-                  {/* 1. 신뢰 구간 Area (가장 아래 레이어) */}
                   <Area 
                     yAxisId="left"
                     name="예측 신뢰구간"
@@ -205,29 +242,24 @@ const StockChartPage: React.FC = () => {
                     connectNulls
                   />
 
-                  {/* 2. 수급 기준선 (0선) */}
                   {showInvestors && <ReferenceLine yAxisId="sub" y={0} stroke="#999" strokeWidth={1} strokeDasharray="3 3" />}
-
-                  {/* 3. 거래량 (배경처럼 연하게) */}
                   {showVolume && <Bar yAxisId="sub" name="거래량" dataKey="volume" fill="#e0e0e0" opacity={0.4} barSize={15} />}
 
-                  {/* 4. 투자자 동향 (외인/기관) - 양수/음수 색상 분기 */}
                   {showInvestors && (
-                    <Bar yAxisId="sub" name="외인순매수" dataKey="foreign" barSize={8}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={`foreign-${index}`} fill={entry.foreign >= 0 ? "#ef5350" : "#1e88e5"} />
-                      ))}
-                    </Bar>
-                  )}
-                  {showInvestors && (
-                    <Bar yAxisId="sub" name="기관순매수" dataKey="institution" barSize={8}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={`inst-${index}`} fill={entry.institution >= 0 ? "#ff80ab" : "#90caf9"} />
-                      ))}
-                    </Bar>
+                    <>
+                      <Bar yAxisId="sub" name="외인순매수" dataKey="foreign" barSize={8}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`foreign-${index}`} fill={entry.foreign >= 0 ? "#ef5350" : "#1e88e5"} />
+                        ))}
+                      </Bar>
+                      <Bar yAxisId="sub" name="기관순매수" dataKey="institution" barSize={8}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`inst-${index}`} fill={entry.institution >= 0 ? "#ff80ab" : "#90caf9"} />
+                        ))}
+                      </Bar>
+                    </>
                   )}
 
-                  {/* 5. 실제 주가 및 예측선 (최상단 레이어) */}
                   <Line yAxisId="left" name="실제 종가" type="monotone" dataKey="actual" stroke="#1976d2" strokeWidth={3} dot={false} connectNulls />
                   <Line yAxisId="left" name="AI 예측" type="monotone" dataKey="predict" stroke="#ff9800" strokeWidth={2} strokeDasharray="5 5" dot={false} connectNulls />
                   

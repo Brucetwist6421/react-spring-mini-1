@@ -104,7 +104,7 @@ def get_fundamental_data(code):
             "PER": float(data.get('per', 0)) if data.get('per') else 0,
             "PBR": float(data.get('pbr', 0)) if data.get('pbr') else 0,
             "EPS": float(data.get('eps', 0)) if data.get('eps') else 0,
-            "DIV": float(data.get('pbr', 0)) # 필요 시 배당수익률(dyd) 등으로 변경 가능
+            "DIV": float(data.get('dyd', 0)) if data.get('dyd') else 0  # dyd가 배당수익률입니다.
         }
     except Exception as e:
         logger.error(f"기본적 분석 데이터 로드 실패: {e}")

@@ -12,6 +12,9 @@ public class StockVO {
     private Map<String, Double> history; // 과거 종가 데이터
     private Map<String, Double> prediction; // AI 예측 데이터
 
+    //기본적 분석 데이터 (PER, PBR 등)를 담을 객체
+    private FundamentalVO fundamental;
+
     private Map<String, Long> volume;      // 날짜별 거래량 데이터
     private Map<String, String> events;    // 날짜별 주요 이벤트
 
@@ -26,5 +29,14 @@ public class StockVO {
         private List<String> dates;
         private List<Long> foreign;
         private List<Long> institution;
+    }
+
+    // 기본적 분석 데이터 클래스
+    @Data
+    public static class FundamentalVO {
+        private Double PER; 
+        private Double PBR;
+        private Double EPS;
+        private Double DIV;
     }
 }
