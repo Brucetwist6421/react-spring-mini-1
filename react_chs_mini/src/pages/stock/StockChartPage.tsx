@@ -32,6 +32,9 @@ interface FundamentalData {
   pbr: number;
   eps: number;
   div: number;
+  vol_power: number;     // 체결강도
+  foreign_rt: number;    // 외인보유비율
+  change_rt: number;     // 전일대비 등락률
 }
 
 interface StockResponse {
@@ -55,7 +58,7 @@ interface ChartDataItem {
   date: string;
   actual?: number | null;
   predict?: number | null;
-  // 💡 [하한, 상한]을 담을 튜플 타입으로 정의
+  // [하한, 상한]을 담을 튜플 타입으로 정의
   predictRange?: [number, number] | null; 
   volume?: number | null;
   rsi?: number | null;
@@ -185,94 +188,106 @@ const StockChartPage: React.FC = () => {
             </Stack>
           </Stack>
 
-          {/* 기본적 분석 지표 (PER, PBR 등) */}
+          {/* 2. 핵심 지표 Grid (PER, PBR, 등락률, 외인비율) */}
           {!loading && fundamental && (
-          <Grid container spacing={2} sx={{ mb: 4 }}>
-            {[
-              { 
-                label: 'PER', 
-                value: fundamental.per, 
-                unit: '배', 
-                color: '#1976d2',
-                desc: '주가수익비율: 현재 주가를 주당순이익(EPS)으로 나눈 값입니다. 낮을수록 저평가된 것으로 봅니다.' 
-              },
-              { 
-                label: 'PBR', 
-                value: fundamental.pbr, 
-                unit: '배', 
-                color: '#388e3c',
-                desc: '주가순자산비율: 주가를 주당순자산가치(BPS)로 나눈 값입니다. 1배 미만이면 청산가치보다 주가가 낮음을 의미합니다.' 
-              },
-              { 
-                label: 'EPS', 
-                value: fundamental.eps, 
-                unit: '원', 
-                color: '#7b1fa2',
-                desc: '주당순이익: 기업이 벌어들인 순이익을 발행 주식 수로 나눈 값입니다. 높을수록 경영 실적이 좋음을 의미합니다.' 
-              },
-              { 
-                label: '배당수익률', 
-                value: fundamental.div, 
-                unit: '%', 
-                color: '#f57c00',
-                desc: '주가 대비 배당금의 비율입니다. 현재 주가로 주식을 샀을 때 기대할 수 있는 배당 수익을 나타냅니다.' 
-              },
-            ].map((item, idx) => (
-              <Grid key={idx} size={{ xs: 6, sm: 3 }}>
-                {/* Tooltip을 감싸 호버 시 desc를 보여줍니다 */}
-                <MuiTooltip 
-                  title={item.desc} 
-                  arrow 
-                  placement="top"
-                  enterTouchDelay={0} // 모바일에서도 바로 뜨게 설정
-                  // 💡 툴팁 내부 글자 크기 및 스타일 수정
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        fontSize: '0.85rem',      // 글자 크기 확대 (기본은 매우 작음)
-                        lineHeight: 1.5,          // 줄 간격 조절로 가독성 향상
-                        bgcolor: 'rgba(50, 50, 50, 0.95)', // 배경색을 좀 더 진하게
-                        px: 1.5,                  // 좌우 여백
-                        py: 1,                    // 상하 여백
-                        maxWidth: 250,            // 툴팁 최대 너비 제한 (줄바꿈 최적화)
-                        borderRadius: 2,          // 모서리 둥글게
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            <Grid container spacing={2} sx={{ mb: 4 }}>
+              {[
+                { 
+                  label: 'PER', 
+                  value: fundamental.per, 
+                  unit: '배', 
+                  color: '#1976d2',
+                  desc: '주가수익비율: 현재 주가를 주당순이익(EPS)으로 나눈 값입니다. 낮을수록 저평가된 것으로 봅니다.' 
+                },
+                { 
+                  label: 'PBR', 
+                  value: fundamental.pbr, 
+                  unit: '배', 
+                  color: '#388e3c',
+                  desc: '주가순자산비율: 주가를 주당순자산가치(BPS)로 나눈 값입니다. 1배 미만이면 청산가치보다 주가가 낮음을 의미합니다.' 
+                },
+                { 
+                  label: '등락률', 
+                  value: fundamental.change_rt, 
+                  unit: '%', 
+                  color: (fundamental.change_rt ?? 0) >= 0 ? '#d32f2f' : '#1976d2', // 양수면 빨강, 음수면 파랑
+                  desc: '전일 대비 가격 변동률입니다. 현재 시장의 단기적인 매수/매도 강도를 나타냅니다.' 
+                },
+                { 
+                  label: '외인비율', 
+                  value: fundamental.foreign_rt, 
+                  unit: '%', 
+                  color: '#7b1fa2', // 외인 수급은 보라색 계열로 차별화
+                  desc: '외국인 보유비율입니다. 대형주의 경우 외인 비중이 늘어나는지 확인하는 것이 수급 분석의 핵심입니다.' 
+                },
+              ].map((item, idx) => (
+                <Grid key={idx} size={{ xs: 6, sm: 3 }}>
+                  <MuiTooltip 
+                    title={item.desc} 
+                    arrow 
+                    placement="top"
+                    enterTouchDelay={0}
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          fontSize: '0.85rem',
+                          lineHeight: 1.5,
+                          bgcolor: 'rgba(50, 50, 50, 0.95)',
+                          px: 1.5,
+                          py: 1,
+                          maxWidth: 250,
+                          borderRadius: 2,
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                        },
                       },
-                    },
-                    arrow: {
-                      sx: {
-                        color: 'rgba(50, 50, 50, 0.95)',
+                      arrow: {
+                        sx: { color: 'rgba(50, 50, 50, 0.95)' },
                       },
-                    },
-                  }}
-                >
-                  <Box sx={{ 
-                    p: 2, 
-                    bgcolor: '#fff', 
-                    borderRadius: 3, 
-                    border: '1px solid #edf2f7',
-                    borderLeft: `4px solid ${item.color}`, 
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-                    cursor: 'help', // 마우스 포인터를 물음표 모양으로 변경
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                    }
-                  }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
-                      {item.label}
-                    </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                      {item.value?.toLocaleString() ?? '0'}
-                      <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>{item.unit}</Typography>
-                    </Typography>
-                  </Box>
-                </MuiTooltip>
-              </Grid>
-            ))}
-          </Grid>
-        )}
+                    }}
+                  >
+                    <Box sx={{ 
+                      p: 2, 
+                      bgcolor: '#fff', 
+                      borderRadius: 3, 
+                      border: '1px solid #edf2f7',
+                      borderLeft: `4px solid ${item.color}`, 
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                      cursor: 'help',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                      }
+                    }}>
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary" 
+                        sx={{ 
+                          fontWeight: 700, 
+                          display: 'block',
+                          mb: 0.5,
+                          fontSize: '0.9rem', // 라벨은 적절한 크기로 유지
+                        }}
+                      >
+                        {item.label}
+                      </Typography>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          fontWeight: 900, // 숫자를 더 강조
+                          color: item.label === '등락률' ? item.color : 'inherit' // 등락률은 숫자 자체에도 색상 적용
+                        }}
+                      >
+                        {item.label === '등락률' && (fundamental.change_rt ?? 0) > 0 ? '+' : ''}
+                        {item.value?.toLocaleString() ?? '0'}
+                        <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700 }}>{item.unit}</Typography>
+                      </Typography>
+                    </Box>
+                  </MuiTooltip>
+                </Grid>
+              ))}
+            </Grid>
+          )}
 
           {/* 차트 영역 */}
           <Box sx={{ width: '100%', height: 550 }}>
@@ -300,6 +315,12 @@ const StockChartPage: React.FC = () => {
                     contentStyle={{ borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', border: 'none' }}
                     formatter={(value: any, name: any) => {
                       if (value === null || value === undefined) return ["-", name];
+                      
+                      // 💡 추가: 예측 신뢰구간(배열) 처리 로직
+                      if (Array.isArray(value)) {
+                        return [`${value[0].toLocaleString()} ~ ${value[1].toLocaleString()}`, name];
+                      }
+
                       if (name === "RSI") return [value.toFixed(2), name];
                       return [`${Math.round(value).toLocaleString()}`, name];
                     }}
@@ -320,7 +341,16 @@ const StockChartPage: React.FC = () => {
                   />
 
                   {showInvestors && <ReferenceLine yAxisId="sub" y={0} stroke="#999" strokeWidth={1} strokeDasharray="3 3" />}
-                  {showVolume && <Bar yAxisId="sub" name="거래량" dataKey="volume" fill="#e0e0e0" opacity={0.4} barSize={15} />}
+                  {showVolume && (
+                    <Bar 
+                      yAxisId="sub" 
+                      name="거래량" 
+                      dataKey="volume" 
+                      fill="#a2b1b9" 
+                      opacity={0.7} 
+                      barSize={20} 
+                    />
+                  )}
 
                   {showInvestors && (
   <>

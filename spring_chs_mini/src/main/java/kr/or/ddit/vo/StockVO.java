@@ -37,7 +37,12 @@ public class StockVO {
         private Double per; 
         private Double pbr;
         private Double eps;
-        private Double div;
+        private Double div; // 배당수익률
+
+        // 💡 추가된 실시간 지표 필드
+        private Double vol_power;  // 체결강도
+        private Double foreign_rt; // 외인보유비율
+        private Double change_rt;  // 전일대비 등락률
     }
 
     @Data

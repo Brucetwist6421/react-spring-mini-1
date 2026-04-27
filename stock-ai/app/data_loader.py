@@ -113,8 +113,11 @@ def get_fundamental_data(code):
             "per": safe_float(data.get('per')),
             "pbr": safe_float(data.get('pbr')),
             "eps": safe_float(data.get('eps')),
-            "div": safe_float(data.get('dyd'))
+            "div": safe_float(data.get('dyd')),
+            "foreign_rt": safe_float(data.get('frgn_ntby_rt')), # 외인보유비율(%)
+            "change_rt": safe_float(data.get('prdy_ctrt')),     # 전일대비 등락률(%)
+            "vol_power": safe_float(data.get('stck_shrn_vrt')) # 체결강도(실시간 수급강도)
         }
     except Exception as e:
         logger.error(f"기본적 분석 데이터 로드 실패: {e}")
-        return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0}
+        return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
