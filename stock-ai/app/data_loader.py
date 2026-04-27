@@ -110,11 +110,11 @@ def get_fundamental_data(code):
                 return 0.0
 
         return {
-            "PER": safe_float(data.get('per')),
-            "PBR": safe_float(data.get('pbr')),
-            "EPS": safe_float(data.get('eps')),
-            "DIV": safe_float(data.get('dyd'))
+            "per": safe_float(data.get('per')),
+            "pbr": safe_float(data.get('pbr')),
+            "eps": safe_float(data.get('eps')),
+            "div": safe_float(data.get('dyd'))
         }
     except Exception as e:
         logger.error(f"기본적 분석 데이터 로드 실패: {e}")
-        return {"PER": 0.0, "PBR": 0.0, "EPS": 0.0, "DIV": 0.0}
+        return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0}
