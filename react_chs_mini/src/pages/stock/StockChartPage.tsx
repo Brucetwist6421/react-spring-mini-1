@@ -4,16 +4,16 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel, FormGroup,
-  InputLabel, MenuItem, Select,
-  Stack, Typography,
   Grid // Grid v6(Grid2) 사용 권장
+  ,
+  InputLabel, MenuItem, Select,
+  Stack, Typography
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import {
   Area,
   Bar,
   CartesianGrid,
-  Cell,
   ComposedChart,
   Legend, Line,
   ReferenceLine,
@@ -247,16 +247,36 @@ const StockChartPage: React.FC = () => {
 
                   {showInvestors && (
                     <>
-                      <Bar yAxisId="sub" name="외인순매수" dataKey="foreign" barSize={8}>
-                        {chartData.map((entry, index) => (
-                          <Cell key={`foreign-${index}`} fill={entry.foreign >= 0 ? "#ef5350" : "#1e88e5"} />
-                        ))}
-                      </Bar>
-                      <Bar yAxisId="sub" name="기관순매수" dataKey="institution" barSize={8}>
-                        {chartData.map((entry, index) => (
-                          <Cell key={`inst-${index}`} fill={entry.institution >= 0 ? "#ff80ab" : "#90caf9"} />
-                        ))}
-                      </Bar>
+                      {/* 외인순매수 */}
+                      <Bar 
+                        yAxisId="sub" 
+                        name="외인순매수" 
+                        dataKey="foreign" 
+                        barSize={8}
+                        // shape 속성을 사용하면 개별 막대의 색상을 직접 제어할 수 있습니다.
+                        shape={(props: any) => {
+                          const { x, y, width, height, payload } = props;
+                          const color = payload.foreign >= 0 ? "#ef5350" : "#1e88e5";
+                          return <rect x={x} y={y} width={width} height={height} fill={color} />;
+                        }}
+                        // 범례(Legend)에 표시될 대표 색상
+                        fill="#ef5350" 
+                      />
+
+                      {/* 기관순매수 */}
+                      <Bar 
+                        yAxisId="sub" 
+                        name="기관순매수" 
+                        dataKey="institution" 
+                        barSize={8}
+                        shape={(props: any) => {
+                          const { x, y, width, height, payload } = props;
+                          const color = payload.institution >= 0 ? "#ff80ab" : "#90caf9";
+                          return <rect x={x} y={y} width={width} height={height} fill={color} />;
+                        }}
+                        // 범례(Legend)에 표시될 대표 색상
+                        fill="#ff80ab"
+                      />
                     </>
                   )}
 

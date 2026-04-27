@@ -97,15 +97,29 @@ def get_fundamental_data(code):
     
     try:
         res = requests.get(url, headers=headers, params=params)
-        data = res.json().get('output', {})
+        res_data = res.json()
         
-        # KIS API에서 제공하는 주요 지표 매핑
+        # [디버깅용] 데이터가 null로 나온다면 터미널에서 이 로그를 확인하세요.
+        # logger.info(f"KIS API Raw Response for {code}: {res_data}")
+        
+        data = res_data.get('output', {})
+        
+        # 안전한 수치 변환 함수
+        def safe_float(val):
+            try:
+                # 데이터가 None, 빈 문자열, 혹은 'null' 문자열인 경우 처리
+                if val is None or str(val).strip() == "" or str(val).lower() == "null":
+                    return 0.0
+                return float(val)
+            except (ValueError, TypeError):
+                return 0.0
+
         return {
-            "PER": float(data.get('per', 0)) if data.get('per') else 0,
-            "PBR": float(data.get('pbr', 0)) if data.get('pbr') else 0,
-            "EPS": float(data.get('eps', 0)) if data.get('eps') else 0,
-            "DIV": float(data.get('dyd', 0)) if data.get('dyd') else 0  # dyd가 배당수익률입니다.
+            "PER": safe_float(data.get('per')),
+            "PBR": safe_float(data.get('pbr')),
+            "EPS": safe_float(data.get('eps')),
+            "DIV": safe_float(data.get('dyd'))  # dyd: 배당수익률
         }
     except Exception as e:
         logger.error(f"기본적 분석 데이터 로드 실패: {e}")
-        return {"PER": 0, "PBR": 0, "EPS": 0, "DIV": 0}
+        return {"PER": 0.0, "PBR": 0.0, "EPS": 0.0, "DIV": 0.0}
