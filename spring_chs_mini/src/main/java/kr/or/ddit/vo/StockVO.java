@@ -34,9 +34,9 @@ public class StockVO {
     // 기본적 분석 데이터 클래스
     @Data
     public static class FundamentalVO {
-        private Double PER; 
-        private Double PBR;
-        private Double EPS;
-        private Double DIV;
+        private Double per; 
+        private Double pbr;
+        private Double eps;
+        private Double div;
     }
 }
