@@ -87,7 +87,8 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         rsi_series = calculate_rsi(df_stock['Close']).tail(display_days)
 
         return {
-            "symbol": code,
+            "symbol": pure_code,  #  실제 종목 코드 (예: 009150)
+            "name": code if not code.isdigit() else dl.get_name_by_code(pure_code), #  실제 종목명
             "industry_status": "HANSUNG'S TRI-CORE 분석 엔진 가동 중",
             "history": to_map(plot_df['Close']),
             "prediction": {

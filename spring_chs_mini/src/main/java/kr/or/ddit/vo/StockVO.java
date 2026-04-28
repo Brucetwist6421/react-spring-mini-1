@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class StockVO {
     private String symbol;          // 종목 코드 (예: 005930)
+    private String name;            // 종목명 (예: 삼성전자)
     private String industry_status; // 산업 현황 메시지 (추가)
     private Map<String, Double> total;   // 전체 데이터 (History + Prediction) (추가)
     private Map<String, Double> history; // 과거 종가 데이터
@@ -38,8 +39,6 @@ public class StockVO {
         private Double pbr;
         private Double eps;
         private Double div; // 배당수익률
-
-        // 💡 추가된 실시간 지표 필드
         private Double vol_power;  // 체결강도
         private Double foreign_rt; // 외인보유비율
         private Double change_rt;  // 전일대비 등락률

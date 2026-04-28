@@ -39,7 +39,8 @@ interface FundamentalData {
 }
 
 interface StockResponse {
-  symbol: string;
+  symbol: string;      // 실제 종목 코드 (예: "005930")
+  name: string;        // 한글 종목명 (예: "삼성전자")
   history: { [key: string]: number };
   prediction: { 
     [key: string]: { value: number; lower: number; upper: number } 
@@ -102,6 +103,7 @@ const StockChartPage: React.FC = () => {
         // 2. 데이터 비구조화 할당 (response.data에서 필요한 객체들을 추출)
         const { 
           symbol, 
+          name,
           history, 
           prediction, 
           volume, 
@@ -113,8 +115,8 @@ const StockChartPage: React.FC = () => {
         // 3. 종목 정보 및 펀더멘털 상태 업데이트
         setFundamental(fundData);
         setDisplayInfo({ 
-          name: isNaN(Number(currentStock)) ? currentStock : "검색 종목", 
-          symbol: symbol 
+          name: name || currentStock, // 백엔드에서 준 이름 사용
+          symbol: symbol              // 백엔드에서 준 실제 코드 사용
         });
 
         // 4. 날짜 병합 및 정렬 (과거 데이터 + 예측 데이터)

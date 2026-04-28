@@ -2,7 +2,6 @@ package kr.or.ddit.service.impl;
 
 import java.net.URI;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
