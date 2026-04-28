@@ -146,3 +146,42 @@ def get_fundamental_data(code):
     except Exception as e:
         logger.error(f"기본적 분석 데이터 로드 실패: {e}")
         return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
+    
+def get_all_stocks():
+    """
+    모든 상장 종목 리스트를 반환합니다. (검색 및 자동완성용)
+    """
+    global _stock_list_cache
+    try:
+        if _stock_list_cache is None:
+            logger.info("전체 종목 리스트를 새로 고칭합니다...")
+            # fdr.StockListing('KRX')는 KOSPI, KOSDAQ, KONEX를 포함합니다.
+            _stock_list_cache = fdr.StockListing('KRX')
+        
+        # 라우터에서 기대하는 'code'와 'name' 컬럼명으로 가공하여 반환
+        return _stock_list_cache[['Code', 'Name']].rename(
+            columns={'Code': 'code', 'Name': 'name'}
+        )
+    except Exception as e:
+        logger.error(f"전체 종목 리스트 로드 실패: {e}")
+        return pd.DataFrame(columns=['code', 'name'])
+
+def get_name_by_code(code):
+    """
+    종목 코드를 입력받아 해당 종목명을 반환합니다.
+    """
+    global _stock_list_cache
+    try:
+        if _stock_list_cache is None:
+            get_all_stocks() # 캐시 로드
+            
+        # 코드 매칭 (문자열 타입 일치 확인)
+        target = _stock_list_cache[_stock_list_cache['Code'] == str(code)]
+        
+        if not target.empty:
+            return target.iloc[0]['Name']
+        
+        return code # 찾지 못하면 코드 그대로 반환
+    except Exception as e:
+        logger.error(f"종목명 변환 실패 (Code: {code}): {e}")
+        return code
