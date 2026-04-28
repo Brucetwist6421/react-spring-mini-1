@@ -50,9 +50,17 @@ except Exception as e:
 @app.get("/stock/{code}")
 async def get_stock_prediction(code: str, period: str = "2y", predict_days: int = 15):
     try:
+        # 1. 종목명으로 들어온 경우 코드로 변환
+        # 숫자 형식이 아니라면 종목명으로 간주
         pure_code = code.split('.')[0]
-        start_date = (datetime.now() - timedelta(days=365*2)).strftime('%Y-%m-%d')
+        if not pure_code.isdigit():
+            converted_code = dl.get_stock_code_by_name(pure_code)
+            if not converted_code:
+                return {"error": f"'{pure_code}'에 해당하는 종목을 찾을 수 없습니다."}
+            pure_code = converted_code
 
+        # 2. 이후 로직은 동일 (이미 pure_code를 사용 중이시네요!)
+        start_date = (datetime.now() - timedelta(days=365*2)).strftime('%Y-%m-%d')
         df_stock = dl.get_stock_data(pure_code, start_date)
         if df_stock.empty:
             return {"error": "시세 데이터를 가져오지 못했습니다."}

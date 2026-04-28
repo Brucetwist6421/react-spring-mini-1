@@ -26,6 +26,7 @@ import RandomSpinner from '../../components/RandomSpinner';
 
 import { Tooltip as MuiTooltip } from '@mui/material';
 import { Tooltip as ChartTooltip } from 'recharts'; // 차트 내부는 이걸로 변경
+import StockSearch from './StockSearch';
 
 interface FundamentalData {
   per: number;
@@ -67,7 +68,6 @@ interface ChartDataItem {
 }
 
 const StockChartPage: React.FC = () => {
-  const stockCode = "005930";
   const [chartData, setChartData] = useState<ChartDataItem[]>([]);
   const [fundamental, setFundamental] = useState<FundamentalData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -79,12 +79,18 @@ const StockChartPage: React.FC = () => {
   const [showRSI, setShowRSI] = useState(false);
   const [showInvestors, setShowInvestors] = useState(true);
 
+  const [currentStock, setCurrentStock] = useState<string>("삼성전자");
+  const [displayInfo, setDisplayInfo] = useState({ name: "삼성전자", symbol: "005930" });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null); // 새로운 검색 시 에러 초기화
+
+        // 1. API 호출 (currentStock은 한글 이름 또는 코드)
         const response = await api.get<StockResponse>(
-          `/api/stock/${stockCode}?period=${period}&predict_days=${predictDays}`
+          `/api/stock/${currentStock}?period=${period}&predict_days=${predictDays}`
         );
 
         if (response.data.error) {
@@ -92,52 +98,79 @@ const StockChartPage: React.FC = () => {
           return;
         }
 
-        const { history, prediction, volume, indicators, investors, fundamental: fundData } = response.data;
-        setFundamental(fundData);
+        // 2. 데이터 비구조화 할당 (response.data에서 필요한 객체들을 추출)
+        const { 
+          symbol, 
+          history, 
+          prediction, 
+          volume, 
+          indicators, 
+          investors, 
+          fundamental: fundData 
+        } = response.data;
 
+        // 3. 종목 정보 및 펀더멘털 상태 업데이트
+        setFundamental(fundData);
+        setDisplayInfo({ 
+          name: isNaN(Number(currentStock)) ? currentStock : "검색 종목", 
+          symbol: symbol 
+        });
+
+        // 4. 날짜 병합 및 정렬 (과거 데이터 + 예측 데이터)
         const allDates = Array.from(
           new Set([...Object.keys(history), ...Object.keys(prediction)])
         ).sort();
 
+        // 5. 차트용 데이터 통합 가공
         const combinedData: ChartDataItem[] = allDates.map((date) => {
-        const investorIdx = investors?.dates.indexOf(date);
-        const predData = prediction[date];
-        
-        let validPredict: number | null = null;
-        let validRange: [number, number] | null = null;
-
-        if (predData && typeof predData === 'object') {
-          // 💡 백엔드 구조와 일치화: predData가 이제 무조건 객체로 옵니다.
-          validPredict = predData.value > 0 ? Math.round(predData.value) : null;
+          const investorIdx = investors?.dates.indexOf(date);
+          const predData = prediction[date];
           
-          // lower, upper 값이 있을 때만 범위 생성
-          if (predData.lower !== undefined && predData.upper !== undefined) {
-            validRange = [Math.round(predData.lower), Math.round(predData.upper)];
-          }
-        }
+          let validPredict: number | null = null;
+          let validRange: [number, number] | null = null;
 
-        return {
-          date,
-          actual: history[date] !== undefined ? Math.round(history[date]) : null,
-          predict: validPredict,
-          predictRange: validRange,
-          volume: volume?.[date] ?? 0,
-          rsi: indicators?.rsi?.[date] ?? null,
-          foreign: (investorIdx !== -1 && investors) ? investors.foreign[investorIdx] : 0,
-          institution: (investorIdx !== -1 && investors) ? investors.institution[investorIdx] : 0,
-        };
-      });
+          // AI 예측 데이터 처리
+          if (predData && typeof predData === 'object') {
+            validPredict = predData.value > 0 ? Math.round(predData.value) : null;
+            
+            // 신뢰 구간 (Lower / Upper) 생성
+            if (predData.lower !== undefined && predData.upper !== undefined) {
+              validRange = [Math.round(predData.lower), Math.round(predData.upper)];
+            }
+          }
+
+          return {
+            date,
+            // 실제 종가 (있을 경우만 반올림)
+            actual: history[date] !== undefined ? Math.round(history[date]) : null,
+            predict: validPredict,
+            predictRange: validRange,
+            // 거래량 데이터 (없으면 0)
+            volume: volume?.[date] ?? 0,
+            // RSI 지표
+            rsi: indicators?.rsi?.[date] ?? null,
+            // 수급 데이터 (외인/기관) - 인덱스 확인 후 매칭
+            foreign: (investors && investorIdx !== undefined && investorIdx !== -1) 
+                    ? investors.foreign[investorIdx] : 0,
+            institution: (investors && investorIdx !== undefined && investorIdx !== -1) 
+                    ? investors.institution[investorIdx] : 0,
+          };
+        });
 
         setChartData(combinedData);
+
       } catch (err) {
         console.error("Error fetching stock data:", err);
-        setError("서버 연결에 실패했습니다.");
+        setError("서버 연결에 실패했거나 종목 정보를 가져올 수 없습니다.");
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
-  }, [stockCode, period, predictDays]);
+    
+    // 의존성 배열에 currentStock을 추가하여 검색 시마다 실행되도록 설정
+  }, [currentStock, period, predictDays]);
 
   return (
     <Box sx={{ p: 3, bgcolor: '#f5f7fa', minHeight: '100vh' }}>
@@ -148,10 +181,12 @@ const StockChartPage: React.FC = () => {
           <Stack direction={{ xs: 'column', lg: 'row' }} justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 4 }}>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>📈 주식 종합 지표 및 AI 예측</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{fontSize:18}}>삼성전자({stockCode})</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{fontSize:18}}>{displayInfo.name} ({displayInfo.symbol})</Typography>
             </Box>
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+              {/* 검색 컴포넌트 적용 */}
+              <StockSearch onSearch={(val) => setCurrentStock(val)} initialValue={currentStock} />
               <FormGroup row>
                 {[
                   { 
