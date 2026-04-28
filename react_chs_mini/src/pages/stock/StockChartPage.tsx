@@ -89,8 +89,9 @@ const StockChartPage: React.FC = () => {
         setError(null); // 새로운 검색 시 에러 초기화
 
         // 1. API 호출 (currentStock은 한글 이름 또는 코드)
+        const trimmedStock = currentStock.trim();
         const response = await api.get<StockResponse>(
-          `/api/stock/${currentStock}?period=${period}&predict_days=${predictDays}`
+          `/api/stock/${trimmedStock}?period=${period}&predict_days=${predictDays}`
         );
 
         if (response.data.error) {
