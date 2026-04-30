@@ -4,6 +4,7 @@ import FinanceDataReader as fdr
 import logging
 import time
 from app.config import APP_KEY, APP_SECRET, URL_BASE, ACCESS_TOKEN
+import re
 
 # 로그 설정
 logger = logging.getLogger(__name__)
@@ -14,24 +15,32 @@ _stock_list_cache = None
 def get_stock_code_by_name(name):
     """
     종목명을 입력받아 종목 코드를 반환 (KRX 기준)
-    성능을 위해 최초 호출 시에만 StockListing을 수행합니다.
+    'LS (006260)' 같은 형태가 들어와도 코드를 정확히 추출합니다.
     """
     global _stock_list_cache
     try:
         if _stock_list_cache is None:
             logger.info("KRX 종목 리스트를 캐싱합니다...")
-            # KOSPI, KOSDAQ, KONEX 전체 상장사 로드
             _stock_list_cache = fdr.StockListing('KRX')
 
-        # 종목명 검색 (공백 제거 후 비교하여 정확도 향상)
-        target = _stock_list_cache[_stock_list_cache['Name'].str.replace(' ', '') == name.replace(' ', '')]
+        name_str = str(name).strip()
+
+        # 1. 정규표현식으로 괄호 안의 6자리 숫자(코드)가 있는지 먼저 확인
+        # 예: "LS (006260)" -> "006260" 추출
+        code_match = re.search(r'\((\d{6})\)', name_str)
+        if code_match:
+            return code_match.group(1)
+
+        # 2. 종목명 검색 (기존 로직 유지)
+        # 공백 제거 후 비교하여 정확도 향상
+        target = _stock_list_cache[_stock_list_cache['Name'].str.replace(' ', '') == name_str.replace(' ', '')]
         
         if not target.empty:
             return target.iloc[0]['Code']
         
-        # 코드로 직접 입력했을 가능성 대비 (6자리 숫자 확인)
-        if name.isdigit() and len(name) == 6:
-            return name
+        # 3. 입력값 자체가 6자리 숫자(코드)인 경우 처리
+        if name_str.isdigit() and len(name_str) == 6:
+            return name_str
             
         return None
     except Exception as e:

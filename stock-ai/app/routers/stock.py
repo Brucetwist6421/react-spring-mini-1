@@ -84,7 +84,7 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
 
         return {
             "symbol": pure_code,
-            "name": dl.get_name_by_code(pure_code) if pure_code != code else code,
+            "name": dl.get_name_by_code(pure_code),
             "industry_status": "HANSUNG'S TRI-CORE 분석 엔진 가동 중",
             "history": to_map(plot_df['Close']),
             "prediction": {
