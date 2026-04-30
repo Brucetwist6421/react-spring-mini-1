@@ -72,7 +72,7 @@ def get_investor_data(code):
     try:
         for i in range(4):
             if i > 0:
-                time.sleep(0.2) # API 호출 제한 방지
+                time.sleep(0.5) # API 호출 제한 방지
                 
             params = {
                 "FID_COND_MRKT_DIV_CODE": "J",
@@ -120,20 +120,34 @@ def get_fundamental_data(code):
     }
     
     try:
-        time.sleep(0.1) # 호출 간격 조정
+        # 1. 호출 간격 상향 조정 (수급 데이터 조회 직후 호출될 가능성이 높으므로 0.5초 권장)
+        time.sleep(0.5) 
+        
         res = requests.get(url, headers=headers, params=params)
         res_data = res.json()
         
+        # 2. API 응답 결과 확인 (실패 시 로그 기록)
+        if res_data.get('rt_cd') != '0':
+            logger.warning(f"KIS API 호출 실패({code}): {res_data.get('msg1')} (에러코드: {res_data.get('rt_cd')})")
+            # 실패 시 기본값 반환
+            return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
+
         data = res_data.get('output', {})
         
+        # 데이터가 아예 없는 경우 방지
+        if not data:
+            logger.warning(f"KIS API 응답 데이터(output)가 비어있음: {code}")
+            return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
+
         def safe_float(val):
             try:
-                if val is None or str(val).strip() in ["", "null", "None"]:
+                if val is None or str(val).strip() in ["", "null", "None", "n/a"]:
                     return 0.0
                 return float(val)
             except (ValueError, TypeError):
                 return 0.0
 
+        # 3. 데이터 추출 (필드명 확인 필수: KIS 명세에 따라 pbr_val 등이 쓰일 때도 있음)
         return {
             "per": safe_float(data.get('per')),
             "pbr": safe_float(data.get('pbr')),
@@ -144,7 +158,7 @@ def get_fundamental_data(code):
             "vol_power": safe_float(data.get('stck_shrn_vrt'))
         }
     except Exception as e:
-        logger.error(f"기본적 분석 데이터 로드 실패: {e}")
+        logger.error(f"기본적 분석 데이터 로드 실패 (Code: {code}): {e}")
         return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
     
 def get_all_stocks():
@@ -169,19 +183,34 @@ def get_all_stocks():
 def get_name_by_code(code):
     """
     종목 코드를 입력받아 해당 종목명을 반환합니다.
+    (공백 제거 및 6자리 패딩 처리를 통해 매칭 성공률을 높였습니다.)
     """
     global _stock_list_cache
     try:
+        # 1. 캐시가 없으면 로드
         if _stock_list_cache is None:
-            get_all_stocks() # 캐시 로드
+            get_all_stocks()
             
-        # 코드 매칭 (문자열 타입 일치 확인)
-        target = _stock_list_cache[_stock_list_cache['Code'] == str(code)]
+        if _stock_list_cache is None or _stock_list_cache.empty:
+            return code
+
+        # 2. 입력된 코드를 6자리 문자열로 정규화 (예: 20 -> '000020')
+        # 앞뒤 공백 제거 후 6자리 숫자로 맞춤
+        clean_code = str(code).strip().zfill(6)
+        
+        # 3. 데이터프레임의 Code 컬럼도 문자열/공백제거 후 비교
+        # .values 비교를 통해 인덱스 문제를 방지하고 속도를 높입니다.
+        mask = _stock_list_cache['Code'].astype(str).str.strip() == clean_code
+        target = _stock_list_cache[mask]
         
         if not target.empty:
+            # 매칭된 첫 번째 데이터의 'Name' 반환
             return target.iloc[0]['Name']
         
-        return code # 찾지 못하면 코드 그대로 반환
+        # 4. 여전히 찾지 못했다면 로그를 남기고 코드 반환
+        logger.warning(f"종목 리스트에서 코드를 찾을 수 없음: {clean_code}")
+        return code 
+        
     except Exception as e:
         logger.error(f"종목명 변환 실패 (Code: {code}): {e}")
         return code

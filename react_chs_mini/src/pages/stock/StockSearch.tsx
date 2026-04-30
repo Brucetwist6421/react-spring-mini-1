@@ -61,17 +61,27 @@ const StockSearch: React.FC<StockSearchProps> = ({ onSearch, initialValue = "" }
         freeSolo
         disableClearable
         options={options}
+        // 1. 현재 입력된 값이 문자열인지 객체인지 판단하여 라벨 표시
         getOptionLabel={(option) => (typeof option === 'string' ? option : `${option.name} (${option.code})`)}
-        onInputChange={(_, newInputValue) => { // 💡 사용하지 않는 첫 번째 인자 event를 '_'로 변경
+        
+        // 2. 검색창에 글자를 칠 때만 inputValue 업데이트
+        onInputChange={(_, newInputValue) => {
           setInputValue(newInputValue);
         }}
-        onChange={(_, newValue) => { // 💡 사용하지 않는 첫 번째 인자 event를 '_'로 변경
+
+        // 3. 옵션을 '클릭'하거나 엔터를 쳤을 때 실행
+        onChange={(_, newValue) => {
           if (newValue && typeof newValue !== 'string') {
+            // ✅ 클릭한 옵션의 코드로 바로 검색 실행
             onSearch(newValue.code);
+            // ✅ 핵심: 검색 버튼이 참조할 inputValue를 클릭된 텍스트로 업데이트
+            setInputValue(newValue.code); 
           } else if (typeof newValue === 'string') {
             onSearch(newValue);
+            setInputValue(newValue);
           }
         }}
+        
         renderInput={(params) => (
           <TextField
             {...params}
@@ -79,7 +89,12 @@ const StockSearch: React.FC<StockSearchProps> = ({ onSearch, initialValue = "" }
             size="small"
             variant="standard"
             sx={{ ml: 1, flex: 1 }}
-            // 💡 InputProps 대신 slotProps를 사용 (MUI 최신 권장 방식)
+            // 엔터 키 대응
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onSearch(inputValue);
+              }
+            }}
             slotProps={{
               input: {
                 ...params.InputProps,
@@ -94,23 +109,20 @@ const StockSearch: React.FC<StockSearchProps> = ({ onSearch, initialValue = "" }
             }}
           />
         )}
-        renderOption={(props, option) => {
-        // props에서 key를 추출하되, 변수로 선언하지 않고 바로 사용합니다.
-        // MUI v6에서는 props에 이미 key가 포함되어 전달되는 경우가 많습니다.
-        return (
-            <Box 
-            component="li" 
-            {...props}           // key를 포함한 모든 props를 전개 (사용하지 않는 변수 할당 없음)
-            key={option.code}    // 하지만 안정성을 위해 고유한 key(종목코드)를 명시적으로 재할당
-            sx={{ fontSize: '0.9rem' }}
-            >
+        renderOption={(props, option) => (
+          <Box component="li" {...props} key={option.code} sx={{ fontSize: '0.9rem' }}>
             <Box sx={{ fontWeight: 'bold', mr: 1 }}>{option.name}</Box>
             <Box sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{option.code}</Box>
-            </Box>
-        );
-        }}
+          </Box>
+        )}
       />
-      <IconButton onClick={() => onSearch(inputValue)} sx={{ p: '10px' }}>
+      <IconButton 
+        onClick={() => {
+          // 현재 상태값인 inputValue로 검색 실행
+          onSearch(inputValue);
+        }} 
+        sx={{ p: '10px' }}
+      >
         <SearchIcon />
       </IconButton>
     </Paper>
