@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {type Request, type Response } from 'express'; // 타입 추가
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
@@ -19,7 +19,7 @@ connectDB();
 app.use('/api/robots', robotRouter);
 
 // 기본 헬스체크
-app.get('/api/health', (req: any, res: any) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'UP', message: '백엔드 정상 작동 중' });
 });
 
