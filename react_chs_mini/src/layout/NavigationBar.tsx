@@ -66,6 +66,7 @@ const NavigationBar = () => {
     { text: "새 포켓몬 목록", icon: <CatchingPokemonTwoTone />, path: "/newPokemonList" },
     { text: "새 포켓몬 등록", icon: <AddCircle />, path: "/pokemon/create" },
     { text: "주식 검색/주가 예측", icon: <ShowChart />, path: "/stock/prediction" },
+    { text: "로봇 모니터링", icon: <ShowChart />, path: "/robot/monitoring" },
     { text: "LMS 대시보드", icon: <Dashboard />, path: "/lms/dashboard" },
     { text: "설정", icon: <Settings />, path: "/settings" },
   ];
@@ -74,7 +75,7 @@ const NavigationBar = () => {
   const visibleMenuItems = isLoggedIn 
     ? menuItems.filter(item => item.text === "LMS 대시보드")
     : menuItems.filter(item => item.text === "포켓몬대시보드" || item.text === "기존 포켓몬 목록" || item.text === "새 포켓몬 목록"
-       || item.text === "새 포켓몬 등록" || item.text === "주식 검색/주가 예측");
+       || item.text === "새 포켓몬 등록" || item.text === "주식 검색/주가 예측" || item.text === "로봇 모니터링");
 
   const currentWidth = open ? fullWidth : collapsedWidth;
 

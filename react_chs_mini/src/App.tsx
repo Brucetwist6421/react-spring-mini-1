@@ -16,6 +16,7 @@ import LmsDashboard from "./pages/lmsDashboard/LmsDashboard";
 import LmsStudentManagement from "./pages/lmsDashboard/components/LmsStudentManagement";
 import theme from "./theme";
 import StockChartPage from "./pages/stock/StockChartPage";
+import RobotMonitoringPage from "./pages/robot/RobotMonitoringPage";
 
 function App() {
   return (
@@ -50,6 +51,9 @@ function App() {
                 <Route path="/pokemon2/:id" element={<NewPokemonDetailPage />} />
                 {/* 주식 예측 차트 페이지 추가 */}
                 <Route path="/stock/prediction" element={<StockChartPage />} />
+
+                {/* express.js 실시간 모니터링 및 워크플로우 페이지 추가 */}
+                <Route path="/robot/monitoring" element={<RobotMonitoringPage />} />
                 {/* 2. 동적 파라미터는 가장 아래에 배치 */}
                 <Route path="/" element={<MainDashboard />} />
                 <Route path="/:pokemonName" element={<MainDashboard />} />
