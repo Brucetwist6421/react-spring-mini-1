@@ -7,8 +7,11 @@ export interface RobotLog {
   created_at?: string;
 }
 
-// 백엔드 Express 서버 주소 기본 세팅 (포트 5000번 조준)
-const BASE_URL = 'http://localhost:5000/api/robots';
+// 로컬 테스트용 주소 주석 처리
+// const BASE_URL = 'http://localhost:5000/api/robots';
+
+// 실제 OCI 배포 및 타인 테스팅용 주소 (스프링 부트와 동일한 서버, 5000번 포트 조준)
+const BASE_URL = 'http://168.107.51.143:5000/api/robots';
 
 export const robotApi = {
   // 🟢 READ: 모든 로봇 로그 조회
