@@ -8,5 +8,8 @@ docker logs -f spring-container
 파이썬 로그 실시간 확인
 docker logs -f python-container
 
+express.js 로그 실시간 확인
+docker logs express-container
+
 파이썬 API 직접 테스트 (서버 내부에서):
 curl http://localhost:8000/stock/005930
