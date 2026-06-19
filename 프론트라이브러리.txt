@@ -61,7 +61,7 @@ CREATE TABLE pokemon_attachment (
 	          <artifactId>spring-security-core</artifactId>
 	      </dependency> -->
 	      
-	      <!-- 스프링 시큐리티와 태그라이브러리를 연결해줌 -->
+	      <!-- 스프링 시큐리티와 태그라이브러리를 연결해줌 -->...
 	      <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-taglibs -->
 	      <!-- <dependency>
 	          <groupId>org.springframework.security</groupId>
