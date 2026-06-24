@@ -1,0 +1,101 @@
+name: CI/CD Deploy to Oracle Cloud
+
+on:
+  push:
+    branches: [ "main" ] # 메인 브랜치에 푸시될 때 실행
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 1. Java 및 빌드 환경 설정
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21' 
+          distribution: 'temurin'
+
+      # 2. 스프링 부트 빌드 (Maven 버전)
+      - name: Build Spring Boot
+        run: |
+          cd spring_chs_mini
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+
+      # 3. Docker Buildx 설정
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 4. Docker Hub 로그인
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 5. 이미지 빌드 및 푸시 (Express 및 파이썬 추가)
+      - name: Build and Push Images
+        run: |
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/spring-app:latest ./spring_chs_mini --push
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/react-app:latest ./react_chs_mini --push
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/stock-ai:latest ./stock-ai --push
+          # 🚀 --- Express 로봇 모니터링 백엔드 추가 ---
+          docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/express-app:latest ./expressjs_backend --push
+
+      # 6. 오라클 서버에 SSH 접속하여 배포
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ubuntu
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            # 1. 기존 컨테이너 정리 (Express 컨테이너 추가 제거)
+            docker rm -f spring-container react-container python-container express-container 2>/dev/null || true
+
+            # 2. 최신 이미지 풀 (Express 추가)
+            docker pull ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/stock-ai:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/express-app:latest
+            
+            # 3. 파이썬 AI 서버 실행
+            docker run -d --name python-container \
+              -p 8000:8000 \
+              -e KIS_APP_KEY="${{ secrets.APP_KEY }}" \
+              -e KIS_APP_SECRET="${{ secrets.APP_SECRET }}" \
+              -e KIS_URL_BASE="https://openapi.koreainvestment.com:9443" \
+              --restart always \
+              ${{ secrets.DOCKER_USERNAME }}/stock-ai:latest
+
+            # 4. 스프링 컨테이너 실행
+            docker run -d --name spring-container \
+              -p 8080:8080 \
+              -v /home/ubuntu/upload:/upload \
+              --link python-container:python-api \
+              --restart always \
+              ${{ secrets.DOCKER_USERNAME }}/spring-app:latest
+
+            # 🚀 5. Express 로봇 백엔드 컨테이너 실행 (Supabase DB 접속 계정 주입)
+            # 수동으로 주입하던 환경변수를 GitHub Secrets 시스템을 통해 안전하게 주입합니다.
+            docker run -d --name express-container \
+              -p 5000:5000 \
+              -e DB_USER="${{ secrets.DB_USER }}" \
+              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e DB_HOST="${{ secrets.DB_HOST }}" \
+              -e DB_PORT="${{ secrets.DB_PORT }}" \
+              -e DB_DATABASE="${{ secrets.DB_DATABASE }}" \
+              --restart always \
+              ${{ secrets.DOCKER_USERNAME }}/express-app:latest
+              
+            # 6. 리액트 컨테이너 실행
+            docker run -d --name react-container \
+              -p 80:80 \
+              --restart always \
+              ${{ secrets.DOCKER_USERNAME }}/react-app:latest
+
+            # 7. 미사용 이미지 정리 (용량 확보)
+            docker image prune -f

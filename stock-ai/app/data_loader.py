@@ -48,7 +48,19 @@ def get_stock_code_by_name(name):
         return None
 
 def get_kis_headers(tr_id):
-    """KIS API 공통 헤더 생성 (config 모듈 참조로 실시간 갱신 토큰 반영)"""
+    """KIS API 공통 헤더 생성 (실시간 토큰 부재 시 강제 발급 세이프가드 추가)"""
+    
+    # 💡 [핵심 세이프가드]
+    # 어떤 이유로든 config.ACCESS_TOKEN이 None이거나 빈 문자열이라면
+    # 요청 직전에 한국투자증권 게이트웨이에서 토큰을 실시간으로 다시 채워 넣습니다.
+    if not getattr(config, 'ACCESS_TOKEN', None):
+        print("[DATA_LOADER WARN] 실시간 참조 토큰이 비어있어 즉시 강제 발급을 시도합니다.")
+        try:
+            config.get_access_token()
+            print(f"[DATA_LOADER RECOVER] 실시간 강제 발급 성공 -> {config.ACCESS_TOKEN[:10]}...")
+        except Exception as e:
+            logger.error(f"실시간 강제 토큰 발급 실패: {e}")
+
     return {
         "Content-Type": "application/json",
         "authorization": f"Bearer {config.ACCESS_TOKEN}", # 💡 config. 으로 실시간 참조
