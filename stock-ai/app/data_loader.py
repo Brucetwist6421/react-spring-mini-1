@@ -157,14 +157,15 @@ def get_fundamental_data(code):
                 return 0.0
 
         # 3. 데이터 추출 (필드명 확인 필수: KIS 명세에 따라 pbr_val 등이 쓰일 때도 있음)
+        # 💡 KIS 주식기본조회(FHKST01010100) 표준 필드명으로 매핑 수정
         return {
-            "per": safe_float(data.get('per')),
-            "pbr": safe_float(data.get('pbr')),
-            "eps": safe_float(data.get('eps')),
-            "div": safe_float(data.get('dyd')),
-            "foreign_rt": safe_float(data.get('frgn_ntby_rt')),
-            "change_rt": safe_float(data.get('prdy_ctrt')),
-            "vol_power": safe_float(data.get('stck_shrn_vrt'))
+            "per": safe_float(data.get('per')),          # 명세서상 per (안 나올 경우 'perx' 확인)
+            "pbr": safe_float(data.get('pbrx')),         # ⭐ KIS 기본조회에서 PBR은 'pbrx'인 경우가 많습니다.
+            "eps": safe_float(data.get('eps')),          # 명세서상 eps
+            "div": safe_float(data.get('perx')),         # 주당 배당수익률 필요 시 명세서의 배당 관련 필드 확인 필요
+            "foreign_rt": safe_float(data.get('frgn_ln_rnw_rt')), # ⭐ 외국인 보유 비율
+            "change_rt": safe_float(data.get('prdy_ctrt')),       # 전일 대비율 (등락률)
+            "vol_power": safe_float(data.get('cldg_gskn'))        # ⭐ 체결강도 (Volume Power)
         }
     except Exception as e:
         logger.error(f"기본적 분석 데이터 로드 실패 (Code: {code}): {e}")
