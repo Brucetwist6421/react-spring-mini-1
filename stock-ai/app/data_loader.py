@@ -120,7 +120,7 @@ def get_investor_data(code):
         return pd.DataFrame()
 
 def get_fundamental_data(code):
-    """KIS API: 주식기본조회 (모든 응답 필드 로그 출력 및 완벽 방어 버전)"""
+    """KIS API: 주식기본조회 (모든 대소문자 변종 및 로깅 먹통 원천 방어 완료 버전)"""
     url = f"{URL_BASE}/uapi/domestic-stock/v1/quotations/inquire-price"
     headers = get_kis_headers("FHKST01010100")
     params = {
@@ -134,27 +134,26 @@ def get_fundamental_data(code):
         res = requests.get(url, headers=headers, params=params)
         res_data = res.json()
         
-        # 🚨 [필수 확인] 배포 후 서버 로그에서 이 부분을 찾으시면 됩니다.
-        # KIS 가 주는 원본 데이터를 보기 위해 로깅 레벨을 'error'나 'warning'으로 강제 격상해 출력합니다.
-        logger.warning(f"==================================================")
-        logger.warning(f"[KIS API 원본 응답 - 종목코드: {code}]")
-        logger.warning(res_data)
-        logger.warning(f"rt_cd (결과코드): {res_data.get('rt_cd')}")
-        logger.warning(f"msg1 (결과메시지): {res_data.get('msg1')}")
-        logger.warning(f"output 데이터 전체: {res_data.get('output')}")
-        logger.warning(f"==================================================")
+        # 🚨 [강제 출력] 로깅 프레임워크가 씹혀도 터미널에 무조건 찍히는 print문 배치
+        print("\n" + "="*60)
+        print(f"🚨 [DATA_LOADER START] KIS API RAW RESPONSE FOR CODE: {code}")
+        print(res_data)
+        print("="*60 + "\n")
         
-        if res_data.get('rt_cd') != '0':
+        # 1. 루트 레벨 딕셔너리의 모든 Key를 소문자로 정규화 ('OUTPUT' -> 'output' 방어)
+        normalized_res = {k.lower(): v for k, v in res_data.items()}
+        
+        if normalized_res.get('rt_cd') != '0' and normalized_res.get('rt_cd') != '00':
+            logger.warning(f"KIS API 내부 응답 실패 code({code}): {normalized_res.get('msg1')}")
             return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
 
-        data = res_data.get('output', {})
+        data = normalized_res.get('output', {})
         if not data:
-            logger.error(f"⚠️ KIS API 응답 성공했으나 output이 비어있음 (Code: {code})")
+            print(f"rt_cd는 0이나 'output' 데이터 바디가 비어있습니다.")
             return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
 
-        # KIS API가 대문자로 줄 때와 소문자로 줄 때 모두 대응하는 헬퍼 함수
-        def get_val(key_str):
-            return data.get(key_str.lower()) or data.get(key_str.upper())
+        # 2. output 내부 필드의 모든 Key도 소문자로 정규화 ('PERX' -> 'perx' 방어)
+        d = {k.lower(): v for k, v in data.items()}
 
         def safe_float(val):
             try:
@@ -164,17 +163,18 @@ def get_fundamental_data(code):
             except (ValueError, TypeError):
                 return 0.0
 
-        # 대소문자 무관하게 값을 꺼내오도록 get_val로 감싸서 매핑
+        # KIS 공식 명세서 및 실전/모의투자 필드명 동시 교차 보완 매핑
         return {
-            "per": safe_float(get_val('per') or get_val('perx')),          
-            "pbr": safe_float(get_val('pbrx') or get_val('pbr')),         
-            "eps": safe_float(get_val('eps')),          
-            "div": safe_float(get_val('hry_dyd') or get_val('dyd') or get_val('lst_stkn_thst_div_tnrt')), 
-            "foreign_rt": safe_float(get_val('frgn_ln_rnw_rt') or get_val('frgn_ntby_rt')), 
-            "change_rt": safe_float(get_val('prdy_ctrt')),       
-            "vol_power": safe_float(get_val('cldg_gskn'))        
+            "per": safe_float(d.get('per') or d.get('perx')),          
+            "pbr": safe_float(d.get('pbrx') or d.get('pbr')),         
+            "eps": safe_float(d.get('eps')),          
+            "div": safe_float(d.get('hry_dyd') or d.get('dyd') or d.get('lst_stkn_thst_div_tnrt')), 
+            "foreign_rt": safe_float(d.get('frgn_ln_rnw_rt') or d.get('frgn_ntby_rt')), 
+            "change_rt": safe_float(d.get('prdy_ctrt')),       
+            "vol_power": safe_float(d.get('cldg_gskn'))        
         }
     except Exception as e:
+        print(f"기본 분석 예외 발생: {str(e)}")
         logger.error(f"분석 데이터 로드 중 예외 발생 (Code: {code}): {e}")
         return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
     
