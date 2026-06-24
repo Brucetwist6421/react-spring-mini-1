@@ -120,7 +120,7 @@ def get_investor_data(code):
         return pd.DataFrame()
 
 def get_fundamental_data(code):
-    """KIS API: 주식기본조회 (PER, PBR 등 투자지표) 디버깅 버전"""
+    """KIS API: 주식기본조회 (모든 응답 필드 로그 출력 및 완벽 방어 버전)"""
     url = f"{URL_BASE}/uapi/domestic-stock/v1/quotations/inquire-price"
     headers = get_kis_headers("FHKST01010100")
     params = {
@@ -134,26 +134,27 @@ def get_fundamental_data(code):
         res = requests.get(url, headers=headers, params=params)
         res_data = res.json()
         
-        # 🔍 [디버깅 1] KIS 서버에서 온 원본 응답 전체를 로그에 출력합니다.
-        logger.info(f"==== [DEBUG] KIS API 원본 응답 ({code}) ====")
-        logger.info(res_data)
-        logger.info("============================================")
+        # 🚨 [필수 확인] 배포 후 서버 로그에서 이 부분을 찾으시면 됩니다.
+        # KIS 가 주는 원본 데이터를 보기 위해 로깅 레벨을 'error'나 'warning'으로 강제 격상해 출력합니다.
+        logger.warning(f"==================================================")
+        logger.warning(f"[KIS API 원본 응답 - 종목코드: {code}]")
+        logger.warning(res_data)
+        logger.warning(f"rt_cd (결과코드): {res_data.get('rt_cd')}")
+        logger.warning(f"msg1 (결과메시지): {res_data.get('msg1')}")
+        logger.warning(f"output 데이터 전체: {res_data.get('output')}")
+        logger.warning(f"==================================================")
         
-        # API 응답 결과 확인
         if res_data.get('rt_cd') != '0':
-            logger.warning(f"KIS API 호출 실패({code}): {res_data.get('msg1')} (에러코드: {res_data.get('rt_cd')})")
             return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
 
         data = res_data.get('output', {})
-        
-        # 🔍 [디버깅 2] output 내용물만 따로 출력합니다.
-        logger.info(f"==== [DEBUG] output 데이터 추출 결과 ====")
-        logger.info(data)
-        logger.info("============================================")
-
         if not data:
-            logger.warning(f"KIS API 응답 데이터(output)가 비어있음: {code}")
+            logger.error(f"⚠️ KIS API 응답 성공했으나 output이 비어있음 (Code: {code})")
             return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
+
+        # KIS API가 대문자로 줄 때와 소문자로 줄 때 모두 대응하는 헬퍼 함수
+        def get_val(key_str):
+            return data.get(key_str.lower()) or data.get(key_str.upper())
 
         def safe_float(val):
             try:
@@ -163,18 +164,18 @@ def get_fundamental_data(code):
             except (ValueError, TypeError):
                 return 0.0
 
-        # KIS 기본조회 명세 기준 매핑
+        # 대소문자 무관하게 값을 꺼내오도록 get_val로 감싸서 매핑
         return {
-            "per": safe_float(data.get('per')),          
-            "pbr": safe_float(data.get('pbrx')),         
-            "eps": safe_float(data.get('eps')),          
-            "div": safe_float(data.get('perx')), # 배당수익률 대용 (필요시 수정)
-            "foreign_rt": safe_float(data.get('frgn_ln_rnw_rt')), 
-            "change_rt": safe_float(data.get('prdy_ctrt')),       
-            "vol_power": safe_float(data.get('cldg_gskn'))        
+            "per": safe_float(get_val('per') or get_val('perx')),          
+            "pbr": safe_float(get_val('pbrx') or get_val('pbr')),         
+            "eps": safe_float(get_val('eps')),          
+            "div": safe_float(get_val('hry_dyd') or get_val('dyd') or get_val('lst_stkn_thst_div_tnrt')), 
+            "foreign_rt": safe_float(get_val('frgn_ln_rnw_rt') or get_val('frgn_ntby_rt')), 
+            "change_rt": safe_float(get_val('prdy_ctrt')),       
+            "vol_power": safe_float(get_val('cldg_gskn'))        
         }
     except Exception as e:
-        logger.error(f"기본적 분석 데이터 로드 실패 (Code: {code}): {e}")
+        logger.error(f"분석 데이터 로드 중 예외 발생 (Code: {code}): {e}")
         return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
     
 def get_all_stocks():
