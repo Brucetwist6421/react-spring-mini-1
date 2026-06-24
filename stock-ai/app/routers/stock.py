@@ -54,24 +54,39 @@ async def search_stocks(query: str):
 @router.get("/{code}")
 async def get_stock_prediction(code: str, period: str = "2y", predict_days: int = 15):
     try:
-        # 1. 종목명으로 들어온 경우 코드로 변환
+        # [강제 출력] 어떤 요청이 들어왔는지 라우터 시작점부터 찍어버립니다.
+        print(f"[ROUTER START] 요청받은 코드/이름: {code}, 기간: {period}")
+
         pure_code = code.split('.')[0]
         if not pure_code.isdigit():
+            print(f"'{pure_code}'는 숫자가 아니므로 종목명 검색을 시작합니다.")
             converted_code = dl.get_stock_code_by_name(pure_code)
+            print(f"이름 검색 결과 반환된 코드: {converted_code}")
+            
             if not converted_code:
                 return {"error": f"'{pure_code}'에 해당하는 종목을 찾을 수 없습니다."}
             pure_code = converted_code
+
+        print(f"종목코드 [{pure_code}]로 데이터를 수집합니다.")
 
         # 2. 데이터 로드 및 예측
         start_date = (datetime.now() - timedelta(days=365*2)).strftime('%Y-%m-%d')
         df_stock = dl.get_stock_data(pure_code, start_date)
         
         if df_stock.empty:
+            print("시세 데이터(df_stock)가 비어있습니다.")
             return {"error": "시세 데이터를 가져오지 못했습니다."}
 
+        print("🔄 수급 데이터(get_investor_data) 요청 중...")
         df_investors = dl.get_investor_data(pure_code)
+        
+        print("🔄 기본적 분석 데이터(get_fundamental_data) 요청 중...")
         fund_info = dl.get_fundamental_data(pure_code)
+        
+        print("🔄 Prophet 예측 엔진(predict_stock) 가동 중...")
         forecast = pt.predict_stock(df_stock, predict_days)
+
+        print("모든 데이터 수집 및 예측 완료. 응답을 조립합니다.")
 
         # 표시 기간 설정
         req_period = period.lower().replace("o", "")
@@ -85,7 +100,7 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
         return {
             "symbol": pure_code,
             "name": dl.get_name_by_code(pure_code),
-            "industry_status": "HANSUNG'S TRI-CORE 분석 엔진 가동 중",
+            "industry_status": "종가 예측 분석 엔진 가동 중",
             "history": to_map(plot_df['Close']),
             "prediction": {
                 d.strftime('%Y-%m-%d'): {
@@ -110,5 +125,7 @@ async def get_stock_prediction(code: str, period: str = "2y", predict_days: int 
             }
         }
     except Exception as e:
+        # 예외 발생 시 어떤 단계에서 터졌는지 터미널에 명확히 기록되도록 설정
+        print(f"치명적 오류 발생: {str(e)}")
         logger.exception("분석 중 에러 발생")
         return {"error": str(e)}
