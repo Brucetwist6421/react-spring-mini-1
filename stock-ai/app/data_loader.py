@@ -120,7 +120,7 @@ def get_investor_data(code):
         return pd.DataFrame()
 
 def get_fundamental_data(code):
-    """KIS API: 주식기본조회 (PER, PBR 등 투자지표)"""
+    """KIS API: 주식기본조회 (PER, PBR 등 투자지표) 디버깅 버전"""
     url = f"{URL_BASE}/uapi/domestic-stock/v1/quotations/inquire-price"
     headers = get_kis_headers("FHKST01010100")
     params = {
@@ -129,21 +129,28 @@ def get_fundamental_data(code):
     }
     
     try:
-        # 1. 호출 간격 상향 조정 (수급 데이터 조회 직후 호출될 가능성이 높으므로 0.5초 권장)
         time.sleep(0.5) 
         
         res = requests.get(url, headers=headers, params=params)
         res_data = res.json()
         
-        # 2. API 응답 결과 확인 (실패 시 로그 기록)
+        # 🔍 [디버깅 1] KIS 서버에서 온 원본 응답 전체를 로그에 출력합니다.
+        logger.info(f"==== [DEBUG] KIS API 원본 응답 ({code}) ====")
+        logger.info(res_data)
+        logger.info("============================================")
+        
+        # API 응답 결과 확인
         if res_data.get('rt_cd') != '0':
             logger.warning(f"KIS API 호출 실패({code}): {res_data.get('msg1')} (에러코드: {res_data.get('rt_cd')})")
-            # 실패 시 기본값 반환
             return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
 
         data = res_data.get('output', {})
         
-        # 데이터가 아예 없는 경우 방지
+        # 🔍 [디버깅 2] output 내용물만 따로 출력합니다.
+        logger.info(f"==== [DEBUG] output 데이터 추출 결과 ====")
+        logger.info(data)
+        logger.info("============================================")
+
         if not data:
             logger.warning(f"KIS API 응답 데이터(output)가 비어있음: {code}")
             return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
@@ -156,16 +163,15 @@ def get_fundamental_data(code):
             except (ValueError, TypeError):
                 return 0.0
 
-        # 3. 데이터 추출 (필드명 확인 필수: KIS 명세에 따라 pbr_val 등이 쓰일 때도 있음)
-        # 💡 KIS 주식기본조회(FHKST01010100) 표준 필드명으로 매핑 수정
+        # KIS 기본조회 명세 기준 매핑
         return {
-            "per": safe_float(data.get('per')),          # 명세서상 per (안 나올 경우 'perx' 확인)
-            "pbr": safe_float(data.get('pbrx')),         # ⭐ KIS 기본조회에서 PBR은 'pbrx'인 경우가 많습니다.
-            "eps": safe_float(data.get('eps')),          # 명세서상 eps
-            "div": safe_float(data.get('perx')),         # 주당 배당수익률 필요 시 명세서의 배당 관련 필드 확인 필요
-            "foreign_rt": safe_float(data.get('frgn_ln_rnw_rt')), # ⭐ 외국인 보유 비율
-            "change_rt": safe_float(data.get('prdy_ctrt')),       # 전일 대비율 (등락률)
-            "vol_power": safe_float(data.get('cldg_gskn'))        # ⭐ 체결강도 (Volume Power)
+            "per": safe_float(data.get('per')),          
+            "pbr": safe_float(data.get('pbrx')),         
+            "eps": safe_float(data.get('eps')),          
+            "div": safe_float(data.get('perx')), # 배당수익률 대용 (필요시 수정)
+            "foreign_rt": safe_float(data.get('frgn_ln_rnw_rt')), 
+            "change_rt": safe_float(data.get('prdy_ctrt')),       
+            "vol_power": safe_float(data.get('cldg_gskn'))        
         }
     except Exception as e:
         logger.error(f"기본적 분석 데이터 로드 실패 (Code: {code}): {e}")
