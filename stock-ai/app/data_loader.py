@@ -3,8 +3,10 @@ import requests
 import FinanceDataReader as fdr
 import logging
 import time
-from app.config import APP_KEY, APP_SECRET, URL_BASE, ACCESS_TOKEN
 import re
+
+# 💡 실시간 전역 변수 자동 갱신을 위해 모듈 자체를 임포트합니다.
+from app import config  
 
 # 로그 설정
 logger = logging.getLogger(__name__)
@@ -26,13 +28,11 @@ def get_stock_code_by_name(name):
         name_str = str(name).strip()
 
         # 1. 정규표현식으로 괄호 안의 6자리 숫자(코드)가 있는지 먼저 확인
-        # 예: "LS (006260)" -> "006260" 추출
         code_match = re.search(r'\((\d{6})\)', name_str)
         if code_match:
             return code_match.group(1)
 
-        # 2. 종목명 검색 (기존 로직 유지)
-        # 공백 제거 후 비교하여 정확도 향상
+        # 2. 종목명 검색 (공백 제거 후 비교하여 정확도 향상)
         target = _stock_list_cache[_stock_list_cache['Name'].str.replace(' ', '') == name_str.replace(' ', '')]
         
         if not target.empty:
@@ -48,12 +48,12 @@ def get_stock_code_by_name(name):
         return None
 
 def get_kis_headers(tr_id):
-    """KIS API 공통 헤더 생성"""
+    """KIS API 공통 헤더 생성 (config 모듈 참조로 실시간 갱신 토큰 반영)"""
     return {
         "Content-Type": "application/json",
-        "authorization": f"Bearer {ACCESS_TOKEN}",
-        "appkey": APP_KEY,
-        "appsecret": APP_SECRET,
+        "authorization": f"Bearer {config.ACCESS_TOKEN}", # 💡 config. 으로 실시간 참조
+        "appkey": config.APP_KEY,                         # 💡 config. 으로 실시간 참조
+        "appsecret": config.APP_SECRET,                   # 💡 config. 으로 실시간 참조
         "tr_id": tr_id,
         "custtype": "P"
     }
@@ -61,7 +61,6 @@ def get_kis_headers(tr_id):
 def get_stock_data(code, start_date):
     """시세 데이터 수집 (FinanceDataReader 사용)"""
     try:
-        # 데이터 로드
         df = fdr.DataReader(code, start_date)
         if df.empty:
             logger.warning(f"종목코드 {code}에 대한 데이터가 없습니다.")
@@ -72,7 +71,8 @@ def get_stock_data(code, start_date):
 
 def get_investor_data(code):
     """KIS API: 투자자별 매매동향 (수급)"""
-    url = f"{URL_BASE}/uapi/domestic-stock/v1/quotations/inquire-investor"
+    # 💡 config.URL_BASE를 참조하도록 변경
+    url = f"{config.URL_BASE}/uapi/domestic-stock/v1/quotations/inquire-investor"
     headers = get_kis_headers("FHKST01010900")
     
     all_data = []
@@ -121,7 +121,8 @@ def get_investor_data(code):
 
 def get_fundamental_data(code):
     """KIS API: 주식기본조회 (모든 대소문자 변종 및 로깅 먹통 원천 방어 완료 버전)"""
-    url = f"{URL_BASE}/uapi/domestic-stock/v1/quotations/inquire-price"
+    # 💡 config.URL_BASE를 참조하도록 변경
+    url = f"{config.URL_BASE}/uapi/domestic-stock/v1/quotations/inquire-price"
     headers = get_kis_headers("FHKST01010100")
     params = {
         "FID_COND_MRKT_DIV_CODE": "J", 
@@ -134,13 +135,12 @@ def get_fundamental_data(code):
         res = requests.get(url, headers=headers, params=params)
         res_data = res.json()
         
-        # 🚨 [강제 출력] 로깅 프레임워크가 씹혀도 터미널에 무조건 찍히는 print문 배치
         print("\n" + "="*60)
         print(f"🚨 [DATA_LOADER START] KIS API RAW RESPONSE FOR CODE: {code}")
         print(res_data)
         print("="*60 + "\n")
         
-        # 1. 루트 레벨 딕셔너리의 모든 Key를 소문자로 정규화 ('OUTPUT' -> 'output' 방어)
+        # 1. 루트 레벨 딕셔너리의 모든 Key를 소문자로 정규화
         normalized_res = {k.lower(): v for k, v in res_data.items()}
         
         if normalized_res.get('rt_cd') != '0' and normalized_res.get('rt_cd') != '00':
@@ -152,7 +152,7 @@ def get_fundamental_data(code):
             print(f"rt_cd는 0이나 'output' 데이터 바디가 비어있습니다.")
             return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
 
-        # 2. output 내부 필드의 모든 Key도 소문자로 정규화 ('PERX' -> 'perx' 방어)
+        # 2. output 내부 필드의 모든 Key도 소문자로 정규화
         d = {k.lower(): v for k, v in data.items()}
 
         def safe_float(val):
@@ -163,7 +163,6 @@ def get_fundamental_data(code):
             except (ValueError, TypeError):
                 return 0.0
 
-        # KIS 공식 명세서 및 실전/모의투자 필드명 동시 교차 보완 매핑
         return {
             "per": safe_float(d.get('per') or d.get('perx')),          
             "pbr": safe_float(d.get('pbrx') or d.get('pbr')),         
@@ -179,17 +178,13 @@ def get_fundamental_data(code):
         return {"per": 0.0, "pbr": 0.0, "eps": 0.0, "div": 0.0, "foreign_rt": 0.0, "change_rt": 0.0, "vol_power": 0.0}
     
 def get_all_stocks():
-    """
-    모든 상장 종목 리스트를 반환합니다. (검색 및 자동완성용)
-    """
+    """모든 상장 종목 리스트를 반환합니다. (검색 및 자동완성용)"""
     global _stock_list_cache
     try:
         if _stock_list_cache is None:
             logger.info("전체 종목 리스트를 새로 고칭합니다...")
-            # fdr.StockListing('KRX')는 KOSPI, KOSDAQ, KONEX를 포함합니다.
             _stock_list_cache = fdr.StockListing('KRX')
         
-        # 라우터에서 기대하는 'code'와 'name' 컬럼명으로 가공하여 반환
         return _stock_list_cache[['Code', 'Name']].rename(
             columns={'Code': 'code', 'Name': 'name'}
         )
@@ -198,33 +193,22 @@ def get_all_stocks():
         return pd.DataFrame(columns=['code', 'name'])
 
 def get_name_by_code(code):
-    """
-    종목 코드를 입력받아 해당 종목명을 반환합니다.
-    (공백 제거 및 6자리 패딩 처리를 통해 매칭 성공률을 높였습니다.)
-    """
+    """종목 코드를 입력받아 해당 종목명을 반환합니다."""
     global _stock_list_cache
     try:
-        # 1. 캐시가 없으면 로드
         if _stock_list_cache is None:
             get_all_stocks()
             
         if _stock_list_cache is None or _stock_list_cache.empty:
             return code
 
-        # 2. 입력된 코드를 6자리 문자열로 정규화 (예: 20 -> '000020')
-        # 앞뒤 공백 제거 후 6자리 숫자로 맞춤
         clean_code = str(code).strip().zfill(6)
-        
-        # 3. 데이터프레임의 Code 컬럼도 문자열/공백제거 후 비교
-        # .values 비교를 통해 인덱스 문제를 방지하고 속도를 높입니다.
         mask = _stock_list_cache['Code'].astype(str).str.strip() == clean_code
         target = _stock_list_cache[mask]
         
         if not target.empty:
-            # 매칭된 첫 번째 데이터의 'Name' 반환
             return target.iloc[0]['Name']
         
-        # 4. 여전히 찾지 못했다면 로그를 남기고 코드 반환
         logger.warning(f"종목 리스트에서 코드를 찾을 수 없음: {clean_code}")
         return code 
         
