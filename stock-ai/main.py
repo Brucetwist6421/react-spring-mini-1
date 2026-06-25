@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import logging
-import asyncio  # 💡 백그라운드 주기적 실행을 위해 추가
+import asyncio  
 from contextlib import asynccontextmanager
 
 from app import config
@@ -12,7 +12,7 @@ from app.routers import stock
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 💡 12시간마다 토큰을 자동으로 갱신하는 백그라운드 태스크
+# 12시간마다 토큰을 자동으로 갱신하는 백그라운드 태스크
 async def _token_refresh_loop():
     try:
         while True:
