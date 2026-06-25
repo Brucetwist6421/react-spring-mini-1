@@ -1,14 +1,13 @@
-import { Avatar, Box, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import FavoriteButton from "../../dashboard/components/FavoriteButton";
+import PokemonDetailRenderer from "./PokemonDetailRenderer"; // 💡 분리한 컴포넌트 임포트
 
 /**
  * 포켓몬 리스트 컬럼 정의를 반환하는 함수
- * @param onOpenDetail 상세 모달을 열기 위한 핸들러
  * @param onNavigate 페이지 이동을 위한 핸들러 (useNavigate)
  */
 export const getPokemonColumns = (
-  // onOpenDetail: (row: any) => void,
   onNavigate: (path: string) => void
 ): GridColDef[] => [
   {
@@ -17,15 +16,6 @@ export const getPokemonColumns = (
     headerAlign: "center",
     width: 200,
     align: "center",
-    // renderCell: (params: GridRenderCellParams) => (
-    //   <Button
-    //     variant="text"
-    //     sx={{ textTransform: "none", fontWeight: 700 }}
-    //     onClick={() => onNavigate(`/pokemon/${params.row.id}`)}
-    //   >
-    //     {params.value}
-    //   </Button>
-    // ),
   },
   {
     field: 'name',
@@ -35,8 +25,7 @@ export const getPokemonColumns = (
     renderCell: (params: GridRenderCellParams) => (
       <Button
         variant="text"
-        sx={{ textTransform: "none", fontWeight: 700,fontSize: "1rem"}}
-        // "/" 경로 뒤에 이름을 붙여 이동 (예: /pikachu)
+        sx={{ textTransform: "none", fontWeight: 700, fontSize: "1rem" }}
         onClick={() => onNavigate(`/${params.value}`)}
       >
         {params.value}
@@ -48,16 +37,6 @@ export const getPokemonColumns = (
     headerName: "포켓몬 한글명",
     width: 150,
     flex: 1,
-    // renderCell: (params: GridRenderCellParams) => (
-    //   <Button
-    //     variant="text"
-    //     sx={{ textTransform: "none", fontWeight: 700,fontSize: "1rem"}}
-    //     // "/" 경로 뒤에 이름을 붙여 이동 (예: /pikachu)
-    //     onClick={() => onNavigate(`/${params.value}`)}
-    //   >
-    //     {params.value}
-    //   </Button>
-    // ),
   },
   {
     field: "type",
@@ -66,26 +45,21 @@ export const getPokemonColumns = (
     headerAlign: "center",
     width: 150,
     flex: 1,
+    renderCell: (params: GridRenderCellParams) => (
+      <PokemonDetailRenderer url={params.row.url} renderType="types" />
+    ),
   },
-  // 1. 썸네일 컬럼 추가
   {
     field: "image",
     headerName: "썸네일",
-    align:"center",
+    align: "center",
     headerAlign: "center",
     width: 150,
     flex: 1,
     sortable: false,
     filterable: false,
     renderCell: (params: GridRenderCellParams) => (
-      <Box sx={{ display: "flex", alignItems: "center", height: "100%",width: "100%", justifyContent: "center" }}>
-        <Avatar
-          src={params.value} // p.image 값이 들어옴
-          alt={params.row.firstName}
-          variant="rounded"
-          sx={{ width: 50, height: 60, bgcolor: "#f5f5f5",alignContent:'center' }}
-        />
-      </Box>
+      <PokemonDetailRenderer url={params.row.url} renderType="image" fallbackValue={params.row.name} />
     ),
   },
   {
@@ -95,9 +69,8 @@ export const getPokemonColumns = (
     headerAlign: "center",
     align: "center",
     width: 200,
-    sortable: true, // 정렬 가능하도록 설정
+    sortable: true,
     renderCell: (params: GridRenderCellParams) => (
-      // 리스트 각 행의 데이터를 props로 전달
       <FavoriteButton 
         pokemonId={params.row.id} 
         pokemonName={params.row.name} 
