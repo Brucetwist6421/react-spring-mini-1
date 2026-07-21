@@ -35,6 +35,7 @@
 	        variant,
 	        main_image_path AS mainImagePath
 	    FROM pokemon
+		ORDER BY id desc
 	</select>
 
 	<!-- 실습 2 시작 -->
